@@ -186,8 +186,19 @@ async function hydrateBySlug(items: Anime[]): Promise<Anime[]> {
       if (!s.slug) return s;
       try {
         const arr = await api<Anime[]>("/animes", { slug: s.slug, _fields: LIST_FIELDS }, 600);
-        const full = arr?.[0];
-        if (!full) return s;
+        const full = Array.isArray(arr) ? arr[0] : null;
+        // post “hantu” (lama): search balik, tapi slug/id gak bisa di-fetch → tetap pakai search + cover via media
+        if (!full) {
+          return {
+            ...s,
+            meta_box: {
+              ...metaOf(s),
+              ...(await coverFromFeatured(s)),
+            },
+          };
+        }
+        const mb = metaOf(full);
+        const coverFallback = mb.ero_image ? {} : await coverFromFeatured(full);
         return {
           ...s,
           id: full.id,
@@ -200,13 +211,56 @@ async function hydrateBySlug(items: Anime[]): Promise<Anime[]> {
           animegenre: full.animegenre,
           animetype: full.animetype,
           animestatus: full.animestatus,
-          meta_box: { ...metaOf(s), ...metaOf(full) },
+          meta_box: { ...metaOf(s), ...mb, ...coverFallback },
         };
       } catch {
         return s;
       }
     }),
   );
+}
+
+/** Cover dari `featured_media` → `/media/{id}` kalau `ero_image` kosong. */
+async function coverFromFeatured(item: Anime): Promise<{ ero_image?: string }> {
+  const fm = item.featured_media;
+  if (!fm || fm === 0) return {};
+  try {
+    const media = await api<{ source_url?: string; media_details?: { sizes?: Record<string, { source_url?: string }> } }>(
+      `/media/${fm}`,
+      { _fields: "source_url,media_details.sizes.medium_large.source_url,media_details.sizes.medium.source_url,media_details.sizes.thumbnail.source_url" },
+      86400,
+    );
+    const url =
+      media.media_details?.sizes?.medium_large?.source_url ||
+      media.media_details?.sizes?.medium?.source_url ||
+      media.media_details?.sizes?.thumbnail?.source_url ||
+      media.source_url;
+    return url ? { ero_image: url } : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeTitle(s: string): string {
+  return stripHtml(s)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+function slugifyQuery(q: string): string {
+  return normalizeTitle(q).replace(/\s+/g, "-");
+}
+
+/** Exact title > exact slug > title mulai query > urutan API. */
+function scoreSearchHit(a: Anime, qNorm: string, qSlug: string): number {
+  const t = normalizeTitle(titleOf(a));
+  const slug = (a.slug || "").toLowerCase();
+  if (t === qNorm) return 100;
+  if (slug === qSlug) return 90;
+  if (t.startsWith(qNorm) || qNorm.startsWith(t)) return 60;
+  if (t.includes(qNorm)) return 40;
+  return 0;
 }
 
 export async function getList(
@@ -227,6 +281,11 @@ export async function searchAnime(
   limit = 12,
 ): Promise<ListResult> {
   if (!q.trim()) return { items: [], total: 0, totalPages: 0 };
+
+  const qNorm = normalizeTitle(q);
+  const qSlug = slugifyQuery(q);
+
+  // 1) search standar
   const raw = await apiFull<Anime[]>(
     "/animes",
     {
@@ -238,8 +297,53 @@ export async function searchAnime(
     },
     120,
   );
-  const hydrated = await hydrateBySlug(raw.body ?? []);
-  return { items: hydrated, total: raw.total, totalPages: raw.totalPages };
+
+  const rawItems = raw.body ?? [];
+
+  // 2) pin judul resmi lewat slug (WP search sering gak balikin series utama, e.g. slug=one-piece)
+  let pinned: Anime | null = null;
+  if (page === 1 && qSlug) {
+    try {
+      const bySlug = await api<Anime[]>("/animes", { slug: qSlug, _fields: LIST_FIELDS }, 300);
+      pinned = bySlug?.[0] ?? null;
+    } catch {
+      pinned = null;
+    }
+  }
+
+  const merged: Anime[] = [];
+  const seen = new Set<string>();
+  for (const item of pinned ? [pinned, ...rawItems] : rawItems) {
+    const key = item.slug || String(item.id);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+  }
+
+  // pinned sudah LIST_FIELDS; hydrate skip slug yang sama biar dobel fetch
+  const toHydrate = merged.filter((item) => !(pinned && item === pinned));
+  const hydRest = await hydrateBySlug(toHydrate);
+  const hydById = new Map(hydRest.map((x) => [x.slug || String(x.id), x]));
+  const hydrated = merged.map((item) =>
+    pinned && item === pinned ? item : hydById.get(item.slug || String(item.id)) || item,
+  );
+
+  // sort relevansi (stable: score desc, lalu index)
+  const withScore = hydrated.map((item, i) => ({
+    item,
+    i,
+    score: scoreSearchHit(item, qNorm, qSlug),
+  }));
+  withScore.sort((a, b) => b.score - a.score || a.i - b.i);
+  const items = withScore.map((x) => x.item);
+
+  // total: kalau page 1 dan pin nambah 1, boleh +1 (WP total gak include pin)
+  let total = raw.total;
+  if (page === 1 && pinned && !rawItems.some((x) => x.slug === pinned!.slug) && total != null) {
+    total = total + 1;
+  }
+
+  return { items, total, totalPages: raw.totalPages };
 }
 
 export async function getDetail(key: string): Promise<Anime | null> {

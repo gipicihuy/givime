@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Givime (web)
 
-## Getting Started
+Next.js 15 · TypeScript · Tailwind — proxy + cache server-side ke karanime WP REST.
 
-First, run the development server:
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# di env FUSE/Android: install tanpa symlink
+npm install --no-bin-links
+npm run dev   # script sudah panggil node_modules/next/... langsung
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Build native (SWC/lightningcss)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Binary `.node` sering gagal load di mount FUSE. Kalau build error soal `.node`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+rsync -a --exclude=node_modules --exclude=.next /path/to/web/ /tmp/givime-web/
+cd /tmp/givime-web && npm install && npm run build && npm start
+```
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+| Path | Fungsi |
+|------|--------|
+| `/` | Ongoing + Top + Movie |
+| `/ongoing` `/completed` `/movies` | list + pagination |
+| `/genres` `/genre/[slug]` | genre + filter |
+| `/search?q=` | search (hydrate by slug) |
+| `/anime/[slug]` | detail + episode |
+| `/play/[slug]?ep=N` | video player |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## lib/api.ts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `LIST_FIELDS` — list tanpa `ab_cdngroup`
+- `hydrateBySlug()` — fix id search yang 404
+- `encodeMedia()` — URL-encode path CDN
+- ISR: list 5–10m, detail 1h, genre 1h, taxonomy 1h

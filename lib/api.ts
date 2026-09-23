@@ -180,8 +180,27 @@ export function sortEps(eps: Episode[] = []): Episode[] {
 }
 
 /**
- * Hydrate via slug. Balik `null` kalau post hantu
- * (muncul di search, tapi `?slug=` kosong / id 404 → detail 404).
+ * Slug kandidat kalau search balikin “slug hantu”:
+ *   haikyuu-season-2-episode-1 → haikyuu-season-2
+ *   haikyuu-season-4-1         → haikyuu-season-4
+ *   one-piece-episode-0        → one-piece
+ */
+function slugCandidates(slug: string): string[] {
+  const out = [slug];
+  const push = (s: string) => {
+    if (s && s !== slug && !out.includes(s)) out.push(s);
+  };
+  push(slug.replace(/-episode-\d+$/i, ""));
+  push(slug.replace(/-\d+$/, ""));
+  push(slug.replace(/-episode-\d+$/i, "").replace(/-\d+$/, ""));
+  // season-2-episode-1 sudah ditangani; sisa numeric mid tanpa episode-N
+  push(slug.replace(/-(episode-)?\d+$/i, ""));
+  return out;
+}
+
+/**
+ * Hydrate via slug. Coba kandidat slug (buang suffix episode/N).
+ * Balik `null` hanya kalau semua kandidat kosong (ghost beneran → detail 404).
  */
 async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
   if (!items.length) return items;
@@ -189,9 +208,16 @@ async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
     items.map(async (s) => {
       if (!s.slug) return s;
       try {
-        const arr = await api<Anime[]>("/animes", { slug: s.slug, _fields: LIST_FIELDS }, 600);
-        const full = Array.isArray(arr) ? arr[0] : null;
-        // ghost: search index ≠ collection — jangan tampilin card yang 404
+        let full: Anime | null = null;
+        for (const cand of slugCandidates(s.slug)) {
+          const arr = await api<Anime[]>("/animes", { slug: cand, _fields: LIST_FIELDS }, 600);
+          const hit = Array.isArray(arr) ? arr[0] : null;
+          if (hit) {
+            full = hit;
+            break;
+          }
+        }
+        // semua kandidat kosong → post hantu (search index ≠ collection)
         if (!full) return null;
         const mb = metaOf(full);
         const coverFallback = mb.ero_image ? {} : await coverFromFeatured(full);
@@ -320,12 +346,31 @@ export async function searchAnime(
   // pinned sudah LIST_FIELDS; hydrate skip slug yang sama biar dobel fetch
   const toHydrate = merged.filter((item) => !(pinned && item === pinned));
   const hydRest = (await hydrateBySlug(toHydrate)).filter((x): x is Anime => x != null);
-  const hydById = new Map(hydRest.map((x) => [x.slug || String(x.id), x]));
-  const hydrated = merged
-    .map((item) =>
-      pinned && item === pinned ? item : hydById.get(item.slug || String(item.id)) || null,
-    )
-    .filter((x): x is Anime => x != null);
+
+  // re-map bisa bikin 2 search row jadi 1 slug asli → dedupe by final slug
+  const hydById = new Map<string, Anime>();
+  for (const x of hydRest) {
+    const k = x.slug || String(x.id);
+    if (!hydById.has(k)) hydById.set(k, x);
+  }
+  const hydrated: Anime[] = [];
+  const seenFinal = new Set<string>();
+  if (pinned) {
+    const pk = pinned.slug || String(pinned.id);
+    if (!seenFinal.has(pk)) {
+      seenFinal.add(pk);
+      hydrated.push(pinned);
+    }
+  }
+  for (const item of merged) {
+    if (pinned && item === pinned) continue;
+    const final = hydById.get(item.slug || String(item.id));
+    if (!final) continue; // ghost beneran
+    const k = final.slug || String(final.id);
+    if (seenFinal.has(k)) continue;
+    seenFinal.add(k);
+    hydrated.push(final);
+  }
 
   // sort relevansi (stable: score desc, lalu index)
   const withScore = hydrated.map((item, i) => ({
@@ -336,13 +381,17 @@ export async function searchAnime(
   withScore.sort((a, b) => b.score - a.score || a.i - b.i);
   const items = withScore.map((x) => x.item);
 
-  // total: + pin, − ghost yang dibuang di page ini
+  // total: − ghost beneran; + pin kalau WP search gak include slug resmi
   let total = raw.total;
-  const dropped = merged.length - (hydRest.length + (pinned ? 1 : 0));
-  if (page === 1 && pinned && !rawItems.some((x) => x.slug === pinned!.slug) && total != null) {
-    total = total + 1;
+  const trulyDropped = merged.filter(
+    (item) =>
+      !(pinned && item === pinned) && !hydById.has(item.slug || String(item.id)),
+  ).length;
+  if (page === 1 && pinned && total != null) {
+    const pinInRaw = rawItems.some((x) => x.slug === pinned!.slug);
+    if (!pinInRaw) total += 1;
   }
-  if (total != null && dropped > 0) total = Math.max(0, total - dropped);
+  if (total != null && trulyDropped > 0) total = Math.max(0, total - trulyDropped);
 
   return { items, total, totalPages: raw.totalPages };
 }

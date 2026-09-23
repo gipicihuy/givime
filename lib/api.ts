@@ -199,11 +199,12 @@ function slugCandidates(slug: string): string[] {
 }
 
 /**
- * Hydrate via slug. Coba kandidat slug (buang suffix episode/N).
- * Balik `null` hanya kalau semua kandidat kosong (ghost beneran → detail 404).
+ * Hydrate per-item (parallel, index-aligned dengan `items`).
+ * - sukses → Anime dengan slug/id asli (bisa beda dari search slug)
+ * - semua kandidat slug kosong → null (ghost beneran)
  */
 async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
-  if (!items.length) return items;
+  if (!items.length) return [];
   return Promise.all(
     items.map(async (s) => {
       if (!s.slug) return s;
@@ -217,7 +218,6 @@ async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
             break;
           }
         }
-        // semua kandidat kosong → post hantu (search index ≠ collection)
         if (!full) return null;
         const mb = metaOf(full);
         const coverFallback = mb.ero_image ? {} : await coverFromFeatured(full);
@@ -236,7 +236,7 @@ async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
           meta_box: { ...metaOf(s), ...mb, ...coverFallback },
         };
       } catch {
-        // network error → keep search row (bukan ghost pasti)
+        // network error → keep search row
         return s;
       }
     }),
@@ -343,33 +343,25 @@ export async function searchAnime(
     merged.push(item);
   }
 
-  // pinned sudah LIST_FIELDS; hydrate skip slug yang sama biar dobel fetch
+  // hydrate index-aligned — JANGAN key map pakai slug hasil re-map
+  // (bug: lookup slug search asli vs key slug final → semua remap di-drop)
   const toHydrate = merged.filter((item) => !(pinned && item === pinned));
-  const hydRest = (await hydrateBySlug(toHydrate)).filter((x): x is Anime => x != null);
+  const hydAligned = await hydrateBySlug(toHydrate);
 
-  // re-map bisa bikin 2 search row jadi 1 slug asli → dedupe by final slug
-  const hydById = new Map<string, Anime>();
-  for (const x of hydRest) {
-    const k = x.slug || String(x.id);
-    if (!hydById.has(k)) hydById.set(k, x);
-  }
   const hydrated: Anime[] = [];
   const seenFinal = new Set<string>();
-  if (pinned) {
-    const pk = pinned.slug || String(pinned.id);
-    if (!seenFinal.has(pk)) {
-      seenFinal.add(pk);
-      hydrated.push(pinned);
-    }
-  }
-  for (const item of merged) {
-    if (pinned && item === pinned) continue;
-    const final = hydById.get(item.slug || String(item.id));
-    if (!final) continue; // ghost beneran
-    const k = final.slug || String(final.id);
-    if (seenFinal.has(k)) continue;
+  const pushUnique = (item: Anime) => {
+    const k = item.slug || String(item.id);
+    if (seenFinal.has(k)) return;
     seenFinal.add(k);
-    hydrated.push(final);
+    hydrated.push(item);
+  };
+
+  if (pinned) pushUnique(pinned);
+
+  for (const final of hydAligned) {
+    if (!final) continue;
+    pushUnique(final);
   }
 
   // sort relevansi (stable: score desc, lalu index)
@@ -381,19 +373,8 @@ export async function searchAnime(
   withScore.sort((a, b) => b.score - a.score || a.i - b.i);
   const items = withScore.map((x) => x.item);
 
-  // total: − ghost beneran; + pin kalau WP search gak include slug resmi
-  let total = raw.total;
-  const trulyDropped = merged.filter(
-    (item) =>
-      !(pinned && item === pinned) && !hydById.has(item.slug || String(item.id)),
-  ).length;
-  if (page === 1 && pinned && total != null) {
-    const pinInRaw = rawItems.some((x) => x.slug === pinned!.slug);
-    if (!pinInRaw) total += 1;
-  }
-  if (total != null && trulyDropped > 0) total = Math.max(0, total - trulyDropped);
-
-  return { items, total, totalPages: raw.totalPages };
+  // total = header WP (source of truth buat pager); items = setelah hydrate/dedupe
+  return { items, total: raw.total, totalPages: raw.totalPages };
 }
 
 export async function getDetail(key: string): Promise<Anime | null> {

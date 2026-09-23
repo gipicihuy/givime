@@ -1,25 +1,49 @@
 # givime
 
-Web anime (Next.js) + CLI reverse-engineered karanime.com.
+Web anime (Next.js) — data dari karanime.com lewat proxy + cache server-side.
 
-## Web
+**Root repo = app Next.js** (siap deploy Cloudflare Pages / Workers).
+
+## Run
 
 ```bash
-cd web
-npm install --no-bin-links   # env tanpa symlink
+npm install --no-bin-links   # env FUSE/Android
 npm run dev
 ```
 
-Routes: `/` · `/ongoing` · `/completed` · `/movies` · `/genres` · `/genre/[slug]` · `/search` · `/anime/[slug]` · `/play/[slug]?ep=N`
+Kalau build gagal native `.node` (SWC/lightningcss), pindah dulu ke tmpfs — lihat catatan di commit history atau build di mesin biasa / CI.
 
-Detail run/build native: [`web/README.md`](web/README.md)
+## Routes
 
-## Design
+| Path | Fungsi |
+|------|--------|
+| `/` | Ongoing + Top + Movie |
+| `/ongoing` `/completed` `/movies` | list + pagination |
+| `/genres` `/genre/[slug]` | genre + filter |
+| `/search?q=` | search (hydrate by slug) |
+| `/anime/[slug]` | detail + episode |
+| `/play/[slug]?ep=N` | video player |
 
-Arah UI: [`DESIGN.md`](DESIGN.md)
+## Struktur
+
+```
+app/          # routes Next.js
+components/   # UI
+lib/api.ts    # client karanime + hydrate + encodeMedia
+DESIGN.md     # arah desain UI
+AGENTS.md     # aturan agent
+animehub.js   # CLI reference (opsional)
+docs/         # catatan endpoint (opsional)
+```
+
+## Deploy (Cloudflare)
+
+- **Root directory:** `/` (repo root)
+- **Build:** `npm install && npm run build`
+- **Output:** default Next.js adapter / `@cloudflare/next-on-pages` sesuai pilihan lo
 
 ## API quirk
 
-- Search `id` sering 404 → hydrate by slug (`web/lib/api.ts`)
-- Jangan minta `meta_box.ab_cdngroup` di list
+- Search `id` sering 404 → hydrate by slug
+- List jangan minta `meta_box.ab_cdngroup`
 - Encode path CDN sebelum putar video

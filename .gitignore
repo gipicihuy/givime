@@ -1,38 +1,43 @@
-# deps / build
+# dependencies
 node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+coverage/
+
+# next.js
 .next/
 out/
 build/
-coverage/
-web/node_modules/
-web/.next/
 
-# secrets
-.env
-.env.*
+# misc
+.DS_Store
 *.pem
-token
-.token
-*.token
-github_pat_*
 
-# binaries / large
-AnimeHub_3.3.1.apks
-*.apks
-
-# local-only (bukan bagian web)
-samples/
-.opencode/
-scripts/smoke_test.sh
-scripts/
-
-# logs / os
+# debug
 npm-debug.log*
 yarn-debug.log*
-.DS_Store
+yarn-error.log*
+.pnpm-debug.log*
+
+# env / secrets
+.env
+.env.*
+.vercel
+github_pat_*
+
+# typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# editor
-.idea/
-.vscode/
+# local-only / large
+AnimeHub_3.3.1.apks
+*.apks
+samples/
+.opencode/

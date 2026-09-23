@@ -179,7 +179,11 @@ export function sortEps(eps: Episode[] = []): Episode[] {
   return [...eps].sort((a, b) => Number(a.ab_namaep) - Number(b.ab_namaep));
 }
 
-async function hydrateBySlug(items: Anime[]): Promise<Anime[]> {
+/**
+ * Hydrate via slug. Balik `null` kalau post hantu
+ * (muncul di search, tapi `?slug=` kosong / id 404 → detail 404).
+ */
+async function hydrateBySlug(items: Anime[]): Promise<(Anime | null)[]> {
   if (!items.length) return items;
   return Promise.all(
     items.map(async (s) => {
@@ -187,16 +191,8 @@ async function hydrateBySlug(items: Anime[]): Promise<Anime[]> {
       try {
         const arr = await api<Anime[]>("/animes", { slug: s.slug, _fields: LIST_FIELDS }, 600);
         const full = Array.isArray(arr) ? arr[0] : null;
-        // post “hantu” (lama): search balik, tapi slug/id gak bisa di-fetch → tetap pakai search + cover via media
-        if (!full) {
-          return {
-            ...s,
-            meta_box: {
-              ...metaOf(s),
-              ...(await coverFromFeatured(s)),
-            },
-          };
-        }
+        // ghost: search index ≠ collection — jangan tampilin card yang 404
+        if (!full) return null;
         const mb = metaOf(full);
         const coverFallback = mb.ero_image ? {} : await coverFromFeatured(full);
         return {
@@ -214,6 +210,7 @@ async function hydrateBySlug(items: Anime[]): Promise<Anime[]> {
           meta_box: { ...metaOf(s), ...mb, ...coverFallback },
         };
       } catch {
+        // network error → keep search row (bukan ghost pasti)
         return s;
       }
     }),
@@ -322,11 +319,13 @@ export async function searchAnime(
 
   // pinned sudah LIST_FIELDS; hydrate skip slug yang sama biar dobel fetch
   const toHydrate = merged.filter((item) => !(pinned && item === pinned));
-  const hydRest = await hydrateBySlug(toHydrate);
+  const hydRest = (await hydrateBySlug(toHydrate)).filter((x): x is Anime => x != null);
   const hydById = new Map(hydRest.map((x) => [x.slug || String(x.id), x]));
-  const hydrated = merged.map((item) =>
-    pinned && item === pinned ? item : hydById.get(item.slug || String(item.id)) || item,
-  );
+  const hydrated = merged
+    .map((item) =>
+      pinned && item === pinned ? item : hydById.get(item.slug || String(item.id)) || null,
+    )
+    .filter((x): x is Anime => x != null);
 
   // sort relevansi (stable: score desc, lalu index)
   const withScore = hydrated.map((item, i) => ({
@@ -337,11 +336,13 @@ export async function searchAnime(
   withScore.sort((a, b) => b.score - a.score || a.i - b.i);
   const items = withScore.map((x) => x.item);
 
-  // total: kalau page 1 dan pin nambah 1, boleh +1 (WP total gak include pin)
+  // total: + pin, − ghost yang dibuang di page ini
   let total = raw.total;
+  const dropped = merged.length - (hydRest.length + (pinned ? 1 : 0));
   if (page === 1 && pinned && !rawItems.some((x) => x.slug === pinned!.slug) && total != null) {
     total = total + 1;
   }
+  if (total != null && dropped > 0) total = Math.max(0, total - dropped);
 
   return { items, total, totalPages: raw.totalPages };
 }

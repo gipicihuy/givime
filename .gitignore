@@ -14,10 +14,17 @@ web/.next/
 token
 .token
 *.token
+github_pat_*
 
 # binaries / large
 AnimeHub_3.3.1.apks
 *.apks
+
+# local-only (bukan bagian web)
+samples/
+.opencode/
+scripts/smoke_test.sh
+scripts/
 
 # logs / os
 npm-debug.log*

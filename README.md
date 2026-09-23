@@ -1,41 +1,25 @@
-# Givime
+# givime
 
-Web anime (Next.js) yang memakai API reverse-engineered dari karanime.com lewat proxy + cache server-side.
+Web anime (Next.js) + CLI reverse-engineered karanime.com.
 
-## Struktur
-
-```
-animehub.js          # CLI (reverse-engineered API client)
-docs/                # endpoint reference
-web/                 # Next.js app
-.opencode/skills/    # anti-slop agent skills
-DESIGN.md            # arah desain UI
-AGENTS.md            # agent routing + constraints
-```
-
-## Web (`web/`)
+## Web
 
 ```bash
 cd web
-npm install --no-bin-links   # filesystem tanpa symlink
-npm run dev                  # http://localhost:3000
+npm install --no-bin-links   # env tanpa symlink
+npm run dev
 ```
 
-Halaman: `/`, `/ongoing`, `/completed`, `/movies`, `/genres`, `/genre/[slug]`, `/search`, `/anime/[slug]`, `/play/[slug]?ep=N`
+Routes: `/` · `/ongoing` · `/completed` · `/movies` · `/genres` · `/genre/[slug]` · `/search` · `/anime/[slug]` · `/play/[slug]?ep=N`
 
-## CLI
-
-```bash
-node animehub.js help
-node animehub.js search "one piece" --all --json
-```
+Detail run/build native: [`web/README.md`](web/README.md)
 
 ## Design
 
-Arah UI: **clean & minimal terang** — baca `DESIGN.md`. Filter anti-slop: `.opencode/skills/antislop*`.
+Arah UI: [`DESIGN.md`](DESIGN.md)
 
-## Jangan commit
+## API quirk
 
-- Token / PAT
-- `node_modules/`, `.next/`
-- `AnimeHub_3.3.1.apks`
+- Search `id` sering 404 → hydrate by slug (`web/lib/api.ts`)
+- Jangan minta `meta_box.ab_cdngroup` di list
+- Encode path CDN sebelum putar video

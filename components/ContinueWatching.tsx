@@ -47,11 +47,11 @@ export function ContinueWatching() {
       </div>
       <div className="continue-rail" tabIndex={0} aria-label="Geser lanjutkan menonton">
         {items.map((h) => {
-          const prog = fmtProgress(h.t, h.d);
+          const hasDur = h.d != null && h.d > 0;
+          const cur = h.t != null && Number.isFinite(h.t) && h.t >= 0 ? h.t : 0;
           const pct =
-            h.t != null && h.d != null && h.d > 0
-              ? Math.min(100, Math.round((h.t / h.d) * 100))
-              : 0;
+            hasDur ? Math.min(100, Math.max(0, (cur / (h.d as number)) * 100)) : 0;
+          const prog = fmtProgress(h.t, h.d);
           return (
             <Link key={h.slug} href={hrefOf(h)} className="continue-card">
               <span className="continue-thumb" aria-hidden>
@@ -62,7 +62,7 @@ export function ContinueWatching() {
                 <span className="continue-play">
                   <IconPlay size={14} />
                 </span>
-                {pct > 0 ? (
+                {hasDur ? (
                   <span className="continue-bar">
                     <span className="continue-bar-fill" style={{ width: `${pct}%` }} />
                   </span>

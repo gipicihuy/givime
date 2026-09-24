@@ -71,21 +71,30 @@ export function clearHistory() {
   }
 }
 
-/** 12:10 / 1:02:03 */
+/** 00:00 / 1:02:03 */
 export function fmtClock(sec: number): string {
-  if (!Number.isFinite(sec) || sec < 0) return "0:00";
+  if (!Number.isFinite(sec) || sec < 0) return "00:00";
   const s = Math.floor(sec % 60);
   const m = Math.floor(sec / 60);
   if (m >= 60) {
     const h = Math.floor(m / 60);
     return `${h}:${String(m % 60).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
-  return `${m}:${String(s).padStart(2, "0")}`;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-/** 12:10/24:00 — null kalau belum ada progres */
+/**
+ * "00:00 / 24:00" — selalu spasi di sekitar "/".
+ * t=0 + duration ada → "00:00 / duration" (0 = progress valid).
+ * Tanpa duration → fallback lama (hanya jam tonton, null kalau belum nonton).
+ */
 export function fmtProgress(t?: number, d?: number): string | null {
-  if (t == null || !Number.isFinite(t) || t < 1) return null;
-  if (d != null && d > 0) return `${fmtClock(t)}/${fmtClock(d)}`;
-  return fmtClock(t);
+  const hasDur = d != null && Number.isFinite(d) && d > 0;
+  const cur = t != null && Number.isFinite(t) && t >= 0 ? t : 0;
+
+  if (hasDur) {
+    return `${fmtClock(cur)} / ${fmtClock(d as number)}`;
+  }
+  if (t != null && Number.isFinite(t) && t >= 1) return fmtClock(t);
+  return null;
 }

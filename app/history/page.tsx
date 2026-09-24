@@ -121,10 +121,12 @@ export default function HistoryPage() {
               <div className="history-day-badge">{g.label}</div>
               <ul className="history-day-items">
                 {g.items.map((h) => {
-                  const pct =
-                    h.t != null && h.d != null && h.d > 0
-                      ? Math.min(100, Math.max(0, (h.t / h.d) * 100))
-                      : 0;
+                  const hasDur = h.d != null && h.d > 0;
+                  const cur =
+                    h.t != null && Number.isFinite(h.t) && h.t >= 0 ? h.t : 0;
+                  const pct = hasDur
+                    ? Math.min(100, Math.max(0, (cur / (h.d as number)) * 100))
+                    : 0;
                   const prog = fmtProgress(h.t, h.d);
                   return (
                     <li key={h.slug} className="history-item">
@@ -153,9 +155,7 @@ export default function HistoryPage() {
                               style={{ width: `${pct}%` }}
                             />
                           </span>
-                          <span className="history-times">
-                            {prog ? prog : "—"}
-                          </span>
+                          <span className="history-times">{prog ?? "—"}</span>
                         </span>
                       </Link>
                     </li>

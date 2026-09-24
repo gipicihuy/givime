@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IconEmpty } from "@/components/Icons";
 import {
   clearHistory,
@@ -10,11 +10,29 @@ import {
   type HistoryEntry,
 } from "@/lib/history";
 
-function formatWhen(at: number) {
+function dayLabel(at: number): string {
   try {
-    return new Date(at).toLocaleString("id-ID", {
+    const d = new Date(at);
+    const now = new Date();
+    const a = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const b = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const diff = Math.round((b - a) / 86_400_000);
+    if (diff === 0) return "Hari ini";
+    if (diff === 1) return "Kemarin";
+    if (diff > 1 && diff < 7) return `${diff} hari lalu`;
+    return d.toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
+      year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    });
+  } catch {
+    return "";
+  }
+}
+
+function clockLabel(at: number): string {
+  try {
+    return new Date(at).toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -28,6 +46,23 @@ function hrefOf(h: HistoryEntry) {
   return h.t && h.t > 0 ? `${base}&t=${Math.floor(h.t)}` : base;
 }
 
+type DayGroup = { key: string; label: string; items: HistoryEntry[] };
+
+function groupByDay(items: HistoryEntry[]): DayGroup[] {
+  const map = new Map<string, DayGroup>();
+  for (const h of items) {
+    const d = new Date(h.at);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    let g = map.get(key);
+    if (!g) {
+      g = { key, label: dayLabel(h.at), items: [] };
+      map.set(key, g);
+    }
+    g.items.push(h);
+  }
+  return [...map.values()];
+}
+
 export default function HistoryPage() {
   const [items, setItems] = useState<HistoryEntry[] | null>(null);
 
@@ -37,6 +72,8 @@ export default function HistoryPage() {
     window.addEventListener("givime:history-updated", onUpdate);
     return () => window.removeEventListener("givime:history-updated", onUpdate);
   }, []);
+
+  const groups = useMemo(() => (items ? groupByDay(items) : []), [items]);
 
   if (items === null) {
     return (
@@ -55,10 +92,14 @@ export default function HistoryPage() {
           History
         </h1>
         {items.length ? (
-          <button type="button" className="text-btn" onClick={() => {
-            clearHistory();
-            setItems([]);
-          }}>
+          <button
+            type="button"
+            className="text-btn"
+            onClick={() => {
+              clearHistory();
+              setItems([]);
+            }}
+          >
             Hapus
           </button>
         ) : null}
@@ -74,30 +115,56 @@ export default function HistoryPage() {
           Episode yang kamu putar akan muncul di sini.
         </div>
       ) : (
-        <ul className="history-list">
-          {items.map((h) => {
-            const prog = fmtProgress(h.t, h.d);
-            return (
-              <li key={h.slug}>
-                <Link href={hrefOf(h)} className="history-row">
-                  <span className="history-cover" aria-hidden>
-                    {h.cover ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={h.cover} alt="" loading="lazy" width={96} height={144} />
-                    ) : null}
-                  </span>
-                  <span className="history-body">
-                    <span className="history-title">{h.title}</span>
-                    <span className="history-meta">
-                      Ep {h.ep} · {formatWhen(h.at)}
-                    </span>
-                    {prog ? <span className="history-prog">{prog}</span> : null}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="history-timeline">
+          {groups.map((g) => (
+            <section key={g.key} className="history-day">
+              <div className="history-day-badge">{g.label}</div>
+              <ul className="history-day-items">
+                {g.items.map((h) => {
+                  const pct =
+                    h.t != null && h.d != null && h.d > 0
+                      ? Math.min(100, Math.max(0, (h.t / h.d) * 100))
+                      : 0;
+                  const prog = fmtProgress(h.t, h.d);
+                  return (
+                    <li key={h.slug} className="history-item">
+                      <Link href={hrefOf(h)} className="history-card">
+                        <span className="history-cover" aria-hidden>
+                          {h.cover ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={h.cover}
+                              alt=""
+                              loading="lazy"
+                              width={96}
+                              height={144}
+                            />
+                          ) : null}
+                        </span>
+                        <span className="history-info">
+                          <span className="history-top">
+                            <span className="history-title">{h.title}</span>
+                            <span className="history-clock">{clockLabel(h.at)}</span>
+                          </span>
+                          <span className="history-ep">Episode {h.ep}</span>
+                          <span className="history-progress" aria-hidden>
+                            <span
+                              className="history-progress-fill"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </span>
+                          <span className="history-times">
+                            {prog ? prog : "—"}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
     </>
   );

@@ -1482,8 +1482,61 @@ a:focus-visible {
   color: var(--muted);
 }
 
-/* —— history —— */
-.history-list {
+/* —— history timeline (date pill + vertical line + horizontal card) —— */
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.history-day {
+  position: relative;
+  padding-left: 18px;
+}
+
+.history-day::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.history-day-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: -18px;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.history-day-badge::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 2px solid var(--background);
+  transform: translate(100%, -50%);
+  display: none;
+}
+
+.history-day-items {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1492,26 +1545,29 @@ a:focus-visible {
   gap: 8px;
 }
 
-.history-row {
+.history-card {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 12px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--foreground);
+  min-width: 0;
+  overflow: hidden;
 }
 
-.history-row:hover {
+.history-card:hover {
   border-color: var(--accent);
   color: var(--foreground);
 }
 
 .history-cover {
-  width: 44px;
-  height: 66px;
-  flex-shrink: 0;
+  width: 52px;
+  flex: 0 0 52px;
+  align-self: flex-start;
+  aspect-ratio: 2 / 3;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface-2);
@@ -1525,30 +1581,89 @@ a:focus-visible {
   display: block;
 }
 
-.history-body {
+.history-info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+}
+
+.history-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
   min-width: 0;
 }
 
 .history-title {
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.history-meta {
+.history-clock {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+
+.history-ep {
   font-size: 12px;
   color: var(--muted);
+  line-height: 1.3;
 }
 
-.history-prog {
-  font-size: 12px;
-  color: var(--accent);
+.history-progress {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.history-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.history-times {
+  align-self: flex-end;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@media (min-width: 560px) {
+  .history-cover {
+    width: 56px;
+    flex-basis: 56px;
+  }
+
+  .history-title {
+    font-size: 15px;
+    -webkit-line-clamp: 1;
+  }
+
+  .history-card {
+    padding: 12px;
+    gap: 14px;
+  }
 }
 
 .text-btn {

@@ -34,7 +34,7 @@ Cap: 1 accent + neutrals.
 - **Home:** hero featured carousel **tinggi tetap** (340/400px; chevron **tanpa bulatan** sisi tengah + dots; autoplay 5s track slide) → **Lanjutkan menonton** (setelah hero ala nontonime; layout **landscape 16:9 + progress bar + jam `12:10/24:00`**, beda dari shelf poster 2:3; localStorage auto-hide) → **Ongoing → Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime)
 - **Browse:** hub kartu kategori (termasuk **Jadwal**) → list pages
 - **Jadwal:** `/jadwal` — pill hari Senin–Minggu (highlight hari ini), grid anime per `jadwalrilis`
-- **History:** localStorage; **cover 2:3** + Ep · waktu + **progres `12:10/24:00`**; klik → `/play/…?ep=…&t=` (seek ke detik)
+- **History:** localStorage; **timeline per tanggal** (badge pill date + garis vertikal) → card horizontal compact (thumb 2:3 kiri, **judul bold**, Episode secondary, **jam kanan-atas**, **progress bar** + `12:10/24:00`); klik → `/play/…?ep=…&t=` (seek ke detik)
 - **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score`); hasil grid di bawah
 - **List pages:** `AnimeGrid` poster 3→6 kolom; `page-title` display font
 - **Detail:** hero (poster + title display/badges/genre-chip/CTA) → Sinopsis → Info fact-list → Episode; tanpa meta-table, tanpa badge angka, tanpa 2-pill segmented
@@ -51,7 +51,7 @@ Cap: 1 accent + neutrals.
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
 - `EpisodeSection` = client, section head + 1 tombol toggle Terbaru (asc default / desc) + auto-fill grid
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
-- `HistoryPage` = cover 2:3 + Ep · waktu + progres `12:10/24:00`; link `?t=` seek
+- `HistoryPage` = timeline date-pill + vertical line + horizontal card (title/ep/jam/progress); link `?t=` seek; token lime
 
 ## Motion
 ≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero **autoplay 5s** **track full-width slide ±100%** ~700ms `cubic-bezier(0.22,1,0.36,1)` (transform-only, bukan fade/36px; pause hover/focus/offscreen/`prefers-reduced-motion`/touch); **swipe kiri-kanan** ≥48px ganti slide.

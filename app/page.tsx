@@ -1,5 +1,6 @@
+import { FeaturedHero } from "@/components/FeaturedHero";
 import { Shelf } from "@/components/Shelf";
-import { getList, IDS, type Anime } from "@/lib/api";
+import { getDetail, getList, IDS, metaOf, type Anime } from "@/lib/api";
 
 export const revalidate = 300;
 
@@ -28,16 +29,33 @@ export default async function HomePage() {
     ),
   ]);
 
+  const featuredBase =
+    top.items.find((a) => metaOf(a).ero_image) ??
+    ongoing.items.find((a) => metaOf(a).ero_image) ??
+    top.items[0] ??
+    ongoing.items[0] ??
+    null;
+
+  let featured: Anime | null = featuredBase;
+  if (featuredBase?.slug) {
+    try {
+      const full = await getDetail(featuredBase.slug);
+      if (full) featured = full;
+    } catch {
+      // list row cukup buat hero
+    }
+  }
+
+  const topRail = top.items.filter((a) => a.slug !== featured?.slug);
+
   return (
     <>
-      <header className="home-head">
-        <h1 className="page-title">Givime</h1>
-        <p className="page-sub">Nonton anime subtitle Indonesia</p>
-      </header>
-      <Shelf title="Ongoing" href="/ongoing" items={ongoing.items} />
-      <Shelf title="Top" items={top.items} />
-      <Shelf title="Movie" href="/movies" items={movie.items} />
-      <Shelf title="Completed" href="/completed" items={completed.items} />
+      <h1 className="sr-only">Givime — nonton anime</h1>
+      {featured ? <FeaturedHero anime={featured} /> : null}
+      <Shelf title="Ongoing" href="/ongoing" items={ongoing.items} index={1} />
+      <Shelf title="Top" items={topRail.length ? topRail : top.items} index={2} />
+      <Shelf title="Movie" href="/movies" items={movie.items} index={3} />
+      <Shelf title="Completed" href="/completed" items={completed.items} index={4} />
     </>
   );
 }

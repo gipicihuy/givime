@@ -10,19 +10,29 @@ export function Shelf({
   title,
   href,
   items,
+  index,
 }: {
   title: string;
   href?: string;
   items: Anime[];
+  index?: number;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
 
   if (!items.length) return null;
 
+  const num =
+    index != null && Number.isFinite(index)
+      ? String(index).padStart(2, "0")
+      : null;
+
   return (
     <section className="section">
       <div className="section-head">
-        <h2 className="section-title">{title}</h2>
+        <h2 className="section-title">
+          {num ? <span className="section-num">{num}</span> : null}
+          {title}
+        </h2>
         {href ? (
           <Link href={href} className="section-more">
             Lihat semua

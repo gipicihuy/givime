@@ -98,6 +98,11 @@ img {
   color: var(--foreground);
 }
 
+.logo-word {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
 .logo:hover {
   color: var(--accent);
 }
@@ -165,41 +170,177 @@ a:focus-visible {
   color: var(--muted);
 }
 
-/* —— home head —— */
-.home-head {
-  margin-bottom: 20px;
+/* —— featured hero (editorial + cinematic) —— */
+.featured {
+  position: relative;
+  margin: 0 -14px 28px;
+  min-height: 300px;
+  overflow: hidden;
+  border-block: 1px solid var(--border);
+  background: var(--surface);
+  isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  .featured {
+    margin-inline: -24px;
+    min-height: 340px;
+  }
+}
+
+.featured-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.featured-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  filter: saturate(0.92) brightness(0.55);
+  transform: scale(1.02);
+}
+
+.featured-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(15, 15, 16, 0.2) 0%, rgba(15, 15, 16, 0.55) 42%, rgba(15, 15, 16, 0.97) 100%),
+    linear-gradient(90deg, rgba(15, 15, 16, 0.72) 0%, transparent 58%);
+}
+
+.featured-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 300px;
+  padding: 22px 16px 24px;
+}
+
+@media (min-width: 768px) {
+  .featured-body {
+    min-height: 340px;
+    padding: 32px;
+    max-width: 640px;
+  }
+}
+
+.featured-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.featured-kicker::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.featured-title {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(26px, 6vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.featured-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: #c5c5cd;
+  font-variant-numeric: tabular-nums;
+  align-items: center;
+}
+
+.featured-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.featured-syn {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #c8c8d0;
+  max-width: 52ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius);
+  background: rgba(15, 15, 16, 0.45);
+  min-height: 44px;
+}
+
+.featured-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* —— section —— */
 .section {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .section-head {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
 }
 
 .section-title {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
   color: var(--foreground);
 }
 
-.section-title::before {
-  content: "";
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
-  background: var(--accent);
-  flex-shrink: 0;
+.section-num {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .section-more {
@@ -208,6 +349,8 @@ a:focus-visible {
   gap: 4px;
   font-size: 13px;
   color: var(--muted);
+  flex-shrink: 0;
+  padding-bottom: 2px;
 }
 
 .section-more:hover {
@@ -224,8 +367,10 @@ a:focus-visible {
   scroll-padding-inline: 4px;
   padding-bottom: 8px;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-width: none;
+  /* edge-fade: rail kiri/kanan fade (referensi nontonime) */
+  mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
 }
 
 .rail:focus-visible {
@@ -234,16 +379,7 @@ a:focus-visible {
 }
 
 .rail::-webkit-scrollbar {
-  height: 6px;
-}
-
-.rail::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.rail::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  display: none;
 }
 
 /* —— vertical poster card —— */
@@ -290,11 +426,16 @@ a:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 150ms ease;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
 .poster:hover .poster-cover {
   transform: scale(1.03);
+  box-shadow: 0 14px 28px -14px rgba(191, 255, 58, 0.35);
+}
+
+.poster:hover .poster-thumb {
+  border-color: rgba(191, 255, 58, 0.45);
 }
 
 .poster-placeholder {
@@ -618,10 +759,11 @@ a:focus-visible {
 }
 
 .detail-title {
-  font-size: clamp(22px, 5vw, 34px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
   text-wrap: balance;
 }
 
@@ -956,9 +1098,11 @@ a:focus-visible {
 
 /* —— page head —— */
 .page-title {
-  font-size: 22px;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(24px, 5vw, 32px);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
   margin-bottom: 4px;
 }
 

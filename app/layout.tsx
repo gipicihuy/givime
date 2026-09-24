@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import { BottomNav } from "@/components/BottomNav";
 import { IconFilm } from "@/components/Icons";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
   variable: "--font-ui",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
 });
@@ -22,14 +28,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id">
-      <body className={`${sans.variable} min-h-screen antialiased`}>
+      <body className={`${sans.variable} ${display.variable} min-h-screen antialiased`}>
         <header className="site-header">
           <div className="shell header-inner">
             <Link href="/" className="logo">
               <span className="logo-mark" aria-hidden>
                 <IconFilm size={16} />
               </span>
-              Givime
+              <span className="logo-word">Givime</span>
             </Link>
           </div>
         </header>

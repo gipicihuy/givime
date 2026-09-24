@@ -96,6 +96,7 @@ export default function HistoryPage() {
             type="button"
             className="text-btn"
             onClick={() => {
+              if (!window.confirm("Hapus semua history? Tindakan ini tidak bisa dibatalkan.")) return;
               clearHistory();
               setItems([]);
             }}

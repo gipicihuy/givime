@@ -8,15 +8,17 @@ export function HistoryTracker({
   title,
   ep,
   cover,
+  t,
 }: {
   slug: string;
   title: string;
   ep: string;
   cover?: string;
+  t?: number;
 }) {
   useEffect(() => {
-    pushHistory({ slug, title, ep, cover });
-  }, [slug, title, ep, cover]);
+    pushHistory({ slug, title, ep, cover, t });
+  }, [slug, title, ep, cover, t]);
 
   return null;
 }

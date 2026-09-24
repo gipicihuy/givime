@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { IconEmpty, IconPlay } from "@/components/Icons";
-import { clearHistory, readHistory, type HistoryEntry } from "@/lib/history";
+import { IconEmpty } from "@/components/Icons";
+import {
+  clearHistory,
+  fmtProgress,
+  readHistory,
+  type HistoryEntry,
+} from "@/lib/history";
 
 function formatWhen(at: number) {
   try {
@@ -16,6 +21,11 @@ function formatWhen(at: number) {
   } catch {
     return "";
   }
+}
+
+function hrefOf(h: HistoryEntry) {
+  const base = `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+  return h.t && h.t > 0 ? `${base}&t=${Math.floor(h.t)}` : base;
 }
 
 export default function HistoryPage() {
@@ -65,21 +75,28 @@ export default function HistoryPage() {
         </div>
       ) : (
         <ul className="history-list">
-          {items.map((h) => (
-            <li key={h.slug}>
-              <Link href={`/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`} className="history-row">
-                <span className="history-thumb" aria-hidden>
-                  <IconPlay size={14} />
-                </span>
-                <span className="history-body">
-                  <span className="history-title">{h.title}</span>
-                  <span className="history-meta">
-                    Ep {h.ep} · {formatWhen(h.at)}
+          {items.map((h) => {
+            const prog = fmtProgress(h.t, h.d);
+            return (
+              <li key={h.slug}>
+                <Link href={hrefOf(h)} className="history-row">
+                  <span className="history-cover" aria-hidden>
+                    {h.cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={h.cover} alt="" loading="lazy" width={96} height={144} />
+                    ) : null}
                   </span>
-                </span>
-              </Link>
-            </li>
-          ))}
+                  <span className="history-body">
+                    <span className="history-title">{h.title}</span>
+                    <span className="history-meta">
+                      Ep {h.ep} · {formatWhen(h.at)}
+                    </span>
+                    {prog ? <span className="history-prog">{prog}</span> : null}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </>

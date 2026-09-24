@@ -428,10 +428,35 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* —— continue watching rail —— */
+/* —— continue watching rail (layout beda: landscape 16:9 + progress) —— */
+.continue-section .section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.continue-head-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.continue-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.continue-rail::-webkit-scrollbar {
+  display: none;
+}
+
 .continue-card {
-  flex: 0 0 128px;
-  width: 128px;
+  flex: 0 0 200px;
+  width: 200px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -442,15 +467,15 @@ a:focus-visible {
 
 @media (min-width: 768px) {
   .continue-card {
-    flex-basis: 148px;
-    width: 148px;
+    flex-basis: 240px;
+    width: 240px;
   }
 }
 
 .continue-thumb {
   position: relative;
   display: block;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius-sm, 8px);
   overflow: hidden;
   background: var(--surface);
@@ -467,14 +492,29 @@ a:focus-visible {
 .continue-play {
   position: absolute;
   inset: auto 8px 8px auto;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.continue-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.continue-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
 }
 
 .continue-title {
@@ -494,6 +534,11 @@ a:focus-visible {
 .continue-meta {
   font-size: 12px;
   color: var(--muted);
+}
+
+.continue-time {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 /* —— section —— */
@@ -1276,6 +1321,9 @@ a:focus-visible {
 
 /* —— page head —— */
 .page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
   font-size: clamp(24px, 5vw, 32px);
   font-weight: 700;
@@ -1284,10 +1332,60 @@ a:focus-visible {
   margin-bottom: 4px;
 }
 
+.page-title-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+
 .page-sub {
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 20px;
+}
+
+/* —— jadwal days —— */
+.jadwal-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.jadwal-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--foreground);
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.jadwal-day:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.jadwal-day.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.jadwal-day.is-today:not(.is-on) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.jadwal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 /* —— genre list —— */
@@ -1411,16 +1509,21 @@ a:focus-visible {
   color: var(--foreground);
 }
 
-.history-thumb {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.history-cover {
+  width: 44px;
+  height: 66px;
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.history-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .history-body {
@@ -1441,6 +1544,12 @@ a:focus-visible {
 .history-meta {
   font-size: 12px;
   color: var(--muted);
+}
+
+.history-prog {
+  font-size: 12px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .text-btn {

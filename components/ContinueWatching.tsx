@@ -2,10 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { IconChevronRight, IconPlay } from "@/components/Icons";
-import { readHistory, type HistoryEntry } from "@/lib/history";
+import { IconChevronRight, IconHistory, IconPlay } from "@/components/Icons";
+import {
+  fmtProgress,
+  readHistory,
+  type HistoryEntry,
+} from "@/lib/history";
 
-/** Rail "Lanjutkan menonton" dari localStorage — hide kalau kosong. */
+function hrefOf(h: HistoryEntry) {
+  const base = `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+  return h.t && h.t > 0 ? `${base}&t=${Math.floor(h.t)}` : base;
+}
+
+/**
+ * Rail "Lanjutkan menonton" — layout beda dari Shelf:
+ * kartu landscape 16:9 + progress bar + jam tonton (bukan poster 2:3).
+ * Posisi: setelah hero (ala nontonime). Auto-hide kalau kosong.
+ */
 export function ContinueWatching() {
   const [items, setItems] = useState<HistoryEntry[] | null>(null);
 
@@ -19,11 +32,11 @@ export function ContinueWatching() {
   if (!items?.length) return null;
 
   return (
-    <section className="section">
+    <section className="section continue-section">
       <div className="section-head">
-        <h2 className="section-title">
-          <span className="section-ornament" aria-hidden>
-            <SectionOrnament />
+        <h2 className="section-title continue-title-head">
+          <span className="continue-head-icon" aria-hidden>
+            <IconHistory size={18} />
           </span>
           Lanjutkan menonton
         </h2>
@@ -32,46 +45,38 @@ export function ContinueWatching() {
           <IconChevronRight size={14} />
         </Link>
       </div>
-      <div className="rail" tabIndex={0} aria-label="Geser lanjutkan menonton">
-        {items.map((h) => (
-          <Link
-            key={h.slug}
-            href={`/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`}
-            className="continue-card"
-          >
-            <span className="continue-thumb" aria-hidden>
-              {h.cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={h.cover} alt="" loading="lazy" width={300} height={450} />
-              ) : null}
-              <span className="continue-play">
-                <IconPlay size={14} />
+      <div className="continue-rail" tabIndex={0} aria-label="Geser lanjutkan menonton">
+        {items.map((h) => {
+          const prog = fmtProgress(h.t, h.d);
+          const pct =
+            h.t != null && h.d != null && h.d > 0
+              ? Math.min(100, Math.round((h.t / h.d) * 100))
+              : 0;
+          return (
+            <Link key={h.slug} href={hrefOf(h)} className="continue-card">
+              <span className="continue-thumb" aria-hidden>
+                {h.cover ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={h.cover} alt="" loading="lazy" width={480} height={270} />
+                ) : null}
+                <span className="continue-play">
+                  <IconPlay size={14} />
+                </span>
+                {pct > 0 ? (
+                  <span className="continue-bar">
+                    <span className="continue-bar-fill" style={{ width: `${pct}%` }} />
+                  </span>
+                ) : null}
               </span>
-            </span>
-            <span className="continue-title">{h.title}</span>
-            <span className="continue-meta">Ep {h.ep}</span>
-          </Link>
-        ))}
+              <span className="continue-title">{h.title}</span>
+              <span className="continue-meta">
+                Ep {h.ep}
+                {prog ? <span className="continue-time"> · {prog}</span> : null}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </section>
-  );
-}
-
-/** Ornamen 3-garis diagonal ala stalker-ff-givy (SectionDividerLabel). */
-function SectionOrnament() {
-  return (
-    <svg
-      width="73"
-      height="4"
-      viewBox="0 0 73 4"
-      preserveAspectRatio="none"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path d="M57.2497 0L53.6572 3.60889H0V0H57.2497Z" fill="currentColor" />
-      <path d="M62.4526 0L58.8601 3.60889H56.8293L60.4218 0H62.4526Z" fill="currentColor" />
-      <path d="M67.6555 0L64.063 3.60889H62.0278L65.6247 0H67.6555Z" fill="currentColor" />
-      <path d="M72.8583 0L69.2614 3.60889H67.2307L70.8276 0H72.8583Z" fill="currentColor" />
-    </svg>
   );
 }

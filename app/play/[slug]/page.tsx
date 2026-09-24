@@ -4,12 +4,13 @@ import { EpisodeSection, VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft } from "@/components/Icons";
 import { getEpisodes, metaOf, titleOf } from "@/lib/api";
+import { updateProgress } from "@/lib/history";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar" };
 
 type Params = { slug: string };
-type SP = { ep?: string };
+type SP = { ep?: string; t?: string };
 
 export default async function PlayPage({
   params,
@@ -49,6 +50,8 @@ export default async function PlayPage({
     );
   }
 
+  const initialTime = Math.max(0, Number(sp.t) || 0);
+
   return (
     <>
       <HistoryTracker
@@ -56,6 +59,7 @@ export default async function PlayPage({
         title={title}
         ep={String(target.ab_namaep)}
         cover={metaOf(anime).ero_image}
+        t={initialTime || undefined}
       />
       <p style={{ marginBottom: 12, fontSize: 14 }}>
         <Link href={`/anime/${slug}`} className="muted meta-item">
@@ -64,7 +68,13 @@ export default async function PlayPage({
         </Link>
       </p>
 
-      <VideoPlayer src={target.ab_linkcdn} animeTitle={title} episode={String(target.ab_namaep)} />
+      <VideoPlayer
+        src={target.ab_linkcdn}
+        animeTitle={title}
+        episode={String(target.ab_namaep)}
+        initialTime={initialTime}
+        onProgress={(t, d) => updateProgress(anime.slug, t, d)}
+      />
 
       <section className="section">
         <EpisodeSection slug={slug} eps={eps} current={String(target.ab_namaep)} />

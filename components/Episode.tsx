@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
 import { IconPlay } from "@/components/Icons";
@@ -73,16 +73,77 @@ export function VideoPlayer({
   src,
   animeTitle,
   episode,
+  initialTime = 0,
+  onProgress,
 }: {
   src: string;
   animeTitle: string;
   episode: string;
+  initialTime?: number;
+  onProgress?: (t: number, d: number) => void;
 }) {
   const playable = encodeMedia(src);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const lastSave = useRef(0);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (initialTime > 0) {
+      const seek = () => {
+        try {
+          v.currentTime = initialTime;
+        } catch {
+          /* ignore */
+        }
+      };
+      if (v.readyState >= 1) seek();
+      else v.addEventListener("loadedmetadata", seek, { once: true });
+      return () => v.removeEventListener("loadedmetadata", seek);
+    }
+  }, [initialTime, playable]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !onProgress) return;
+
+    const save = () => {
+      const d = v.duration;
+      if (!Number.isFinite(d) || d <= 0) return;
+      onProgress(Math.floor(v.currentTime), Math.floor(d));
+    };
+
+    const onTime = () => {
+      const now = Date.now();
+      if (now - lastSave.current < 4000) return;
+      lastSave.current = now;
+      save();
+    };
+
+    v.addEventListener("timeupdate", onTime);
+    v.addEventListener("pause", save);
+    v.addEventListener("ended", save);
+    window.addEventListener("beforeunload", save);
+    return () => {
+      save();
+      v.removeEventListener("timeupdate", onTime);
+      v.removeEventListener("pause", save);
+      v.removeEventListener("ended", save);
+      window.removeEventListener("beforeunload", save);
+    };
+  }, [onProgress, playable]);
+
   return (
     <div className="player-wrap">
       {/* URL CDN hanya di src — jangan ditampilkan ke UI */}
-      <video controls playsInline preload="metadata" key={playable} src={playable} />
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        preload="metadata"
+        key={playable}
+        src={playable}
+      />
       <div className="player-bar">
         <span>
           {animeTitle} · Ep {episode}

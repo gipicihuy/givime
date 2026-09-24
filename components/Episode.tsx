@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
+import { updateProgress } from "@/lib/history";
 import { IconPlay } from "@/components/Icons";
 
 type Order = "asc" | "desc";
@@ -73,14 +74,14 @@ export function VideoPlayer({
   src,
   animeTitle,
   episode,
+  slug,
   initialTime = 0,
-  onProgress,
 }: {
   src: string;
   animeTitle: string;
   episode: string;
+  slug: string;
   initialTime?: number;
-  onProgress?: (t: number, d: number) => void;
 }) {
   const playable = encodeMedia(src);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -105,12 +106,12 @@ export function VideoPlayer({
 
   useEffect(() => {
     const v = videoRef.current;
-    if (!v || !onProgress) return;
+    if (!v) return;
 
     const save = () => {
       const d = v.duration;
       if (!Number.isFinite(d) || d <= 0) return;
-      onProgress(Math.floor(v.currentTime), Math.floor(d));
+      updateProgress(slug, Math.floor(v.currentTime), Math.floor(d));
     };
 
     const onTime = () => {
@@ -131,7 +132,7 @@ export function VideoPlayer({
       v.removeEventListener("ended", save);
       window.removeEventListener("beforeunload", save);
     };
-  }, [onProgress, playable]);
+  }, [slug, playable]);
 
   return (
     <div className="player-wrap">

@@ -4,7 +4,6 @@ import { EpisodeSection, VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft } from "@/components/Icons";
 import { getEpisodes, metaOf, titleOf } from "@/lib/api";
-import { updateProgress } from "@/lib/history";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar" };
@@ -72,8 +71,8 @@ export default async function PlayPage({
         src={target.ab_linkcdn}
         animeTitle={title}
         episode={String(target.ab_namaep)}
+        slug={anime.slug}
         initialTime={initialTime}
-        onProgress={(t, d) => updateProgress(anime.slug, t, d)}
       />
 
       <section className="section">

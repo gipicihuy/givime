@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { type Anime, episodeLabel, metaOf, titleOf } from "@/lib/api";
-import { IconEye, IconPlay, IconStar } from "@/components/Icons";
+import { IconPlay, IconStar } from "@/components/Icons";
 
 function statusClass(status?: string) {
   if (!status) return "chip";
@@ -19,12 +19,12 @@ export function AnimeCard({ anime }: { anime: Anime }) {
   const cover = mb.ero_image;
 
   return (
-    <Link href={`/anime/${anime.slug}`} className="card">
-      <div className="card-thumb">
+    <Link href={`/anime/${anime.slug}`} className="poster">
+      <div className="poster-thumb">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            className="card-cover"
+            className="poster-cover"
             src={cover}
             alt=""
             loading="lazy"
@@ -32,32 +32,49 @@ export function AnimeCard({ anime }: { anime: Anime }) {
             height={450}
           />
         ) : (
-          <div className="card-cover-placeholder">Tanpa cover</div>
+          <div className="poster-placeholder">Tanpa cover</div>
         )}
-        <span className="card-play" aria-hidden>
-          <IconPlay size={18} />
+        <span className="poster-badge" aria-hidden>
+          <IconPlay size={14} />
         </span>
+        {status ? <span className={`poster-status ${statusClass(status)}`}>{status}</span> : null}
       </div>
-      <div className="card-body">
-        <span className="card-title">{title}</span>
-        <div className="card-meta">
-          {status ? <span className={statusClass(status)}>{status}</span> : null}
-          <span className="meta-item">
-            <IconEye size={13} />
-            Ep {ep}
+      <span className="poster-title">{title}</span>
+      <span className="poster-meta">
+        <span className="meta-item">
+          Ep {ep}
+        </span>
+        {score ? (
+          <span className="meta-item meta-score">
+            <IconStar size={11} />
+            {score}
           </span>
-          {score ? (
-            <span className="meta-item meta-score">
-              <IconStar size={12} />
-              {score}
-            </span>
-          ) : null}
-        </div>
-      </div>
+        ) : null}
+      </span>
     </Link>
   );
 }
 
+/** Rail horizontal — scroll ke kanan (home sections). */
+export function AnimeRail({ items }: { items: Anime[] }) {
+  if (!items.length) {
+    return (
+      <div className="state">
+        <strong>Belum ada judul</strong>
+        Coba lagi nanti.
+      </div>
+    );
+  }
+  return (
+    <div className="rail" tabIndex={0} aria-label="Geser ke kanan">
+      {items.map((a) => (
+        <AnimeCard key={`${a.id}-${a.slug}`} anime={a} />
+      ))}
+    </div>
+  );
+}
+
+/** Grid poster — halaman list (ongoing/completed/search/dll). */
 export function AnimeGrid({ items }: { items: Anime[] }) {
   if (!items.length) {
     return (
@@ -68,7 +85,7 @@ export function AnimeGrid({ items }: { items: Anime[] }) {
     );
   }
   return (
-    <div className="card-grid">
+    <div className="poster-grid">
       {items.map((a) => (
         <AnimeCard key={`${a.id}-${a.slug}`} anime={a} />
       ))}

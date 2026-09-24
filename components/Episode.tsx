@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
-import { IconExternal, IconPlay } from "@/components/Icons";
+import { IconPlay } from "@/components/Icons";
 
 export function EpisodeGrid({
   slug,
@@ -15,7 +15,7 @@ export function EpisodeGrid({
     return (
       <div className="state">
         <strong>Belum ada episode</strong>
-        Sumber belum mengisi daftar CDN untuk judul ini.
+        Daftar episode belum tersedia untuk judul ini.
       </div>
     );
   }
@@ -51,18 +51,13 @@ export function VideoPlayer({
 }) {
   const playable = encodeMedia(src);
   return (
-    <div>
-      <div className="player-wrap">
-        <video controls playsInline preload="metadata" key={playable} src={playable} />
-        <div className="player-bar">
-          <span>
-            {animeTitle} · Ep {episode}
-          </span>
-          <a href={playable} target="_blank" rel="noreferrer" className="muted meta-item">
-            <IconExternal size={13} />
-            Buka di tab baru
-          </a>
-        </div>
+    <div className="player-wrap">
+      {/* URL CDN hanya di src — jangan ditampilkan ke UI */}
+      <video controls playsInline preload="metadata" key={playable} src={playable} />
+      <div className="player-bar">
+        <span>
+          {animeTitle} · Ep {episode}
+        </span>
       </div>
     </div>
   );

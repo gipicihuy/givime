@@ -1,62 +1,50 @@
 # DESIGN.md — Givime (situs anime)
 
 ## Direction
-**Dark streaming, horizontal cards.** Content-first list: cover normal di kiri, judul+meta di kanan — bukan grid poster vertikal. Referensi vibe: theme retrotube / bokepnoz (dark UI, badge overlay, list rapi).
+**App-like dark streaming.** Bottom nav (Home / Ongoing / Search / Movies / Genre) + home = section **rail** poster vertikal yang **scroll ke kanan**. Cover normal (2:3). Tanpa credit sumber, tanpa URL CDN di UI.
 
 ## Identity
 - **Nama:** Givime
-- **Feel:** nonton cepat — cari → list horizontal → play
-- **Audience:** penonton anime Indonesia
+- **Feel:** buka → scroll section → tap poster → play
+- **Referensi structure:** AnimeHub (menu Home/Search/Genre/Movies/Schedule/Update/Bookmark) — di web kita pakai subset yang relevan
 
 ## Dials
 `Dial: ENERGY 2 / RHYTHM 2 / MOTION 1`
 
-## Palette (dark streaming)
-| Role | Value | Use |
-|------|--------|-----|
-| Canvas | `#0f0f10` | page bg |
-| Surface | `#17171a` | cards |
-| Surface-2 | `#1e1e22` | hover, inputs |
-| Ink | `#f2f2f3` | primary text |
-| Muted | `#9b9ba3` | meta |
-| Border | `#2c2c33` | edges |
-| Accent | `#25efcd` | CTA, focus, score, active ep |
-| Accent-ink | `#062b26` | text on accent |
-| Accent-soft | `rgba(37,239,205,.12)` | Ongoing chip |
-| Success | `#4ade80` | sparse |
+## Palette
+| Role | Value |
+|------|--------|
+| Canvas | `#0f0f10` |
+| Surface | `#17171a` |
+| Ink | `#f2f2f3` |
+| Muted | `#9b9ba3` |
+| Border | `#2c2c33` |
+| Accent | `#25efcd` |
+| Accent-ink | `#062b26` |
 
-**Cap:** 1 accent (teal) + neutrals. No blue-purple gradient hero, no glow/glass.
+Cap: 1 accent + neutrals.
 
-## Typography
-- Geist / system-ui — 400 body, 600–700 titles
-- tabular-nums untuk ep/score
-- Scale: 12 / 13 / 14 / 16 / 22 / 28
-
-## Layout rules
-- Max width ~1120px; pad 14–24px
-- **Card = horizontal row:** thumb 72–84px (aspect 2:3 natural) + body
-- Grid: 1 col mobile → 2 col ≥720 → 3 col ≥1100; gap 8–10px
-- Radius: 8 cards/inputs, 6 chips/buttons, 999 status pills only
-- Nav solid `#121214` + bottom border; logo mark tile teal
-- Icons: **inline SVG only** — jangan glyph text (★ ▶ ←)
+## Layout
+- **Top bar:** logo + search only (nav pindah ke bawah)
+- **Bottom nav fixed 5 item:** Home · Ongoing · Search · Movies · Genre (SVG, active teal)
+- **Home sections (stack):** Ongoing → Top → Movie → Completed  
+  masing-masing: `AnimeRail` horizontal-scroll poster **vertikal** 128–148px
+- **List pages:** `AnimeGrid` poster 3→6 kolom
+- **Detail:** cover 200px + info; CTA teal
+- **Player:** 16:9; **jangan tampilkan** URL MP4 / source / credit origin
+- Footer: minimal / tanpa “data dari …”
 
 ## Components
-- **AnimeCard:** horizontal; cover normal (bukan full-bleed raksasa); play overlay on hover; title 2-line; meta: chip status · Ep (icon eye) · score (icon star)
-- **Chips:** Ongoing = accent-soft + teal; Completed = neutral
-- **Player:** black 16:9; bar bawah dengan external-link icon
-- **Search:** input dark + search icon kiri
-- **Empty/error:** icon + cause + next action
-- **Detail:** cover 200px left; CTA solid teal `.btn-play`
+- `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
+- `AnimeRail` = flex overflow-x scroll-snap
+- `AnimeGrid` = responsive poster grid
+- `BottomNav` = client, `aria-current`
+- Icons: `components/Icons.tsx` only
 
 ## Motion
-- CSS only; ≤150ms hover
-- Play overlay opacity on card hover; no infinite loops
+≤150ms hover; rail scroll native; poster scale 1.03 on hover.
 
 ## Forbidden
-- Vertical poster-only grid (user reject)
-- Text glyphs as icons when SVG exists
-- Blue/purple gradient heroes, glassmorphism, fake stats
-- Marketing fluff copy
-
-## Copy voice
-Plain ID/EN from real data: title, status, episode, score.
+- URL CDN / “Source: …” / “data dari karanime” di UI
+- Nav top penuh (sudah pindah bottom)
+- Vertical-only home without horizontal rail

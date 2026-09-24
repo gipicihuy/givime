@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeGrid, VideoPlayer } from "@/components/Episode";
 import { IconChevronLeft, IconClock } from "@/components/Icons";
-import { encodeMedia, getEpisodes, titleOf } from "@/lib/api";
+import { getEpisodes, titleOf } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar" };
@@ -48,8 +48,6 @@ export default async function PlayPage({
     );
   }
 
-  const playable = encodeMedia(target.ab_linkcdn);
-
   return (
     <>
       <p style={{ marginBottom: 12, fontSize: 14 }}>
@@ -71,11 +69,6 @@ export default async function PlayPage({
         </div>
         <EpisodeGrid slug={slug} eps={eps} current={Number(target.ab_namaep)} />
       </section>
-
-      <p className="muted" style={{ fontSize: 13, wordBreak: "break-all" }}>
-        Source: {playable.slice(0, 80)}
-        {playable.length > 80 ? "…" : ""}
-      </p>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AnimeGrid } from "@/components/AnimeCard";
+import { AnimeRail } from "@/components/AnimeCard";
 import { IconChevronRight } from "@/components/Icons";
 import { getList, IDS, type Anime } from "@/lib/api";
 
@@ -14,6 +14,7 @@ function Section({
   href?: string;
   items: Anime[];
 }) {
+  if (!items.length) return null;
   return (
     <section className="section">
       <div className="section-head">
@@ -25,7 +26,7 @@ function Section({
           </Link>
         ) : null}
       </div>
-      <AnimeGrid items={items} />
+      <AnimeRail items={items} />
     </section>
   );
 }
@@ -42,24 +43,29 @@ async function safeList(
 }
 
 export default async function HomePage() {
-  const [ongoing, top, movie] = await Promise.all([
+  const [ongoing, top, movie, completed] = await Promise.all([
     safeList(
-      { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 9 },
+      { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 12 },
       300,
     ),
-    safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 9 }, 3600),
-    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 9 }, 600),
+    safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 12 }, 3600),
+    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 12 }, 600),
+    safeList(
+      { animestatus: IDS.status.completed, orderby: "date", order: "desc", per_page: 12 },
+      3600,
+    ),
   ]);
 
   return (
     <>
-      <header style={{ marginBottom: 24 }}>
-        <h1 className="page-title">Anime</h1>
-        <p className="page-sub">Daftar ongoing, top, dan movie — filter dari karanime.</p>
+      <header className="home-head">
+        <h1 className="page-title">Givime</h1>
+        <p className="page-sub">Nonton anime subtitle Indonesia</p>
       </header>
       <Section title="Ongoing" href="/ongoing" items={ongoing.items} />
       <Section title="Top" items={top.items} />
       <Section title="Movie" href="/movies" items={movie.items} />
+      <Section title="Completed" href="/completed" items={completed.items} />
     </>
   );
 }

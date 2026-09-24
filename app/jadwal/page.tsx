@@ -151,10 +151,10 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
       {r.items.length ? (
         <ul className="jadwal-list">
           {r.items.map((a) => {
-            const tone = jadwalTone(a);
             const ep = episodeLabel(a);
             const score = metaOf(a).ero_skor;
             const cover = metaOf(a).ero_image;
+            const tone = jadwalTone(a);
             return (
               <li key={`${a.id}-${a.slug}`}>
                 <Link href={`/anime/${a.slug}`} className={`jadwal-item is-${tone}`}>
@@ -169,15 +169,14 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                     <span className="jadwal-ep">
                       {ep ? `Episode ${ep}` : "Episode —"}
                     </span>
-                    <span className="jadwal-meta">
-                      <span className={`jadwal-status-dot is-${tone}`} aria-hidden />
-                      {score ? (
+                    {score ? (
+                      <span className="jadwal-meta">
                         <span className="jadwal-meta-item">
                           <IconStar size={12} />
                           {score}
                         </span>
-                      ) : null}
-                    </span>
+                      </span>
+                    ) : null}
                   </span>
                 </Link>
               </li>

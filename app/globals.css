@@ -1583,32 +1583,12 @@ a:focus-visible {
   color: var(--accent);
 }
 
-.jadwal-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  flex-shrink: 0;
-  background: var(--muted);
-}
-
-.jadwal-status-dot.is-aired {
-  background: var(--accent);
-}
-
-.jadwal-status-dot.is-wait {
-  background: var(--muted);
-}
-
-.jadwal-status-dot.is-late {
-  background: #f87171;
-}
-
 /* —— jadwal: prev/next day (ikon sama Pager) —— */
 .jadwal-daynav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-top: 20px;
   flex-wrap: wrap;
 }
@@ -1616,26 +1596,37 @@ a:focus-visible {
 .jadwal-daynav-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
+  padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   text-decoration: none;
-  transition: color 120ms ease;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
 .jadwal-daynav-link:hover {
   color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .jadwal-daynav-link:hover .pager-arrow {
   color: var(--accent);
 }
 
+.jadwal-daynav-link .pager-arrow {
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
 .jadwal-daynav-link.is-next {
   margin-left: auto;
-  text-align: right;
 }
 
 /* —— genre list —— */

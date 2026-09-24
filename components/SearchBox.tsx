@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useState } from "react";
+import { IconSearch } from "@/components/Icons";
 
 function SearchForm() {
   const router = useRouter();
@@ -24,6 +25,9 @@ function SearchForm() {
       <label htmlFor="q" className="sr-only">
         Cari anime
       </label>
+      <span className="search-icon" aria-hidden>
+        <IconSearch size={15} />
+      </span>
       <input
         id="q"
         className="search-input"

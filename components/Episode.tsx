@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
+import { IconExternal, IconPlay } from "@/components/Icons";
 
 export function EpisodeGrid({
   slug,
@@ -30,6 +31,7 @@ export function EpisodeGrid({
             className="ep-link"
             aria-current={active ? "page" : undefined}
           >
+            {active ? <IconPlay size={11} /> : null}
             {e.ab_namaep}
           </Link>
         );
@@ -56,7 +58,8 @@ export function VideoPlayer({
           <span>
             {animeTitle} · Ep {episode}
           </span>
-          <a href={playable} target="_blank" rel="noreferrer" className="muted">
+          <a href={playable} target="_blank" rel="noreferrer" className="muted meta-item">
+            <IconExternal size={13} />
             Buka di tab baru
           </a>
         </div>

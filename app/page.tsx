@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnimeGrid } from "@/components/AnimeCard";
+import { IconChevronRight } from "@/components/Icons";
 import { getList, IDS, type Anime } from "@/lib/api";
 
 export const revalidate = 300;
@@ -19,7 +20,8 @@ function Section({
         <h2 className="section-title">{title}</h2>
         {href ? (
           <Link href={href} className="section-more">
-            Lihat semua →
+            Lihat semua
+            <IconChevronRight size={14} />
           </Link>
         ) : null}
       </div>
@@ -42,11 +44,11 @@ async function safeList(
 export default async function HomePage() {
   const [ongoing, top, movie] = await Promise.all([
     safeList(
-      { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 8 },
+      { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 9 },
       300,
     ),
-    safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 8 }, 3600),
-    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 8 }, 600),
+    safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 9 }, 3600),
+    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 9 }, 600),
   ]);
 
   return (

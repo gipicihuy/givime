@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconTag } from "@/components/Icons";
 import { getGenres } from "@/lib/api";
 
 export const revalidate = 86400;
@@ -19,9 +20,10 @@ export default async function GenresPage() {
       <div className="genre-list">
         {genres.map((g) => (
           <Link key={g.id} href={`/genre/${g.slug}`} className="genre-tag">
+            <IconTag size={13} />
             {g.name}
             {typeof g.count === "number" ? (
-              <span className="muted" style={{ marginLeft: 6, fontSize: 12 }}>
+              <span className="muted" style={{ fontSize: 12 }}>
                 {g.count}
               </span>
             ) : null}

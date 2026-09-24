@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeGrid } from "@/components/Episode";
+import { IconPlay, IconStar } from "@/components/Icons";
 import {
   getDetail,
   metaOf,
@@ -48,7 +49,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
           // eslint-disable-next-line @next/next/no-img-element
           <img className="detail-cover" src={mb.ero_image} alt="" width={440} height={660} />
         ) : (
-          <div className="card-cover-placeholder" style={{ borderRadius: 8, maxWidth: 220 }}>
+          <div className="card-cover-placeholder" style={{ borderRadius: 8, maxWidth: 200, aspectRatio: "2/3", border: "1px solid var(--border)" }}>
             Tanpa cover
           </div>
         )}
@@ -65,7 +66,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
           {mb.ero_type ? <span>{mb.ero_type}</span> : null}
           {mb.ero_tayang ? <span>{mb.ero_tayang}</span> : null}
           <span>Ep {String(mb.ero_episode ?? mb.ero_episodebaru ?? eps.length)}</span>
-          {mb.ero_skor ? <span>★ {mb.ero_skor}</span> : null}
+          {mb.ero_skor ? (
+            <span className="meta-item meta-score">
+              <IconStar size={12} />
+              {mb.ero_skor}
+            </span>
+          ) : null}
           {mb.ero_sub ? <span>{mb.ero_sub}</span> : null}
         </div>
 
@@ -98,8 +104,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
 
         {firstEp ? (
           <p style={{ marginBottom: 20 }}>
-            <Link href={`/play/${anime.slug}?ep=${encodeURIComponent(firstEp.ab_namaep)}`} className="ep-link">
-              ▶ Putar Ep {firstEp.ab_namaep}
+            <Link
+              href={`/play/${anime.slug}?ep=${encodeURIComponent(firstEp.ab_namaep)}`}
+              className="btn-play"
+            >
+              <IconPlay size={14} />
+              Putar Ep {firstEp.ab_namaep}
             </Link>
           </p>
         ) : null}

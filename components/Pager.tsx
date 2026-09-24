@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconChevronLeft, IconChevronRight } from "@/components/Icons";
 
 export function Pager({
   page,
@@ -30,17 +31,29 @@ export function Pager({
   return (
     <nav className="pager" aria-label="Halaman">
       {prev ? (
-        <Link href={href(prev)}>← Prev</Link>
+        <Link href={href(prev)}>
+          <IconChevronLeft size={14} />
+          Prev
+        </Link>
       ) : (
-        <span className="disabled">← Prev</span>
+        <span className="disabled">
+          <IconChevronLeft size={14} />
+          Prev
+        </span>
       )}
       <span>
         {page} / {totalPages}
       </span>
       {next ? (
-        <Link href={href(next)}>Next →</Link>
+        <Link href={href(next)}>
+          Next
+          <IconChevronRight size={14} />
+        </Link>
       ) : (
-        <span className="disabled">Next →</span>
+        <span className="disabled">
+          Next
+          <IconChevronRight size={14} />
+        </span>
       )}
     </nav>
   );

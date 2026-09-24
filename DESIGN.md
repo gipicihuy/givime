@@ -1,60 +1,62 @@
 # DESIGN.md — Givime (situs anime)
 
 ## Direction
-**Clean & minimal terang.** Content-first: daftar anime, cover, dan episode yang jelas — bukan landing page marketing.
+**Dark streaming, horizontal cards.** Content-first list: cover normal di kiri, judul+meta di kanan — bukan grid poster vertikal. Referensi vibe: theme retrotube / bokepnoz (dark UI, badge overlay, list rapi).
 
 ## Identity
 - **Nama:** Givime
-- **Feel:** rapi, lega, gampang dipakai tiap hari (browse → detail → nonton)
-- **Audience:** penonton anime Indonesia yang cari judul + sub episode cepat
+- **Feel:** nonton cepat — cari → list horizontal → play
+- **Audience:** penonton anime Indonesia
 
 ## Dials
 `Dial: ENERGY 2 / RHYTHM 2 / MOTION 1`
 
-## Palette (light)
+## Palette (dark streaming)
 | Role | Value | Use |
 |------|--------|-----|
-| Canvas | `#fafafa` | page bg |
-| Surface | `#ffffff` | cards, nav |
-| Ink | `#171717` | primary text |
-| Muted | `#737373` | meta, secondary |
-| Border | `#e5e5e5` | dividers, card edge |
-| Accent | `#e11d48` | status Ongoing, primary CTA, focus ring only |
-| Accent-soft | `#fff1f2` | rare badge bg for Ongoing |
-| Success | `#15803d` | Completed chip (sparse) |
+| Canvas | `#0f0f10` | page bg |
+| Surface | `#17171a` | cards |
+| Surface-2 | `#1e1e22` | hover, inputs |
+| Ink | `#f2f2f3` | primary text |
+| Muted | `#9b9ba3` | meta |
+| Border | `#2c2c33` | edges |
+| Accent | `#25efcd` | CTA, focus, score, active ep |
+| Accent-ink | `#062b26` | text on accent |
+| Accent-soft | `rgba(37,239,205,.12)` | Ongoing chip |
+| Success | `#4ade80` | sparse |
 
-**Cap:** max 2 core + 1 accent + neutrals. No blue-purple gradients, no glow, no glassmorphism by default.
+**Cap:** 1 accent (teal) + neutrals. No blue-purple gradient hero, no glow/glass.
 
 ## Typography
-- **UI:** `Inter` (or system-ui stack) — 400 body, 600 titles
-- **Numerals / ep / score:** tabular-nums
-- Scale: 14 / 16 / 18 / 24 / 32 (no giant hero type)
+- Geist / system-ui — 400 body, 600–700 titles
+- tabular-nums untuk ep/score
+- Scale: 12 / 13 / 14 / 16 / 22 / 28
 
 ## Layout rules
-- Max content width ~1120px; horizontal padding 16–24px
-- Grid: 2 col mobile → 4 col desktop for anime cards; gap consistent (`gap-4` / `gap-6`)
-- Cards: flat by default (`border`, no shadow). One elevation level only if a dropdown/modal needs lift
-- Radius: `8px` cards/inputs, `6px` chips, `999px` only for status pills
-- Nav solid white + bottom border — no backdrop blur
-- Whitespace as structure; section labels small uppercase tracking-wide muted
+- Max width ~1120px; pad 14–24px
+- **Card = horizontal row:** thumb 72–84px (aspect 2:3 natural) + body
+- Grid: 1 col mobile → 2 col ≥720 → 3 col ≥1100; gap 8–10px
+- Radius: 8 cards/inputs, 6 chips/buttons, 999 status pills only
+- Nav solid `#121214` + bottom border; logo mark tile teal
+- Icons: **inline SVG only** — jangan glyph text (★ ▶ ←)
 
-## Components notes
-- **AnimeCard:** 2:3 cover, title 1 line clamp, meta row (status · ep · score)
-- **Chips:** Ongoing = accent-soft; Completed = neutral border
-- **Video player:** native controls first; page around player stays quiet
-- **Search:** obvious input in nav; results same card grid (not a different template)
-- **Empty/loading/error:** name cause + next action (e.g. “Judul tidak ditemukan — coba kata lain”)
+## Components
+- **AnimeCard:** horizontal; cover normal (bukan full-bleed raksasa); play overlay on hover; title 2-line; meta: chip status · Ep (icon eye) · score (icon star)
+- **Chips:** Ongoing = accent-soft + teal; Completed = neutral
+- **Player:** black 16:9; bar bawah dengan external-link icon
+- **Search:** input dark + search icon kiri
+- **Empty/error:** icon + cause + next action
+- **Detail:** cover 200px left; CTA solid teal `.btn-play`
 
 ## Motion
-- CSS only; ≤150ms hover/opacity
-- No infinite decorative loops, no parallax, no staggered hero reveals
+- CSS only; ≤150ms hover
+- Play overlay opacity on card hover; no infinite loops
 
-## Forbidden (unless purpose written)
-- Generic blue/purple/cyan gradient heroes
-- Sparkle/star/AI icons as decoration
-- Fake stats, “10k+ users”, marketing fluff copy
-- Pill-shaped everything, page-wide glow, bento mosaic without content reason
-- Dark-by-default for “tech” look
+## Forbidden
+- Vertical poster-only grid (user reject)
+- Text glyphs as icons when SVG exists
+- Blue/purple gradient heroes, glassmorphism, fake stats
+- Marketing fluff copy
 
 ## Copy voice
-Plain Indonesian/English UI labels from real data: title, status, episode count, score. No “Discover your next adventure.”
+Plain ID/EN from real data: title, status, episode, score.

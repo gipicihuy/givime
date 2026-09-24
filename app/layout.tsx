@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SearchBox } from "@/components/SearchBox";
+import { IconFilm, IconGrid, IconHome, IconLayers, IconTag } from "@/components/Icons";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,11 +24,11 @@ export const metadata: Metadata = {
 };
 
 const nav = [
-  { href: "/", label: "Home" },
-  { href: "/ongoing", label: "Ongoing" },
-  { href: "/completed", label: "Completed" },
-  { href: "/movies", label: "Movies" },
-  { href: "/genres", label: "Genres" },
+  { href: "/", label: "Home", icon: IconHome },
+  { href: "/ongoing", label: "Ongoing", icon: IconLayers },
+  { href: "/completed", label: "Completed", icon: IconGrid },
+  { href: "/movies", label: "Movies", icon: IconFilm },
+  { href: "/genres", label: "Genres", icon: IconTag },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -37,14 +38,21 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header className="site-header">
           <div className="shell header-inner">
             <Link href="/" className="logo">
+              <span className="logo-mark" aria-hidden>
+                <IconFilm size={16} />
+              </span>
               Givime
             </Link>
             <nav className="nav" aria-label="Utama">
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} className="nav-link">
-                  {n.label}
-                </Link>
-              ))}
+              {nav.map((n) => {
+                const Icon = n.icon;
+                return (
+                  <Link key={n.href} href={n.href} className="nav-link">
+                    <Icon size={14} />
+                    {n.label}
+                  </Link>
+                );
+              })}
             </nav>
             <SearchBox />
           </div>

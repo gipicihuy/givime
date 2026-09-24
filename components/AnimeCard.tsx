@@ -1,10 +1,6 @@
 import Link from "next/link";
-import {
-  type Anime,
-  episodeLabel,
-  metaOf,
-  titleOf,
-} from "@/lib/api";
+import { type Anime, episodeLabel, metaOf, titleOf } from "@/lib/api";
+import { IconEye, IconPlay, IconStar } from "@/components/Icons";
 
 function statusClass(status?: string) {
   if (!status) return "chip";
@@ -24,25 +20,38 @@ export function AnimeCard({ anime }: { anime: Anime }) {
 
   return (
     <Link href={`/anime/${anime.slug}`} className="card">
-      {cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          className="card-cover"
-          src={cover}
-          alt=""
-          loading="lazy"
-          width={300}
-          height={450}
-        />
-      ) : (
-        <div className="card-cover-placeholder">Tanpa cover</div>
-      )}
+      <div className="card-thumb">
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="card-cover"
+            src={cover}
+            alt=""
+            loading="lazy"
+            width={300}
+            height={450}
+          />
+        ) : (
+          <div className="card-cover-placeholder">Tanpa cover</div>
+        )}
+        <span className="card-play" aria-hidden>
+          <IconPlay size={18} />
+        </span>
+      </div>
       <div className="card-body">
         <span className="card-title">{title}</span>
         <div className="card-meta">
           {status ? <span className={statusClass(status)}>{status}</span> : null}
-          <span>Ep {ep}</span>
-          {score ? <span>★ {score}</span> : null}
+          <span className="meta-item">
+            <IconEye size={13} />
+            Ep {ep}
+          </span>
+          {score ? (
+            <span className="meta-item meta-score">
+              <IconStar size={12} />
+              {score}
+            </span>
+          ) : null}
         </div>
       </div>
     </Link>

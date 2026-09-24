@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeGrid, VideoPlayer } from "@/components/Episode";
+import { IconChevronLeft, IconClock } from "@/components/Icons";
 import { encodeMedia, getEpisodes, titleOf } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -52,8 +53,9 @@ export default async function PlayPage({
   return (
     <>
       <p style={{ marginBottom: 12, fontSize: 14 }}>
-        <Link href={`/anime/${slug}`} className="muted">
-          ← {title}
+        <Link href={`/anime/${slug}`} className="muted meta-item">
+          <IconChevronLeft size={14} />
+          {title}
         </Link>
       </p>
 
@@ -62,7 +64,10 @@ export default async function PlayPage({
       <section className="section">
         <div className="section-head">
           <h2 className="section-title">Episode</h2>
-          <span className="section-more">{eps.length} total</span>
+          <span className="section-more meta-item">
+            <IconClock size={13} />
+            {eps.length} total
+          </span>
         </div>
         <EpisodeGrid slug={slug} eps={eps} current={Number(target.ab_namaep)} />
       </section>

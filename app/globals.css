@@ -631,21 +631,6 @@ a:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.ep-count {
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 28px;
-  height: 22px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
 .btn-play {
   display: inline-flex;
   align-items: center;
@@ -681,26 +666,26 @@ a:focus-visible {
 
 /* —— episodes —— */
 .ep-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
 }
 
 .ep-link {
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  min-width: 44px;
-  min-height: 36px;
-  display: inline-flex;
+  min-height: 40px;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 6px 4px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   color: var(--foreground);
   transition: border-color 120ms ease, color 120ms ease;
+  text-align: center;
 }
 
 .ep-link:hover {

@@ -8,7 +8,6 @@ import {
   metaOf,
   sortEps,
   stripHtml,
-  synopsisOf,
   titleOf,
 } from "@/lib/api";
 
@@ -48,7 +47,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
   const mb = metaOf(anime);
   const eps = sortEps(mb.ab_cdngroup ?? []);
   const title = titleOf(anime);
-  const synopsis = synopsisOf(anime, 420);
+  const synopsis = stripHtml(anime.content?.rendered ?? "").trim();
   const firstEp = eps[0];
   const epCount = Number(mb.ero_episode ?? mb.ero_episodebaru ?? eps.length) || eps.length;
 
@@ -198,10 +197,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
         </section>
 
         <section className="detail-block">
-          <div className="section-head">
-            <h2 className="section-title">Episode</h2>
-            <span className="ep-count">{eps.length}</span>
-          </div>
+          <h2 className="section-title">Episode</h2>
           <EpisodeGrid slug={anime.slug} eps={eps} />
         </section>
       </div>

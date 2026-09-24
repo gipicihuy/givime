@@ -67,7 +67,7 @@ export default async function PlayPage({
       <VideoPlayer src={target.ab_linkcdn} animeTitle={title} episode={String(target.ab_namaep)} />
 
       <section className="section">
-        <EpisodeSection slug={slug} eps={eps} current={Number(target.ab_namaep)} />
+        <EpisodeSection slug={slug} eps={eps} current={String(target.ab_namaep)} />
       </section>
     </>
   );

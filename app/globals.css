@@ -665,42 +665,34 @@ a:focus-visible {
 }
 
 /* —— episodes —— */
-.ep-sort {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
+.ep-sort-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 7px 12px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-2);
-}
-
-.ep-sort-btn {
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
 }
 
 .ep-sort-btn:hover {
   color: var(--foreground);
+  border-color: var(--muted);
 }
 
 .ep-sort-btn[aria-pressed="true"] {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
 }
 
 .ep-sort-btn:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .ep-grid {

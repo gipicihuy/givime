@@ -36,7 +36,7 @@ Cap: 1 accent + neutrals.
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **List pages:** `AnimeGrid` poster 3→6 kolom
-- **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis full → Info (fact-list) → Episode (auto-fill grid + segmented sort Terlama/Terbaru); tanpa meta-table, tanpa badge angka di section head
+- **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis full → Info (fact-list) → Episode (auto-fill grid + 1 tombol toggle Terbaru); tanpa meta-table, tanpa badge angka, tanpa 2-pill segmented
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components
@@ -45,7 +45,7 @@ Cap: 1 accent + neutrals.
 - `AnimeGrid` = responsive poster grid
 - `Pager` = nomor halaman pill + chevron icon-only (tanpa teks Prev/Next)
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
-- `EpisodeSection` = client, section head + segmented sort (Terlama/Terbaru) + auto-fill grid
+- `EpisodeSection` = client, section head + 1 tombol toggle Terbaru (asc default / desc) + auto-fill grid; sortEps dedupe + parse nomor dari label
 - `HistoryTracker` / `lib/history.ts` = riwayat tonton lokal
 - Icons: `components/Icons.tsx` only
 

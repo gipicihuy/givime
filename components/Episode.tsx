@@ -14,7 +14,7 @@ export function EpisodeSection({
 }: {
   slug: string;
   eps: Episode[];
-  current?: number;
+  current?: string;
 }) {
   const [order, setOrder] = useState<Order>("asc");
 
@@ -38,39 +38,29 @@ export function EpisodeSection({
     <>
       <div className="section-head">
         <h2 className="section-title">Episode</h2>
-        <div className="ep-sort" role="group" aria-label="Urutkan episode">
-          <button
-            type="button"
-            className="ep-sort-btn"
-            aria-pressed={order === "asc"}
-            onClick={() => setOrder("asc")}
-          >
-            Terlama
-          </button>
-          <button
-            type="button"
-            className="ep-sort-btn"
-            aria-pressed={order === "desc"}
-            onClick={() => setOrder("desc")}
-          >
-            Terbaru
-          </button>
-        </div>
+        <button
+          type="button"
+          className="ep-sort-btn"
+          aria-pressed={order === "desc"}
+          onClick={() => setOrder(order === "asc" ? "desc" : "asc")}
+        >
+          Terbaru
+        </button>
       </div>
 
       <div className="ep-grid">
-        {list.map((e) => {
-          const n = Number(e.ab_namaep);
-          const active = current != null && n === current;
+        {list.map((e, i) => {
+          const label = String(e.ab_namaep);
+          const active = current != null && label === String(current);
           return (
             <Link
-              key={e.ab_namaep}
-              href={`/play/${slug}?ep=${encodeURIComponent(e.ab_namaep)}`}
+              key={`${i}-${label}`}
+              href={`/play/${slug}?ep=${encodeURIComponent(label)}`}
               className="ep-link"
               aria-current={active ? "page" : undefined}
             >
               {active ? <IconPlay size={11} /> : null}
-              {e.ab_namaep}
+              {label}
             </Link>
           );
         })}

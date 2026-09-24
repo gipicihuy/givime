@@ -213,8 +213,31 @@ export function encodeMedia(url: string): string {
   }
 }
 
+/** Ambil nomor episode dari label ("542 Part 1" → 542, "227 - 228" → 227). */
+function epNum(label: string): number {
+  const m = label.match(/\d+/);
+  return m ? Number(m[0]) : Number.NaN;
+}
+
 export function sortEps(eps: Episode[] = []): Episode[] {
-  return [...eps].sort((a, b) => Number(a.ab_namaep) - Number(b.ab_namaep));
+  const seen = new Set<string>();
+  const unique: Episode[] = [];
+  for (const e of eps) {
+    const key = String(e.ab_namaep);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(e);
+  }
+  return unique.sort((a, b) => {
+    const na = epNum(String(a.ab_namaep));
+    const nb = epNum(String(b.ab_namaep));
+    const aN = Number.isNaN(na);
+    const bN = Number.isNaN(nb);
+    if (aN && bN) return 0;
+    if (aN) return 1;
+    if (bN) return -1;
+    return na - nb;
+  });
 }
 
 /**

@@ -31,7 +31,7 @@ Cap: 1 accent + neutrals.
 ## Layout
 - **Top bar:** logo saja (search pindah ke `/search`)
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
-- **Home:** hero featured carousel **tinggi tetap** (340/400px; chevron **tanpa bulatan** sisi tengah + dots; autoplay 5s track slide) → **Lanjutkan menonton** (setelah hero ala nontonime; layout **landscape 16:9 + progress bar + jam `12:10/24:00`**, beda dari shelf poster 2:3; localStorage auto-hide) → **Ongoing → Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime)
+- **Home:** hero featured carousel **tinggi tetap** (340/400px; chevron **tanpa bulatan** sisi tengah + dots; autoplay 5s track slide) → **Lanjutkan menonton** (setelah hero ala nontonime; layout **landscape 16:9 + progress bar + jam `00:00 / 24:00`**, beda dari shelf poster 2:3; localStorage auto-hide) → **Ongoing → Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime)
 - **Browse:** hub kartu kategori (termasuk **Jadwal**) → list pages
 - **Jadwal:** `/jadwal` — pill hari Senin–Minggu (highlight hari ini), grid anime per `jadwalrilis`
 - **History:** localStorage; **timeline per tanggal** (badge pill date + garis vertikal) → card horizontal compact (thumb 2:3 kiri, **judul bold**, Episode secondary, **jam kanan-atas bold**, **progress bar** + `00:00 / 24:00` spasi di sekitar `/`); klik → `/play/…?ep=…&t=` (seek ke detik)

@@ -31,7 +31,7 @@ Cap: 1 accent + neutrals.
 ## Layout
 - **Top bar:** logo saja (search pindah ke `/search`)
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
-- **Home:** hero featured (1 judul Top/terbaru: backdrop cover + bottom gradient + title display + meta + CTA Putar) → rail **01 Ongoing → 02 Top → 03 Movie → 04 Completed** (Shelf head asymmetric: nomor display kiri, judul, “Lihat semua” kanan; rail edge-fade + card-lift)
+- **Home:** hero featured (1 judul Top/terbaru: backdrop cover terang + bottom gradient + title display + meta + CTA Putar — **tanpa** kicker label) → rail **01 Ongoing → 02 Top → 03 Movie → 04 Completed** (Shelf head asymmetric: nomor display kiri, judul, “Lihat semua” kanan; rail **full tanpa edge-fade**, tanpa shadow lime hover)
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score`); hasil grid di bawah
@@ -42,7 +42,7 @@ Cap: 1 accent + neutrals.
 ## Components
 - `FeaturedHero` = home hero cinematic (backdrop cover + gradient + CTA)
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
-- `Shelf` = head bernomor (`01`…) + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll; edge-fade)
+- `Shelf` = head bernomor (`01`…) + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll; **tanpa** edge-fade mask)
 - `AnimeGrid` = responsive poster grid
 - `Pager` = nomor halaman pill + chevron icon-only (tanpa teks Prev/Next)
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
@@ -51,7 +51,7 @@ Cap: 1 accent + neutrals.
 - Icons: `components/Icons.tsx` only
 
 ## Motion
-≤150ms hover; rail scroll native; poster scale 1.03 + lime shadow lift; hero static (tanpa autoplay carousel).
+≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero static (tanpa autoplay carousel).
 
 ## Forbidden
 - URL CDN / “Source: …” / “data dari karanime” di UI

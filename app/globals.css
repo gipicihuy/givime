@@ -199,16 +199,14 @@ a:focus-visible {
   height: 100%;
   object-fit: cover;
   object-position: center 18%;
-  filter: saturate(0.92) brightness(0.55);
-  transform: scale(1.02);
+  filter: saturate(1) brightness(0.78);
 }
 
 .featured-scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 15, 16, 0.2) 0%, rgba(15, 15, 16, 0.55) 42%, rgba(15, 15, 16, 0.97) 100%),
-    linear-gradient(90deg, rgba(15, 15, 16, 0.72) 0%, transparent 58%);
+    linear-gradient(180deg, rgba(15, 15, 16, 0.05) 0%, rgba(15, 15, 16, 0.35) 48%, rgba(15, 15, 16, 0.92) 100%);
 }
 
 .featured-body {
@@ -228,25 +226,6 @@ a:focus-visible {
     padding: 32px;
     max-width: 640px;
   }
-}
-
-.featured-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.featured-kicker::before {
-  content: "";
-  width: 18px;
-  height: 2px;
-  background: var(--accent);
 }
 
 .featured-title {
@@ -368,9 +347,6 @@ a:focus-visible {
   padding-bottom: 8px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* edge-fade: rail kiri/kanan fade (referensi nontonime) */
-  mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
 }
 
 .rail:focus-visible {
@@ -426,16 +402,11 @@ a:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition: transform 150ms ease;
 }
 
 .poster:hover .poster-cover {
   transform: scale(1.03);
-  box-shadow: 0 14px 28px -14px rgba(191, 255, 58, 0.35);
-}
-
-.poster:hover .poster-thumb {
-  border-color: rgba(191, 255, 58, 0.45);
 }
 
 .poster-placeholder {

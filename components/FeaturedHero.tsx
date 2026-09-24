@@ -20,7 +20,7 @@ export function FeaturedHero({ anime }: { anime: Anime }) {
   const firstEps = mb.ab_cdngroup?.[0];
 
   return (
-    <section className="featured" aria-label="Pilihan utama">
+    <section className="featured" aria-label={title}>
       <div className="featured-backdrop" aria-hidden>
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -29,7 +29,6 @@ export function FeaturedHero({ anime }: { anime: Anime }) {
         <div className="featured-scrim" />
       </div>
       <div className="featured-body">
-        <p className="featured-kicker">Pilihan utama</p>
         <h2 className="featured-title">{title}</h2>
         <div className="featured-meta">
           {status ? <span>{status}</span> : null}

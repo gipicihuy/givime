@@ -24,7 +24,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     );
   }
 
-  const r = await searchAnime(q, page, 12);
+  let r: Awaited<ReturnType<typeof searchAnime>>;
+  try {
+    r = await searchAnime(q, page, 12);
+  } catch {
+    r = { items: [], total: 0, totalPages: 1 };
+  }
 
   return (
     <>
@@ -32,7 +37,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       <p className="page-sub">
         {r.total ?? r.items.length} hasil · halaman {page}
       </p>
-      <AnimeGrid items={r.items} />
+      {r.items.length === 0 ? (
+        <div className="state">
+          <strong>Gagal load / tidak ada hasil</strong>
+          API sumber lagi error atau tidak ada yang cocok. Coba refresh.
+        </div>
+      ) : (
+        <AnimeGrid items={r.items} />
+      )}
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/search" searchKey="q" searchValue={q} />
     </>
   );

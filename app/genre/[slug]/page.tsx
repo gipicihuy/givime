@@ -10,8 +10,12 @@ type SP = { page?: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const g = await resolveGenre(slug);
-  return { title: g ? g.name : "Genre" };
+  try {
+    const g = await resolveGenre(slug);
+    return { title: g ? g.name : "Genre" };
+  } catch {
+    return { title: "Genre" };
+  }
 }
 
 export default async function GenrePage({
@@ -25,19 +29,29 @@ export default async function GenrePage({
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
 
-  const genre = await resolveGenre(slug);
+  let genre = null;
+  try {
+    genre = await resolveGenre(slug);
+  } catch {
+    genre = null;
+  }
   if (!genre) notFound();
 
-  const r = await getList(
-    {
-      animegenre: genre.id,
-      orderby: "modified",
-      order: "desc",
-      per_page: 24,
-      page,
-    },
-    600,
-  );
+  let r: Awaited<ReturnType<typeof getList>>;
+  try {
+    r = await getList(
+      {
+        animegenre: genre.id,
+        orderby: "modified",
+        order: "desc",
+        per_page: 24,
+        page,
+      },
+      600,
+    );
+  } catch {
+    r = { items: [], total: 0, totalPages: 1 };
+  }
 
   return (
     <>

@@ -19,15 +19,15 @@ export default async function PlayPage({
   const { slug } = await params;
   const sp = await searchParams;
 
-  let data;
+  let data: Awaited<ReturnType<typeof getEpisodes>> | null = null;
   try {
     data = await getEpisodes(slug);
   } catch {
-    notFound();
+    data = null;
   }
+  if (!data?.anime) notFound();
 
   const { anime, eps } = data;
-  if (!anime) notFound();
 
   const title = titleOf(anime);
   const requested = sp.ep;

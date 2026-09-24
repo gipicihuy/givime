@@ -5,7 +5,12 @@ export const revalidate = 86400;
 export const metadata = { title: "Genres" };
 
 export default async function GenresPage() {
-  const genres = await getGenres();
+  let genres: Awaited<ReturnType<typeof getGenres>> = [];
+  try {
+    genres = await getGenres();
+  } catch {
+    genres = [];
+  }
 
   return (
     <>

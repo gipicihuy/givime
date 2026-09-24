@@ -27,7 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }) 
 
 export default async function AnimeDetailPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const anime = await getDetail(slug);
+  let anime = null;
+  try {
+    anime = await getDetail(slug);
+  } catch {
+    anime = null;
+  }
   if (!anime) notFound();
 
   const mb = metaOf(anime);

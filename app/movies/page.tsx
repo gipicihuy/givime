@@ -10,16 +10,21 @@ type SP = { page?: string };
 export default async function MoviesPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
-  const r = await getList(
-    {
-      animetype: IDS.type.movie,
-      orderby: "date",
-      order: "desc",
-      per_page: 24,
-      page,
-    },
-    600,
-  );
+  let r: Awaited<ReturnType<typeof getList>>;
+  try {
+    r = await getList(
+      {
+        animetype: IDS.type.movie,
+        orderby: "date",
+        order: "desc",
+        per_page: 24,
+        page,
+      },
+      600,
+    );
+  } catch {
+    r = { items: [], total: 0, totalPages: 1 };
+  }
 
   return (
     <>

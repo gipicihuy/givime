@@ -28,14 +28,25 @@ function Section({
   );
 }
 
+async function safeList(
+  params: Record<string, string | number | undefined | null>,
+  revalidate: number,
+) {
+  try {
+    return await getList(params, revalidate);
+  } catch {
+    return { items: [] as Anime[], total: 0, totalPages: 1 };
+  }
+}
+
 export default async function HomePage() {
   const [ongoing, top, movie] = await Promise.all([
-    getList(
+    safeList(
       { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 8 },
       300,
     ),
-    getList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 8 }, 3600),
-    getList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 8 }, 600),
+    safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 8 }, 3600),
+    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 8 }, 600),
   ]);
 
   return (

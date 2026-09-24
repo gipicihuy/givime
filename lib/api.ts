@@ -95,20 +95,64 @@ function buildUrl(path: string, params: Record<string, string | number | undefin
   return url;
 }
 
+/** Parse JSON; throw kalau body non-JSON (origin kadang balikin HTML activation error). */
+async function readJson<T>(res: Response, label: string): Promise<T> {
+  const text = await res.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(
+      `Non-JSON from ${label}: ${text.slice(0, 60).replace(/\s+/g, " ")}`,
+    );
+  }
+}
+
+/**
+ * GET JSON. Origin karanime intermittent (HTML “Product activation error”,
+ * HTTP 200) → retry tanpa cache sebelum menyerah.
+ */
+async function fetchJson<T>(
+  path: string,
+  params: Record<string, string | number | undefined | null> = {},
+  revalidate = 300,
+): Promise<{ data: T; res: Response }> {
+  const url = buildUrl(path, params);
+  const label = url.pathname + url.search.slice(0, 40);
+  let lastErr: unknown = null;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", "User-Agent": "givime-web/1.0" },
+        // attempt 0: Next data cache; retry: no-store biar HTML error gak nempel
+        ...(attempt === 0
+          ? { next: { revalidate } as { revalidate: number } }
+          : { cache: "no-store" as const }),
+      });
+      if (!res.ok) {
+        lastErr = new Error(`HTTP ${res.status} for ${label}`);
+        continue;
+      }
+      const ct = res.headers.get("content-type") || "";
+      const data = await readJson<T>(res, label);
+      if (ct && !ct.includes("json") && typeof data !== "object") {
+        lastErr = new Error(`Unexpected content-type ${ct} for ${label}`);
+        continue;
+      }
+      return { data, res };
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
 async function api<T>(
   path: string,
   params: Record<string, string | number | undefined | null> = {},
   revalidate = 300,
 ): Promise<T> {
-  const url = buildUrl(path, params);
-  const res = await fetch(url, {
-    headers: { Accept: "application/json", "User-Agent": "givime-web/1.0" },
-    next: { revalidate },
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} for ${url.pathname}`);
-  }
-  return res.json() as Promise<T>;
+  return (await fetchJson<T>(path, params, revalidate)).data;
 }
 
 async function apiFull<T>(
@@ -116,15 +160,9 @@ async function apiFull<T>(
   params: Record<string, string | number | undefined | null> = {},
   revalidate = 300,
 ): Promise<{ body: T; total: number | null; totalPages: number | null }> {
-  const url = buildUrl(path, params);
-  const res = await fetch(url, {
-    headers: { Accept: "application/json", "User-Agent": "givime-web/1.0" },
-    next: { revalidate },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const body = (await res.json()) as T;
+  const { data, res } = await fetchJson<T>(path, params, revalidate);
   return {
-    body,
+    body: data,
     total: Number(res.headers.get("x-wp-total")) || null,
     totalPages: Number(res.headers.get("x-wp-totalpages")) || null,
   };

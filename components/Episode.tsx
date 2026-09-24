@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
 import { updateProgress } from "@/lib/history";
-import { IconPlay } from "@/components/Icons";
 
 type Order = "asc" | "desc";
 
@@ -60,7 +59,6 @@ export function EpisodeSection({
               className="ep-link"
               aria-current={active ? "page" : undefined}
             >
-              {active ? <IconPlay size={11} /> : null}
               {label}
             </Link>
           );

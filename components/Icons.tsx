@@ -76,6 +76,31 @@ export function IconChevronRight(p: P) {
   );
 }
 
+export function IconChevronUp(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="m6 15 6-6 6 6" />
+    </svg>
+  );
+}
+
+export function IconChevronDown(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+export function IconFlame(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 2c1 3.5 5 5.5 5 10a7 7 0 1 1-14 0c0-4.5 3.5-6.5 4.5-9.5 2 2.5 4.5 2 4.5-.5z" />
+      <path d="M12 18a3 3 0 0 0 3-3c0-1.8-1.2-2.8-2-3.8-.4.8-1.2 1.2-1.6.8-.8-.8 0-2.4.8-3.6-2.8 1.2-4 4-2.8 6.4.5 1.2 1.4 2.2 2.6 2.2z" />
+    </svg>
+  );
+}
+
 export function IconHome(p: P) {
   return (
     <svg {...base(p)}>

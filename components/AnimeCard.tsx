@@ -55,25 +55,6 @@ export function AnimeCard({ anime }: { anime: Anime }) {
   );
 }
 
-/** Rail horizontal — scroll ke kanan (home sections). */
-export function AnimeRail({ items }: { items: Anime[] }) {
-  if (!items.length) {
-    return (
-      <div className="state">
-        <strong>Belum ada judul</strong>
-        Coba lagi nanti.
-      </div>
-    );
-  }
-  return (
-    <div className="rail" tabIndex={0} aria-label="Geser ke kanan">
-      {items.map((a) => (
-        <AnimeCard key={`${a.id}-${a.slug}`} anime={a} />
-      ))}
-    </div>
-  );
-}
-
 /** Grid poster — halaman list (ongoing/completed/search/dll). */
 export function AnimeGrid({ items }: { items: Anime[] }) {
   if (!items.length) {

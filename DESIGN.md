@@ -1,7 +1,7 @@
 # DESIGN.md — Givime (situs anime)
 
 ## Direction
-**App-like dark streaming.** Bottom nav (Home / Ongoing / Search / Movies / Genre) + home = section **rail** poster vertikal yang **scroll ke kanan**. Cover normal (2:3). Tanpa credit sumber, tanpa URL CDN di UI.
+**App-like dark streaming.** Bottom nav **icon-only** (Home / Ongoing / Search / Movies / Genre) + home = section **rail** poster vertikal + **chevron scroll buttons** (kiri/kanan). Cover normal (2:3). Tanpa credit sumber, tanpa URL CDN di UI. Tanpa label teks di bottom nav. Tanpa glyph panah `→ ← ↑ ↓` — pakai chevron SVG saja.
 
 ## Identity
 - **Nama:** Givime
@@ -26,9 +26,9 @@ Cap: 1 accent + neutrals.
 
 ## Layout
 - **Top bar:** logo + search only (nav pindah ke bawah)
-- **Bottom nav fixed 5 item:** Home · Ongoing · Search · Movies · Genre (SVG, active teal)
+- **Bottom nav fixed 5 item:** icon-only (Home · Ongoing · Search · Movies · Genre), active teal, `aria-label` untuk aksesibilitas
 - **Home sections (stack):** Ongoing → Top → Movie → Completed  
-  masing-masing: `AnimeRail` horizontal-scroll poster **vertikal** 128–148px
+  masing-masing: `Shelf` = section head + chevron scroll btn + rail poster **vertikal** 128–148px
 - **List pages:** `AnimeGrid` poster 3→6 kolom
 - **Detail:** cover 200px + info; CTA teal
 - **Player:** 16:9; **jangan tampilkan** URL MP4 / source / credit origin
@@ -36,10 +36,10 @@ Cap: 1 accent + neutrals.
 
 ## Components
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
-- `AnimeRail` = flex overflow-x scroll-snap
+- `Shelf` = section head + chevron scroll + rail flex overflow-x scroll-snap (client)
 - `AnimeGrid` = responsive poster grid
-- `BottomNav` = client, `aria-current`
-- Icons: `components/Icons.tsx` only
+- `BottomNav` = client, icon-only, `aria-label` + `aria-current`
+- Icons: `components/Icons.tsx` only (chevron up/down/left/right, flame, dll)
 
 ## Motion
 ≤150ms hover; rail scroll native; poster scale 1.03 on hover.

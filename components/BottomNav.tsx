@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconFilm, IconHome, IconLayers, IconSearch, IconTag } from "@/components/Icons";
+import { IconFilm, IconFlame, IconHome, IconSearch, IconTag } from "@/components/Icons";
 
 const items = [
   { href: "/", label: "Home", icon: IconHome },
-  { href: "/ongoing", label: "Ongoing", icon: IconLayers },
+  { href: "/ongoing", label: "Ongoing", icon: IconFlame },
   { href: "/search", label: "Search", icon: IconSearch },
   { href: "/movies", label: "Movies", icon: IconFilm },
   { href: "/genres", label: "Genre", icon: IconTag },
@@ -34,10 +34,10 @@ export function BottomNav() {
             key={n.href}
             href={n.href}
             className="bottom-link"
+            aria-label={n.label}
             aria-current={active ? "page" : undefined}
           >
-            <Icon size={20} />
-            <span>{n.label}</span>
+            <Icon size={22} />
           </Link>
         );
       })}

@@ -1,35 +1,7 @@
-import Link from "next/link";
-import { AnimeRail } from "@/components/AnimeCard";
-import { IconChevronRight } from "@/components/Icons";
+import { Shelf } from "@/components/Shelf";
 import { getList, IDS, type Anime } from "@/lib/api";
 
 export const revalidate = 300;
-
-function Section({
-  title,
-  href,
-  items,
-}: {
-  title: string;
-  href?: string;
-  items: Anime[];
-}) {
-  if (!items.length) return null;
-  return (
-    <section className="section">
-      <div className="section-head">
-        <h2 className="section-title">{title}</h2>
-        {href ? (
-          <Link href={href} className="section-more">
-            Lihat semua
-            <IconChevronRight size={14} />
-          </Link>
-        ) : null}
-      </div>
-      <AnimeRail items={items} />
-    </section>
-  );
-}
 
 async function safeList(
   params: Record<string, string | number | undefined | null>,
@@ -62,10 +34,10 @@ export default async function HomePage() {
         <h1 className="page-title">Givime</h1>
         <p className="page-sub">Nonton anime subtitle Indonesia</p>
       </header>
-      <Section title="Ongoing" href="/ongoing" items={ongoing.items} />
-      <Section title="Top" items={top.items} />
-      <Section title="Movie" href="/movies" items={movie.items} />
-      <Section title="Completed" href="/completed" items={completed.items} />
+      <Shelf title="Ongoing" href="/ongoing" items={ongoing.items} />
+      <Shelf title="Top" items={top.items} />
+      <Shelf title="Movie" href="/movies" items={movie.items} />
+      <Shelf title="Completed" href="/completed" items={completed.items} />
     </>
   );
 }

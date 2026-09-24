@@ -55,18 +55,22 @@ export default async function HomePage() {
   ]);
 
   const ongoingItems = ongoing.items.filter(isOngoingAnime);
+  const topItems = [...top.items].sort(
+    (a, b) =>
+      Number(metaOf(b).ero_skor || 0) - Number(metaOf(a).ero_skor || 0),
+  );
 
   const featuredSeeds = [
-    ...top.items.filter((a) => metaOf(a).ero_image),
+    ...topItems.filter((a) => metaOf(a).ero_image),
     ...ongoingItems.filter((a) => metaOf(a).ero_image),
-    ...top.items,
+    ...topItems,
     ...ongoingItems,
   ].slice(0, 4);
 
   const featured = await hydrateFeatured(featuredSeeds);
   const featuredSlugs = new Set(featured.map((a) => a.slug));
 
-  const topRail = top.items.filter((a) => !featuredSlugs.has(a.slug));
+  const topRail = topItems.filter((a) => !featuredSlugs.has(a.slug));
   const ongoingRail = ongoingItems.filter((a) => !featuredSlugs.has(a.slug));
 
   return (
@@ -79,7 +83,7 @@ export default async function HomePage() {
         href="/ongoing"
         items={ongoingRail.length ? ongoingRail : ongoingItems}
       />
-      <Shelf title="Top" items={topRail.length ? topRail : top.items} />
+      <Shelf title="Top" items={topRail.length ? topRail : topItems} />
       <Shelf title="Movie" href="/movies" items={movie.items} />
       <Shelf title="Completed" href="/completed" items={completed.items} />
     </>

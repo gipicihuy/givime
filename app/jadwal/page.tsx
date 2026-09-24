@@ -31,7 +31,7 @@ type MalItem = {
 };
 
 type JadwalRow =
-  | { kind: "local"; key: string; a: Anime }
+  | { kind: "local"; key: string; a: Anime; score?: string }
   | { kind: "mal"; key: string; m: MalItem };
 
 const DOW = [
@@ -107,22 +107,57 @@ function jadwalTone(a: Anime): "aired" | "wait" | "late" {
   return "wait";
 }
 
-/** Gabung katalog lokal + jadwal MAL; judul sama (toleran season) = 1, menang lokal. */
+function rowScore(r: JadwalRow): number {
+  const raw =
+    r.kind === "local"
+      ? (r.score ?? metaOf(r.a).ero_skor ?? "")
+      : (r.m.score ?? "");
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function rowLabel(r: JadwalRow): string {
+  return r.kind === "local" ? titleOf(r.a) : r.m.title;
+}
+
+/**
+ * Gabung katalog lokal + jadwal MAL; judul sama (toleran season) = 1, menang lokal.
+ * Skor: lokal dulu; kalau lokal kosong, pakai skor MAL hasil match.
+ * Urut: skor desc, lalu judul.
+ */
 function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
-  const localTitles = items.map((a) => titleOf(a));
-  const rows: JadwalRow[] = items.map((a) => ({
-    kind: "local",
-    key: `l-${a.id}-${a.slug}`,
-    a,
-  }));
+  const rows: JadwalRow[] = [];
+  const usedMal = new Set<number>();
+
+  for (const a of items) {
+    const title = titleOf(a);
+    const localScore = (metaOf(a).ero_skor || "").trim();
+    let score = localScore;
+    if (!score) {
+      const hit = mal.find(
+        (m) => titlesLikelySame(title, m.title) && m.score,
+      );
+      if (hit) {
+        score = hit.score;
+        usedMal.add(hit.malId);
+      }
+    } else {
+      for (const m of mal) {
+        if (titlesLikelySame(title, m.title)) usedMal.add(m.malId);
+      }
+    }
+    rows.push({ kind: "local", key: `l-${a.id}-${a.slug}`, a, score });
+  }
 
   for (const m of mal) {
-    if (localTitles.some((ln) => titlesLikelySame(ln, m.title))) continue;
+    if (usedMal.has(m.malId)) continue;
+    if (items.some((a) => titlesLikelySame(titleOf(a), m.title))) continue;
     rows.push({ kind: "mal", key: `m-${m.malId}`, m });
   }
 
-  const label = (r: JadwalRow) => (r.kind === "local" ? titleOf(r.a) : r.m.title);
-  return rows.sort((x, y) => label(x).localeCompare(label(y)));
+  return rows.sort(
+    (x, y) => rowScore(y) - rowScore(x) || rowLabel(x).localeCompare(rowLabel(y)),
+  );
 }
 
 function malForDay(day: string): MalItem[] {
@@ -220,11 +255,11 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                     {episodeLabel(row.a) ? (
                       <span className="jadwal-ep">Episode {episodeLabel(row.a)}</span>
                     ) : null}
-                    {metaOf(row.a).ero_skor ? (
+                    {row.score ? (
                       <span className="jadwal-meta">
                         <span className="jadwal-meta-item">
                           <IconStar size={12} />
-                          {metaOf(row.a).ero_skor}
+                          {row.score}
                         </span>
                       </span>
                     ) : null}

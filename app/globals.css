@@ -1565,7 +1565,7 @@ a:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-height: 0;
   font-size: 12px;
   font-weight: 700;
@@ -1583,33 +1583,59 @@ a:focus-visible {
   color: var(--accent);
 }
 
-.jadwal-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
 .jadwal-status-dot {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: currentColor;
   flex-shrink: 0;
+  background: var(--muted);
 }
 
-.jadwal-item.is-aired .jadwal-status {
+.jadwal-status-dot.is-aired {
+  background: var(--accent);
+}
+
+.jadwal-status-dot.is-wait {
+  background: var(--muted);
+}
+
+.jadwal-status-dot.is-late {
+  background: #f87171;
+}
+
+/* —— jadwal: prev/next day (ikon sama Pager) —— */
+.jadwal-daynav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.jadwal-daynav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.jadwal-daynav-link:hover {
   color: var(--accent);
 }
 
-.jadwal-item.is-wait .jadwal-status {
-  color: var(--muted);
+.jadwal-daynav-link:hover .pager-arrow {
+  color: var(--accent);
 }
 
-.jadwal-item.is-late .jadwal-status {
-  color: #f87171;
+.jadwal-daynav-link.is-next {
+  margin-left: auto;
+  text-align: right;
 }
 
 /* —— genre list —— */

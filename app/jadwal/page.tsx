@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { IconSchedule, IconStar } from "@/components/Icons";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconSchedule,
+  IconStar,
+} from "@/components/Icons";
 import {
   IDS,
   getList,
@@ -38,6 +43,17 @@ function todayKey(): string {
   return DOW[new Date().getDay()] ?? "senin";
 }
 
+function dayIndex(key: string): number {
+  const i = DOW.indexOf(key as (typeof DOW)[number]);
+  return i >= 0 ? i : 0;
+}
+
+function neighborDay(key: string, delta: -1 | 1): { key: string; label: string } {
+  const i = dayIndex(key);
+  const n = (i + delta + DOW.length) % DOW.length;
+  return { key: DOW[n], label: LONG[n] };
+}
+
 /** Minggu Sun-Sat yang memuat hari aktif (pakai minggu kalender hari ini). */
 function stripDays(activeKey: string) {
   const now = new Date();
@@ -59,30 +75,32 @@ function stripDays(activeKey: string) {
 }
 
 /**
- * Status list dari data yang ada:
- * - completed, merah "Tamat"
- * - punya label episode valid, lime "Sudah Tayang"
- * - else, abu "Menunggu Update Baru"
+ * Warna indikator dari data nyata (tanpa label teks karangan):
+ * - completed, merah
+ * - punya label episode valid, lime
+ * - else, abu
  * Views & jam presisi: API tidak punya, tidak dirender.
  */
-function jadwalStatus(a: Anime): { tone: "aired" | "wait" | "late"; label: string } {
+function jadwalTone(a: Anime): "aired" | "wait" | "late" {
   const s = (metaOf(a).ero_status || "").trim().toLowerCase();
   const ids = a.animestatus ?? [];
   const done =
     s === "completed" ||
     (ids.includes(IDS.status.completed) && !ids.includes(IDS.status.ongoing));
-  if (done) return { tone: "late", label: "Tamat" };
-  if (episodeLabel(a)) return { tone: "aired", label: "Sudah Tayang" };
-  return { tone: "wait", label: "Menunggu Update Baru" };
+  if (done) return "late";
+  if (episodeLabel(a)) return "aired";
+  return "wait";
 }
 
 export default async function JadwalPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const today = todayKey();
   const day = DOW.includes(sp.day as (typeof DOW)[number]) ? (sp.day as string) : today;
-  const label = LONG[DOW.indexOf(day as (typeof DOW)[number])] ?? "Senin";
+  const label = LONG[dayIndex(day)] ?? "Senin";
   const id = IDS.jadwal[day as keyof typeof IDS.jadwal];
   const strip = stripDays(day);
+  const prev = neighborDay(day, -1);
+  const next = neighborDay(day, 1);
 
   let r: Awaited<ReturnType<typeof getList>>;
   try {
@@ -133,16 +151,13 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
       {r.items.length ? (
         <ul className="jadwal-list">
           {r.items.map((a) => {
-            const st = jadwalStatus(a);
+            const tone = jadwalTone(a);
             const ep = episodeLabel(a);
             const score = metaOf(a).ero_skor;
             const cover = metaOf(a).ero_image;
             return (
               <li key={`${a.id}-${a.slug}`}>
-                <Link
-                  href={`/anime/${a.slug}`}
-                  className={`jadwal-item is-${st.tone}`}
-                >
+                <Link href={`/anime/${a.slug}`} className={`jadwal-item is-${tone}`}>
                   <span className="jadwal-thumb" aria-hidden>
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -154,17 +169,14 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                     <span className="jadwal-ep">
                       {ep ? `Episode ${ep}` : "Episode —"}
                     </span>
-                    {score ? (
-                      <span className="jadwal-meta">
+                    <span className="jadwal-meta">
+                      <span className={`jadwal-status-dot is-${tone}`} aria-hidden />
+                      {score ? (
                         <span className="jadwal-meta-item">
                           <IconStar size={12} />
                           {score}
                         </span>
-                      </span>
-                    ) : null}
-                    <span className="jadwal-status">
-                      <span className="jadwal-status-dot" aria-hidden />
-                      {st.label}
+                      ) : null}
                     </span>
                   </span>
                 </Link>
@@ -178,6 +190,21 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
           Tidak ada judul untuk hari {label}.
         </div>
       )}
+
+      <nav className="jadwal-daynav" aria-label="Pindah hari">
+        <Link href={`/jadwal?day=${prev.key}`} className="jadwal-daynav-link">
+          <span className="pager-arrow" aria-hidden>
+            <IconChevronLeft size={16} />
+          </span>
+          <span>{prev.label}</span>
+        </Link>
+        <Link href={`/jadwal?day=${next.key}`} className="jadwal-daynav-link is-next">
+          <span>{next.label}</span>
+          <span className="pager-arrow" aria-hidden>
+            <IconChevronRight size={16} />
+          </span>
+        </Link>
+      </nav>
     </>
   );
 }

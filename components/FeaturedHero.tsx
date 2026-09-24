@@ -20,6 +20,7 @@ const AUTOPLAY_MS = 5000;
 
 export function FeaturedHero({ items }: { items: Anime[] }) {
   const [i, setI] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
   const n = items.length;
   const pausedRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -28,9 +29,21 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
   const go = useCallback(
     (delta: number) => {
       if (n <= 1) return;
+      setDir(delta < 0 ? -1 : 1);
       setI((prev) => (prev + delta + n) % n);
     },
     [n],
+  );
+
+  const jumpTo = useCallback(
+    (next: number) => {
+      if (n <= 1 || next === i) return;
+      const forward = next > i || (i === n - 1 && next === 0);
+      const backward = next < i || (i === 0 && next === n - 1);
+      setDir(forward && !backward ? 1 : -1);
+      setI(next);
+    },
+    [i, n],
   );
 
   useEffect(() => {
@@ -130,7 +143,7 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
   return (
     <section
       ref={sectionRef}
-      className="featured"
+      className={`featured dir-${dir < 0 ? "prev" : "next"}`}
       aria-roledescription="carousel"
       aria-label="Pilihan utama"
       onMouseEnter={pause}
@@ -148,7 +161,7 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            key={cover}
+            key={`${anime.id}-${cover}`}
             className="featured-img is-enter"
             src={cover}
             alt=""
@@ -231,7 +244,7 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
                 aria-selected={idx === i}
                 aria-label={titleOf(a)}
                 className={idx === i ? "featured-dot is-on" : "featured-dot"}
-                onClick={() => setI(idx)}
+                onClick={() => jumpTo(idx)}
               />
             ))}
           </div>

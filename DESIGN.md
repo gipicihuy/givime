@@ -31,7 +31,7 @@ Cap: 1 accent + neutrals.
 ## Layout
 - **Top bar:** logo saja (search pindah ke `/search`)
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
-- **Home:** hero featured carousel **tinggi tetap** (340/400px — cover gak ikut panjang judul; title clamp 2-line, syn clamp 2-line; chevron **tanpa bulatan di sisi tengah** kiri/kanan + dots bawah; **autoplay 5s** smooth fade/rise; **swipe horizontal** manual) → rail **Ongoing** → **Lanjutkan menonton** (localStorage, auto-hide, **bukan** tepat di bawah hero) → **Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime; rail full tanpa edge-fade)
+- **Home:** hero featured carousel **tinggi tetap** (340/400px — cover gak ikut panjang judul; title clamp 2-line, syn clamp 2-line; chevron **tanpa bulatan di sisi tengah** kiri/kanan + dots bawah; **autoplay 5s** **geser horizontal** ikut arah; **swipe horizontal** manual) → rail **Ongoing** → **Lanjutkan menonton** (localStorage, auto-hide, **bukan** tepat di bawah hero) → **Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime; rail full tanpa edge-fade)
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score`); hasil grid di bawah
@@ -40,7 +40,7 @@ Cap: 1 accent + neutrals.
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components
-- `FeaturedHero` = home hero cinematic multi-slide **fixed height** (backdrop cover-fit + gradient + chevron sisi + dots + **autoplay 5s** + **touch swipe** + CTA; body absolute/fixed box biar slide gak resize hero; `touch-action: pan-y`)
+- `FeaturedHero` = home hero cinematic multi-slide **fixed height** (backdrop cover-fit + gradient + chevron sisi + dots + **autoplay 5s** + **touch swipe** + CTA; transition **horizontal slide** dir-aware; body absolute/fixed box biar slide gak resize hero; `touch-action: pan-y`)
 - `ContinueWatching` = rail history lokal (`readHistory`), auto-hide
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
 - `Shelf` = head ornamen 3-garis (bukan nomor) + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll; **tanpa** edge-fade mask)
@@ -52,7 +52,7 @@ Cap: 1 accent + neutrals.
 - Icons: `components/Icons.tsx` only
 
 ## Motion
-≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero **autoplay ~5s** crossfade + body rise (pause hover/focus/offscreen/`prefers-reduced-motion`/touch); **swipe kiri-kanan** ≥48px ganti slide.
+≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero **autoplay ~5s** **slide horizontal** (kiri/kanan sesuai arah, bukan rise-from-bottom; pause hover/focus/offscreen/`prefers-reduced-motion`/touch); **swipe kiri-kanan** ≥48px ganti slide.
 
 ## Forbidden
 - URL CDN / “Source: …” / “data dari karanime” di UI

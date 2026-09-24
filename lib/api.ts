@@ -140,22 +140,28 @@ export async function suggestAnime(q: string, limit = 8): Promise<SuggestItem[]>
     const items = await Promise.all(
       hits.map(async (hit): Promise<SuggestItem | null> => {
         try {
-          let a = hit;
+          // Wajib hydrate: search kadang balikin slug hantu (404 di detail)
+          let full: Anime | null = null;
           if (hit.slug) {
-            let full: Anime | null = null;
             for (const cand of slugCandidates(hit.slug)) {
-              const bySlug = await api<Anime[]>(
-                "/animes",
-                { slug: cand, _fields: SUGGEST_FIELDS },
-                600,
-              );
-              if (bySlug?.[0]) {
-                full = bySlug[0];
-                break;
+              try {
+                const bySlug = await api<Anime[]>(
+                  "/animes",
+                  { slug: cand, _fields: SUGGEST_FIELDS },
+                  600,
+                );
+                if (bySlug?.[0]) {
+                  full = bySlug[0];
+                  break;
+                }
+              } catch {
+                // coba kandidat berikutnya
               }
             }
-            if (full) a = full;
           }
+          if (!full || !full.slug) return null;
+
+          const a = full;
           const mb = metaOf(a);
           let cover = mb.ero_image || undefined;
           if (!cover) {
@@ -170,14 +176,12 @@ export async function suggestAnime(q: string, limit = 8): Promise<SuggestItem[]>
             if (Number.isFinite(n) && n > 0) totalEps = n;
           }
           if (!totalEps) {
-            totalEps = await maxCdnEp(a.slug || hit.slug || "");
+            totalEps = await maxCdnEp(a.slug);
           }
 
-          const slug = a.slug || hit.slug;
-          if (!slug) return null;
           return {
-            slug,
-            title: titleOf(a) || titleOf(hit),
+            slug: a.slug,
+            title: titleOf(a),
             cover,
             totalEps: totalEps || undefined,
             score: mb.ero_skor || undefined,
@@ -386,19 +390,43 @@ export function sortEps(eps: Episode[] = []): Episode[] {
 /**
  * Slug kandidat kalau search balikin “slug hantu”:
  *   haikyuu-season-2-episode-1 → haikyuu-season-2
- *   haikyuu-season-4-1         → haikyuu-season-4
+ *   kimetsu-…-yuukaku-hen-season-2 → kimetsu-…-yuukaku-hen
  *   one-piece-episode-0        → one-piece
  */
 function slugCandidates(slug: string): string[] {
-  const out = [slug];
-  const push = (s: string) => {
-    if (s && s !== slug && !out.includes(s)) out.push(s);
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (s: string) => {
+    if (s && !seen.has(s)) {
+      seen.add(s);
+      out.push(s);
+    }
   };
-  push(slug.replace(/-episode-\d+$/i, ""));
-  push(slug.replace(/-\d+$/, ""));
-  push(slug.replace(/-episode-\d+$/i, "").replace(/-\d+$/, ""));
-  // season-2-episode-1 sudah ditangani; sisa numeric mid tanpa episode-N
-  push(slug.replace(/-(episode-)?\d+$/i, ""));
+  add(slug);
+
+  const strips: Array<(s: string) => string> = [
+    (s) => s.replace(/-episode-\d+$/i, ""),
+    (s) => s.replace(/-season-\d+$/i, ""),
+    (s) => s.replace(/-part-\d+$/i, ""),
+    (s) => s.replace(/-\d+$/, ""),
+    (s) => s.replace(/-(episode|season|part)-\d+$/i, ""),
+  ];
+
+  let frontier = [slug];
+  for (let depth = 0; depth < 3; depth++) {
+    const next: string[] = [];
+    for (const s of frontier) {
+      for (const strip of strips) {
+        const t = strip(s);
+        if (t && t !== s && !seen.has(t)) {
+          add(t);
+          next.push(t);
+        }
+      }
+    }
+    if (!next.length) break;
+    frontier = next;
+  }
   return out;
 }
 
@@ -584,11 +612,33 @@ export async function searchAnime(
 
 export async function getDetail(key: string): Promise<Anime | null> {
   if (/^\d+$/.test(key)) {
-    const data = await api<Anime | Anime[]>(`/animes/${key}`, {}, 3600);
-    return Array.isArray(data) ? data[0] ?? null : data;
+    try {
+      const data = await api<Anime | Anime[]>(`/animes/${key}`, {}, 3600);
+      return Array.isArray(data) ? data[0] ?? null : data;
+    } catch {
+      return null;
+    }
   }
-  const arr = await api<Anime[]>("/animes", { slug: key }, 3600);
-  return arr?.[0] ?? null;
+
+  // exact slug
+  try {
+    const arr = await api<Anime[]>("/animes", { slug: key }, 3600);
+    if (arr?.[0]) return arr[0];
+  } catch {
+    // lanjut kandidat
+  }
+
+  // slug hantu search (mis. …-season-2 → …-yuukaku-hen)
+  for (const cand of slugCandidates(key)) {
+    if (cand === key) continue;
+    try {
+      const arr = await api<Anime[]>("/animes", { slug: cand }, 3600);
+      if (arr?.[0]) return arr[0];
+    } catch {
+      // coba berikutnya
+    }
+  }
+  return null;
 }
 
 export async function getEpisodes(key: string): Promise<{ anime: Anime; eps: Episode[] }> {

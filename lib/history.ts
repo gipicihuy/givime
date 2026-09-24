@@ -3,6 +3,8 @@ export type HistoryEntry = {
   title: string;
   ep: string;
   cover?: string;
+  /** URL video episode (untuk resume frame di Continue Watching) */
+  src?: string;
   at: number;
   /** detik posisi terakhir ditonton */
   t?: number;
@@ -39,6 +41,8 @@ export function pushHistory(entry: Omit<HistoryEntry, "at">) {
       ...entry,
       t: entry.t ?? prev?.t,
       d: entry.d ?? prev?.d,
+      src: entry.src ?? prev?.src,
+      cover: entry.cover ?? prev?.cover,
       at: Date.now(),
     });
     writeList(list);
@@ -47,14 +51,19 @@ export function pushHistory(entry: Omit<HistoryEntry, "at">) {
   }
 }
 
-/** Update posisi tonton (t/d) tanpa ubah urutan. */
-export function updateProgress(slug: string, t: number, d: number) {
+/** Update posisi tonton (t/d) tanpa ubah urutan. Opsional simpan src video. */
+export function updateProgress(slug: string, t: number, d: number, src?: string) {
   if (typeof window === "undefined") return;
   try {
     const list = readHistory();
     const idx = list.findIndex((h) => h.slug === slug);
     if (idx < 0) return;
-    list[idx] = { ...list[idx], t, d };
+    list[idx] = {
+      ...list[idx],
+      t,
+      d,
+      src: src ?? list[idx].src,
+    };
     writeList(list);
   } catch {
     /* ignore */

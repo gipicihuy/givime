@@ -1,7 +1,14 @@
 import { ContinueWatching } from "@/components/ContinueWatching";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Shelf } from "@/components/Shelf";
-import { getDetail, getList, IDS, metaOf, type Anime } from "@/lib/api";
+import {
+  getDetail,
+  getList,
+  IDS,
+  isOngoingAnime,
+  metaOf,
+  type Anime,
+} from "@/lib/api";
 
 export const revalidate = 300;
 
@@ -47,25 +54,31 @@ export default async function HomePage() {
     ),
   ]);
 
+  const ongoingItems = ongoing.items.filter(isOngoingAnime);
+
   const featuredSeeds = [
     ...top.items.filter((a) => metaOf(a).ero_image),
-    ...ongoing.items.filter((a) => metaOf(a).ero_image),
+    ...ongoingItems.filter((a) => metaOf(a).ero_image),
     ...top.items,
-    ...ongoing.items,
+    ...ongoingItems,
   ].slice(0, 4);
 
   const featured = await hydrateFeatured(featuredSeeds);
   const featuredSlugs = new Set(featured.map((a) => a.slug));
 
   const topRail = top.items.filter((a) => !featuredSlugs.has(a.slug));
-  const ongoingRail = ongoing.items.filter((a) => !featuredSlugs.has(a.slug));
+  const ongoingRail = ongoingItems.filter((a) => !featuredSlugs.has(a.slug));
 
   return (
     <>
       <h1 className="sr-only">Givime — nonton anime</h1>
       {featured.length ? <FeaturedHero items={featured} /> : null}
       <ContinueWatching />
-      <Shelf title="Ongoing" href="/ongoing" items={ongoingRail.length ? ongoingRail : ongoing.items} />
+      <Shelf
+        title="Ongoing"
+        href="/ongoing"
+        items={ongoingRail.length ? ongoingRail : ongoingItems}
+      />
       <Shelf title="Top" items={topRail.length ? topRail : top.items} />
       <Shelf title="Movie" href="/movies" items={movie.items} />
       <Shelf title="Completed" href="/completed" items={completed.items} />

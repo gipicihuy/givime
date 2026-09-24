@@ -42,8 +42,8 @@ Cap: 1 accent + neutrals.
 
 ## Components
 - `FeaturedHero` = home hero cinematic multi-slide **fixed height** (track full-width slide ±100% ~700ms + backdrop cover-fit + gradient + chevron sisi + dots + **autoplay 5s** + **touch swipe** + CTA; body per-slide absolute/fixed box biar gak resize hero; `touch-action: pan-y`)
-- `ContinueWatching` = rail history lokal **setelah hero**, layout landscape 16:9 + progress + `fmtProgress` (`00:00 / duration`, bar 0% kalau t=0); auto-hide
-- `HistoryTracker` / `lib/history.ts` = riwayat + progres `t`/`d` (detik); player `timeupdate`/`pause` → `updateProgress`; `?t=` seek
+- `ContinueWatching` = rail history lokal **setelah hero**, layout landscape 16:9 + progress + `fmtProgress` (`00:00 / duration`, bar 0% kalau t=0); **resume frame** dari `src` video di detik `t` (fallback poster); auto-hide
+- `HistoryTracker` / `lib/history.ts` = riwayat + progres `t`/`d` (detik) + `src` video; player `timeupdate`/`pause` → `updateProgress`; `?t=` seek
 - Icons: `components/Icons.tsx` only (termasuk `IconSchedule` untuk Jadwal)
 - `Shelf` = head ornamen 3-garis (bukan nomor) + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll; **tanpa** edge-fade mask)
 - `AnimeGrid` = responsive poster grid

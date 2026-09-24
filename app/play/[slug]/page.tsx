@@ -58,6 +58,7 @@ export default async function PlayPage({
         title={title}
         ep={String(target.ab_namaep)}
         cover={metaOf(anime).ero_image}
+        src={target.ab_linkcdn}
         t={initialTime || undefined}
       />
       <p style={{ marginBottom: 12, fontSize: 14 }}>

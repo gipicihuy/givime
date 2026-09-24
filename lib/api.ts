@@ -307,6 +307,16 @@ export function metaOf(x: Anime): MetaBox {
   return mb as MetaBox;
 }
 
+/** true kalau layak masuk section Ongoing (bukan Completed). */
+export function isOngoingAnime(a: Anime): boolean {
+  const s = (metaOf(a).ero_status || "").trim().toLowerCase();
+  if (s === "completed") return false;
+  if (s === "ongoing") return true;
+  const ids = a.animestatus ?? [];
+  if (ids.includes(IDS.status.completed) && !ids.includes(IDS.status.ongoing)) return false;
+  return true;
+}
+
 export function episodeLabel(x: Anime): string {
   const mb = metaOf(x);
   const raw = mb.ero_episode ?? mb.ero_episodebaru;

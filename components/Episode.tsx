@@ -109,7 +109,7 @@ export function VideoPlayer({
     const save = () => {
       const d = v.duration;
       if (!Number.isFinite(d) || d <= 0) return;
-      updateProgress(slug, Math.floor(v.currentTime), Math.floor(d));
+      updateProgress(slug, Math.floor(v.currentTime), Math.floor(d), src);
     };
 
     const onTime = () => {
@@ -130,7 +130,7 @@ export function VideoPlayer({
       v.removeEventListener("ended", save);
       window.removeEventListener("beforeunload", save);
     };
-  }, [slug, playable]);
+  }, [slug, playable, src]);
 
   return (
     <div className="player-wrap">

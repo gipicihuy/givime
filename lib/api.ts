@@ -197,7 +197,12 @@ export function metaOf(x: Anime): MetaBox {
 
 export function episodeLabel(x: Anime): string {
   const mb = metaOf(x);
-  return String(mb.ero_episode ?? mb.ero_episodebaru ?? "?");
+  const raw = mb.ero_episode ?? mb.ero_episodebaru;
+  if (raw == null || raw === "") return "";
+  const n = Number(raw);
+  //99999 = placeholder ongoing panjang (mis. One Piece) — jangan tampilkan
+  if (!Number.isFinite(n) || n >= 99999) return "";
+  return String(raw);
 }
 
 export function encodeMedia(url: string): string {

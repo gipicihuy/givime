@@ -49,7 +49,9 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
   const title = titleOf(anime);
   const synopsis = stripHtml(anime.content?.rendered ?? "").trim();
   const firstEp = eps[0];
-  const epCount = Number(mb.ero_episode ?? mb.ero_episodebaru ?? eps.length) || eps.length;
+  // Label meta bisa99999 (lelucon ongoing) — total asli = jumlah episode CDN
+  const epCount =
+    eps.length || Number(mb.ero_episode ?? mb.ero_episodebaru ?? 0) || 0;
 
   let genreTerms: { id: number; name: string; slug: string }[] = [];
   try {
@@ -188,10 +190,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
             ) : null}
             <div className="fact-row">
               <dt>Episode</dt>
-              <dd>
-                {eps.length} tersedia
-                {epCount !== eps.length ? ` · total ${epCount}` : ""}
-              </dd>
+              <dd>{eps.length} tersedia</dd>
             </div>
           </dl>
         </section>

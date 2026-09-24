@@ -41,9 +41,11 @@ export function AnimeCard({ anime }: { anime: Anime }) {
       </div>
       <span className="poster-title">{title}</span>
       <span className="poster-meta">
-        <span className="meta-item">
-          Ep {ep}
-        </span>
+        {ep ? (
+          <span className="meta-item">
+            Ep {ep}
+          </span>
+        ) : null}
         {score ? (
           <span className="meta-item meta-score">
             <IconStar size={11} />

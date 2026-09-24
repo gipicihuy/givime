@@ -506,6 +506,51 @@ async function coverFromFeatured(item: Anime): Promise<{ ero_image?: string }> {
   }
 }
 
+const ROMAN: Record<string, number> = {
+  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10,
+  xi: 11, xii: 12, xiii: 13, xiv: 14, xv: 15, xvi: 16, xvii: 17, xviii: 18,
+  xix: 19, xx: 20,
+};
+
+/** Key dedup/ranking: samakan Season 2 / 2nd Season / II / part 2. */
+export function titleMatchKey(s: string): string {
+  let t = normalizeTitle(s);
+  t = t.replace(/\b(\d+)(?:st|nd|rd|th)\b/g, "$1");
+  t = t.replace(/\b([ivx]+)\b/g, (m) => {
+    const n = ROMAN[m];
+    return n != null ? String(n) : m;
+  });
+  t = t.replace(/\b(\d+)\s+(?:season|part|vol|volume|cour|series)\b/g, "season $1");
+  t = t.replace(/\b(?:season|part|vol|volume|cour|series)\s+(\d+)\b/g, "season $1");
+  t = t.replace(/\bseason\s*$/, "");
+  return t.replace(/\s+/g, " ").trim();
+}
+
+/** Judul tanpa nomor season (basis buat banding sumber yang beda format). */
+export function titleBaseKey(s: string): string {
+  return titleMatchKey(s)
+    .replace(/\bseason\s*\d+\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * true kalau dua judul kemungkinan anime yang sama
+ * (toleran format season; beda nomor season eksplisit = beda).
+ */
+export function titlesLikelySame(a: string, b: string): boolean {
+  const ka = titleMatchKey(a);
+  const kb = titleMatchKey(b);
+  if (ka && ka === kb) return true;
+  const ba = titleBaseKey(a);
+  const bb = titleBaseKey(b);
+  if (!ba || ba !== bb) return false;
+  const sa = ka.match(/\bseason\s*(\d+)\b/)?.[1];
+  const sb = kb.match(/\bseason\s*(\d+)\b/)?.[1];
+  if (sa && sb && sa !== sb) return false;
+  return true;
+}
+
 export function normalizeTitle(s: string): string {
   return stripHtml(s)
     .toLowerCase()
@@ -517,12 +562,38 @@ function slugifyQuery(q: string): string {
   return normalizeTitle(q).replace(/\s+/g, "-");
 }
 
+/** Kandidat slug/query dari variasi format season (judul kadang beda pola). */
+function querySlugCandidates(q: string): string[] {
+  const set = new Set<string>();
+  const add = (s: string) => {
+    const n = normalizeTitle(s).replace(/\s+/g, "-");
+    if (n) set.add(n);
+  };
+  add(q);
+  add(titleMatchKey(q));
+  add(titleBaseKey(q));
+  const m = titleMatchKey(q).match(/^(.*)\s+season\s+(\d+)$/);
+  if (m) {
+    add(`${m[1]} season ${m[2]}`);
+    add(`${m[1]} ${m[2]}`);
+    add(`${m[1]}`);
+  }
+  // selain itu, pakai slugCandidates biasa (strip -episode-N dst) dari kandidat pertama
+  for (const c of [...set]) {
+    for (const s of slugCandidates(c)) add(s.replace(/-/g, " "));
+  }
+  return [...set];
+}
+
 /** Exact title > exact slug > title mulai query > urutan API. */
 function scoreSearchHit(a: Anime, qNorm: string, qSlug: string): number {
-  const t = normalizeTitle(titleOf(a));
+  const title = titleOf(a);
+  const t = normalizeTitle(title);
+  const k = titleMatchKey(title);
   const slug = (a.slug || "").toLowerCase();
   if (t === qNorm) return 100;
-  if (slug === qSlug) return 90;
+  if (slug && slug === qSlug) return 90;
+  if (k && k === titleMatchKey(qSlug.replace(/-/g, " "))) return 85;
   if (t.startsWith(qNorm) || qNorm.startsWith(t)) return 60;
   if (t.includes(qNorm)) return 40;
   return 0;
@@ -550,30 +621,55 @@ export async function searchAnime(
 
   const qNorm = normalizeTitle(q);
   const qSlug = slugifyQuery(q);
+  const qKey = titleMatchKey(q);
 
-  // 1) search standar
-  const raw = await apiFull<Anime[]>(
-    "/animes",
-    {
-      search: q,
-      page,
-      per_page: limit,
-      _fields:
-        "id,slug,title,date,modified,featured_media,link,meta_box.ero_episodebaru,meta_box.ero_seri,meta_box.ero_credit",
-    },
-    120,
-  );
+  // 1) search standar — coba query asli + kandidat slug season
+  let raw: Awaited<ReturnType<typeof apiFull<Anime[]>>> | null = null;
+  const attempts = [
+    { search: q },
+    ...querySlugCandidates(q)
+      .filter((s) => s !== qSlug && s !== normalizeTitle(q).replace(/\s+/g, "-"))
+      .slice(0, 4)
+      .map((slug) => ({ search: slug.replace(/-/g, " ") })),
+  ];
+  for (const attempt of attempts) {
+    try {
+      const r = await apiFull<Anime[]>(
+        "/animes",
+        {
+          ...attempt,
+          page,
+          per_page: limit,
+          _fields:
+            "id,slug,title,date,modified,featured_media,link,meta_box.ero_episodebaru,meta_box.ero_seri,meta_box.ero_credit",
+        },
+        120,
+      );
+      if ((r.body?.length ?? 0) > 0 || !raw) raw = r;
+      if ((r.body?.length ?? 0) > 0) break;
+    } catch {
+      // lanjut attempt berikutnya
+    }
+  }
+  if (!raw) {
+    raw = { body: [], total: 0, totalPages: 0 };
+  }
 
   const rawItems = raw.body ?? [];
 
   // 2) pin judul resmi lewat slug (WP search sering gak balikin series utama, e.g. slug=one-piece)
   let pinned: Anime | null = null;
-  if (page === 1 && qSlug) {
-    try {
-      const bySlug = await api<Anime[]>("/animes", { slug: qSlug, _fields: LIST_FIELDS }, 300);
-      pinned = bySlug?.[0] ?? null;
-    } catch {
-      pinned = null;
+  if (page === 1) {
+    for (const slug of querySlugCandidates(q)) {
+      try {
+        const bySlug = await api<Anime[]>("/animes", { slug, _fields: LIST_FIELDS }, 300);
+        if (bySlug?.[0]) {
+          pinned = bySlug[0];
+          break;
+        }
+      } catch {
+        // coba slug berikutnya
+      }
     }
   }
 
@@ -608,11 +704,14 @@ export async function searchAnime(
   }
 
   // sort relevansi (stable: score desc, lalu index)
-  const withScore = hydrated.map((item, i) => ({
-    item,
-    i,
-    score: scoreSearchHit(item, qNorm, qSlug),
-  }));
+  const withScore = hydrated.map((item, i) => {
+    let score = scoreSearchHit(item, qNorm, qSlug);
+    if (score < 100 && qKey && titleMatchKey(titleOf(item)) === qKey) score = Math.max(score, 95);
+    if (score < 95 && titleBaseKey(titleOf(item)) && titleBaseKey(titleOf(item)) === titleBaseKey(q)) {
+      score = Math.max(score, 80);
+    }
+    return { item, i, score };
+  });
   withScore.sort((a, b) => b.score - a.score || a.i - b.i);
   const items = await hydrateEpCounts(withScore.map((x) => x.item));
 

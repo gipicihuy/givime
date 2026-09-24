@@ -10,7 +10,8 @@ import {
   getList,
   episodeLabel,
   metaOf,
-  normalizeTitle,
+  titlesLikelySame,
+  titleMatchKey,
   titleOf,
   type Anime,
 } from "@/lib/api";
@@ -106,15 +107,9 @@ function jadwalTone(a: Anime): "aired" | "wait" | "late" {
   return "wait";
 }
 
-function titlesMatch(a: string, b: string): boolean {
-  if (a === b) return true;
-  if (a.length < 8 || b.length < 8) return false;
-  return a.includes(b) || b.includes(a);
-}
-
-/** Gabung katalog lokal + jadwal MAL; judul yang sama jadi 1 (menang lokal). */
+/** Gabung katalog lokal + jadwal MAL; judul sama (toleran season) = 1, menang lokal. */
 function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
-  const localNorms = items.map((a) => normalizeTitle(titleOf(a)));
+  const localTitles = items.map((a) => titleOf(a));
   const rows: JadwalRow[] = items.map((a) => ({
     kind: "local",
     key: `l-${a.id}-${a.slug}`,
@@ -122,9 +117,7 @@ function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
   }));
 
   for (const m of mal) {
-    const n = normalizeTitle(m.title);
-    if (!n) continue;
-    if (localNorms.some((ln) => titlesMatch(ln, n))) continue;
+    if (localTitles.some((ln) => titlesLikelySame(ln, m.title))) continue;
     rows.push({ kind: "mal", key: `m-${m.malId}`, m });
   }
 
@@ -135,6 +128,12 @@ function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
 function malForDay(day: string): MalItem[] {
   const bag = malSchedule as Record<string, MalItem[]>;
   return bag[day] ?? [];
+}
+
+/** Query search yang lebih ramah format season ("X 2nd Season" -> "X Season 2" / base). */
+function titleBaseSearch(title: string): string {
+  const k = titleMatchKey(title);
+  return k || title;
 }
 
 export default async function JadwalPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -218,11 +217,9 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                   </span>
                   <span className="jadwal-body">
                     <span className="jadwal-title">{titleOf(row.a)}</span>
-                    <span className="jadwal-ep">
-                      {episodeLabel(row.a)
-                        ? `Episode ${episodeLabel(row.a)}`
-                        : "Episode —"}
-                    </span>
+                    {episodeLabel(row.a) ? (
+                      <span className="jadwal-ep">Episode {episodeLabel(row.a)}</span>
+                    ) : null}
                     {metaOf(row.a).ero_skor ? (
                       <span className="jadwal-meta">
                         <span className="jadwal-meta-item">
@@ -237,7 +234,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
             ) : (
               <li key={row.key}>
                 <Link
-                  href={`/search?q=${encodeURIComponent(row.m.title)}`}
+                  href={`/search?q=${encodeURIComponent(titleBaseSearch(row.m.title))}`}
                   className="jadwal-item is-wait"
                 >
                   <span className="jadwal-thumb" aria-hidden>
@@ -254,7 +251,6 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                   </span>
                   <span className="jadwal-body">
                     <span className="jadwal-title">{row.m.title}</span>
-                    <span className="jadwal-ep">Episode —</span>
                     {row.m.score ? (
                       <span className="jadwal-meta">
                         <span className="jadwal-meta-item">

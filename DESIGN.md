@@ -40,7 +40,7 @@ Cap: 1 accent + neutrals.
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components
-- `FeaturedHero` = home hero cinematic multi-slide **fixed height** (backdrop cover-fit + gradient + chevron sisi + dots + **autoplay 5s** + **touch swipe** + CTA; transition **horizontal slide** dir-aware; body absolute/fixed box biar slide gak resize hero; `touch-action: pan-y`)
+- `FeaturedHero` = home hero cinematic multi-slide **fixed height** (track full-width slide ±100% ~700ms + backdrop cover-fit + gradient + chevron sisi + dots + **autoplay 5s** + **touch swipe** + CTA; body per-slide absolute/fixed box biar gak resize hero; `touch-action: pan-y`)
 - `ContinueWatching` = rail history lokal (`readHistory`), auto-hide
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
 - `Shelf` = head ornamen 3-garis (bukan nomor) + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll; **tanpa** edge-fade mask)
@@ -52,7 +52,7 @@ Cap: 1 accent + neutrals.
 - Icons: `components/Icons.tsx` only
 
 ## Motion
-≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero **autoplay ~5s** **slide horizontal** (kiri/kanan sesuai arah, bukan rise-from-bottom; pause hover/focus/offscreen/`prefers-reduced-motion`/touch); **swipe kiri-kanan** ≥48px ganti slide.
+≤150ms hover; rail scroll native; poster scale 1.03 (tanpa glow/shadow); hero **autoplay 5s** **track full-width slide ±100%** ~700ms `cubic-bezier(0.22,1,0.36,1)` (transform-only, bukan fade/36px; pause hover/focus/offscreen/`prefers-reduced-motion`/touch); **swipe kiri-kanan** ≥48px ganti slide.
 
 ## Forbidden
 - URL CDN / “Source: …” / “data dari karanime” di UI

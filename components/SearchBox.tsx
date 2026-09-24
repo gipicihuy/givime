@@ -178,7 +178,7 @@ function SearchForm() {
                 <span className="suggest-body">
                   <span className="suggest-title">{item.title}</span>
                   <span className="suggest-meta">
-                    {item.ep ? `Ep ${item.ep}` : item.status || ""}
+                    {item.totalEps ? `${item.totalEps} Eps` : item.status || "—"}
                     {item.score ? ` · ★ ${item.score}` : ""}
                   </span>
                 </span>

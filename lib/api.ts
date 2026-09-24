@@ -90,7 +90,7 @@ export type SuggestItem = {
   slug: string;
   title: string;
   cover?: string;
-  ep?: string;
+  totalEps?: number;
   score?: string;
   status?: string;
 };
@@ -99,6 +99,7 @@ const SUGGEST_FIELDS = [
   "id",
   "slug",
   "title",
+  "featured_media",
   "meta_box.ero_image",
   "meta_box.ero_episode",
   "meta_box.ero_episodebaru",
@@ -106,7 +107,24 @@ const SUGGEST_FIELDS = [
   "meta_box.ero_status",
 ].join(",");
 
-/** Cari ringan buat dropdown suggest (tanpa hydrate berat). */
+async function maxCdnEp(slug: string): Promise<number> {
+  try {
+    const full = await api<Anime[]>("/animes", { slug }, 3600);
+    const a = Array.isArray(full) ? full[0] : null;
+    if (!a) return 0;
+    const eps = sortEps(metaOf(a).ab_cdngroup ?? []);
+    let max = 0;
+    for (const e of eps) {
+      const n = epNum(String(e.ab_namaep));
+      if (Number.isFinite(n) && n > max) max = n;
+    }
+    return max;
+  } catch {
+    return 0;
+  }
+}
+
+/** Cari buat dropdown suggest: hydrate by slug biar cover + total Eps keisi. */
 export async function suggestAnime(q: string, limit = 8): Promise<SuggestItem[]> {
   const term = q.trim();
   if (!term) return [];
@@ -116,18 +134,61 @@ export async function suggestAnime(q: string, limit = 8): Promise<SuggestItem[]>
       { search: term, page: 1, per_page: limit, _fields: SUGGEST_FIELDS },
       60,
     );
-    return (r.body ?? []).map((a) => {
-      const mb = metaOf(a);
-      const ep = episodeLabel(a);
-      return {
-        slug: a.slug,
-        title: titleOf(a),
-        cover: mb.ero_image || undefined,
-        ep: ep || undefined,
-        score: mb.ero_skor || undefined,
-        status: mb.ero_status || undefined,
-      };
-    });
+    const hits = r.body ?? [];
+    if (!hits.length) return [];
+
+    const items = await Promise.all(
+      hits.map(async (hit): Promise<SuggestItem | null> => {
+        try {
+          let a = hit;
+          if (hit.slug) {
+            let full: Anime | null = null;
+            for (const cand of slugCandidates(hit.slug)) {
+              const bySlug = await api<Anime[]>(
+                "/animes",
+                { slug: cand, _fields: SUGGEST_FIELDS },
+                600,
+              );
+              if (bySlug?.[0]) {
+                full = bySlug[0];
+                break;
+              }
+            }
+            if (full) a = full;
+          }
+          const mb = metaOf(a);
+          let cover = mb.ero_image || undefined;
+          if (!cover) {
+            const fb = await coverFromFeatured(a);
+            cover = fb.ero_image || undefined;
+          }
+
+          let totalEps = 0;
+          const label = episodeLabel(a);
+          if (label) {
+            const n = Number(label);
+            if (Number.isFinite(n) && n > 0) totalEps = n;
+          }
+          if (!totalEps) {
+            totalEps = await maxCdnEp(a.slug || hit.slug || "");
+          }
+
+          const slug = a.slug || hit.slug;
+          if (!slug) return null;
+          return {
+            slug,
+            title: titleOf(a) || titleOf(hit),
+            cover,
+            totalEps: totalEps || undefined,
+            score: mb.ero_skor || undefined,
+            status: mb.ero_status || undefined,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    );
+    return items.filter((x): x is SuggestItem => x != null);
   } catch {
     return [];
   }

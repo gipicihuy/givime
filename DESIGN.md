@@ -35,7 +35,7 @@ Cap: 1 accent + neutrals.
   masing-masing: `Shelf` = section head + rail poster vertikal 128–148px
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
-- **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows); hasil grid di bawah
+- **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score` dari hydrate slug/CDN); hasil grid di bawah
 - **List pages:** `AnimeGrid` poster 3→6 kolom
 - **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis full → Info (fact-list) → Episode (auto-fill grid + 1 tombol toggle Terbaru); tanpa meta-table, tanpa badge angka, tanpa 2-pill segmented
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin

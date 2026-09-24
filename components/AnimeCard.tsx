@@ -28,7 +28,7 @@ export function AnimeCard({ anime }: { anime: Anime }) {
         <span className="poster-fade" aria-hidden />
         {score ? (
           <span className="poster-score">
-            <IconStar size={10} />
+            <IconStar size={13} />
             {score}
           </span>
         ) : null}

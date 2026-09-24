@@ -179,6 +179,9 @@ a:focus-visible {
   border-block: 1px solid var(--border);
   background: var(--surface);
   isolation: isolate;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 @media (min-width: 768px) {

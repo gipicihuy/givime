@@ -23,6 +23,7 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
   const n = items.length;
   const pausedRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const touchRef = useRef<{ x: number; y: number } | null>(null);
 
   const go = useCallback(
     (delta: number) => {
@@ -106,6 +107,26 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
     pausedRef.current = false;
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    touchRef.current = { x: t.clientX, y: t.clientY };
+    pausedRef.current = true;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchRef.current;
+    touchRef.current = null;
+    pausedRef.current = false;
+    if (!start || n <= 1) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+    go(dx < 0 ? 1 : -1);
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -116,6 +137,12 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
       onMouseLeave={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={() => {
+        touchRef.current = null;
+        pausedRef.current = false;
+      }}
     >
       <div className="featured-backdrop" aria-hidden>
         {cover ? (

@@ -2,22 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconFilm, IconFlame, IconHome, IconSearch, IconTag } from "@/components/Icons";
+import { IconCompass, IconHistory, IconHome, IconSearch } from "@/components/Icons";
 
+/**
+ * Bottom = tujuan inti app (streaming pattern: Netflix/YouTube/Spotify).
+ * Kategori konten (Ongoing/Movie/Genre) di dalam /browse — bukan tab sendiri.
+ */
 const items = [
   { href: "/", label: "Home", icon: IconHome },
-  { href: "/ongoing", label: "Ongoing", icon: IconFlame },
   { href: "/search", label: "Search", icon: IconSearch },
-  { href: "/movies", label: "Movies", icon: IconFilm },
-  { href: "/genres", label: "Genre", icon: IconTag },
+  { href: "/browse", label: "Browse", icon: IconCompass },
+  { href: "/history", label: "History", icon: IconHistory },
 ];
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
-  if (href === "/ongoing") return pathname === "/ongoing" || pathname === "/completed";
   if (href === "/search") return pathname.startsWith("/search");
-  if (href === "/movies") return pathname.startsWith("/movies");
-  if (href === "/genres") return pathname.startsWith("/genre");
+  if (href === "/browse")
+    return (
+      pathname === "/browse" ||
+      pathname === "/ongoing" ||
+      pathname === "/completed" ||
+      pathname === "/movies" ||
+      pathname.startsWith("/genre")
+    );
+  if (href === "/history") return pathname.startsWith("/history");
   return false;
 }
 

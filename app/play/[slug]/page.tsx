@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeGrid, VideoPlayer } from "@/components/Episode";
+import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft, IconClock } from "@/components/Icons";
-import { getEpisodes, titleOf } from "@/lib/api";
+import { getEpisodes, metaOf, titleOf } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar" };
@@ -50,6 +51,12 @@ export default async function PlayPage({
 
   return (
     <>
+      <HistoryTracker
+        slug={anime.slug}
+        title={title}
+        ep={String(target.ab_namaep)}
+        cover={metaOf(anime).ero_image}
+      />
       <p style={{ marginBottom: 12, fontSize: 14 }}>
         <Link href={`/anime/${slug}`} className="muted meta-item">
           <IconChevronLeft size={14} />

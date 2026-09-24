@@ -166,3 +166,21 @@ export function IconEmpty(p: P) {
     </svg>
   );
 }
+
+export function IconCompass(p: P) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15.5 8.5-2.2 5-5 2.2 2.2-5 5-2.2z" />
+    </svg>
+  );
+}
+
+export function IconHistory(p: P) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}

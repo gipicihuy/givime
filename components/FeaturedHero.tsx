@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -16,9 +16,13 @@ import {
   type Anime,
 } from "@/lib/api";
 
+const AUTOPLAY_MS = 5000;
+
 export function FeaturedHero({ items }: { items: Anime[] }) {
   const [i, setI] = useState(0);
   const n = items.length;
+  const pausedRef = useRef(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const go = useCallback(
     (delta: number) => {
@@ -27,6 +31,46 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
     },
     [n],
   );
+
+  useEffect(() => {
+    if (n <= 1) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    const start = () => {
+      if (timer) return;
+      timer = setInterval(() => {
+        if (pausedRef.current) return;
+        if (document.hidden) return;
+        const el = sectionRef.current;
+        if (el) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > window.innerHeight) return;
+        }
+        setI((prev) => (prev + 1) % n);
+      }, AUTOPLAY_MS);
+    };
+
+    const stop = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    start();
+    const onVis = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [n]);
 
   if (!n) return null;
 
@@ -55,17 +99,40 @@ export function FeaturedHero({ items }: { items: Anime[] }) {
         ? "Selesai tayang"
         : "Pilihan editor";
 
+  const pause = () => {
+    pausedRef.current = true;
+  };
+  const resume = () => {
+    pausedRef.current = false;
+  };
+
   return (
-    <section className="featured" aria-roledescription="carousel" aria-label="Pilihan utama">
+    <section
+      ref={sectionRef}
+      className="featured"
+      aria-roledescription="carousel"
+      aria-label="Pilihan utama"
+      onMouseEnter={pause}
+      onMouseLeave={resume}
+      onFocusCapture={pause}
+      onBlurCapture={resume}
+    >
       <div className="featured-backdrop" aria-hidden>
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={cover} src={cover} alt="" width={800} height={1200} />
+          <img
+            key={cover}
+            className="featured-img is-enter"
+            src={cover}
+            alt=""
+            width={800}
+            height={1200}
+          />
         ) : null}
         <div className="featured-scrim" />
       </div>
 
-      <div className="featured-body" key={anime.id}>
+      <div className="featured-body is-enter" key={anime.id}>
         <p className="featured-label">{kicker}</p>
         <h2 className="featured-title">{title}</h2>
         <div className="featured-meta">

@@ -39,8 +39,35 @@ const LONG = [
   "Sabtu",
 ] as const;
 
+/** Hari/tanggal sekarang di WIB (server UTC, bukan timezone user). */
+function wibToday(): { y: number; m: number; d: number; dow: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+  }).formatToParts(new Date());
+  const val = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const dowMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  return {
+    y: Number(val("year")),
+    m: Number(val("month")),
+    d: Number(val("day")),
+    dow: dowMap[val("weekday")] ?? 0,
+  };
+}
+
 function todayKey(): string {
-  return DOW[new Date().getDay()] ?? "senin";
+  return DOW[wibToday().dow] ?? "senin";
 }
 
 function dayIndex(key: string): number {
@@ -54,20 +81,19 @@ function neighborDay(key: string, delta: -1 | 1): { key: string; label: string }
   return { key: DOW[n], label: LONG[n] };
 }
 
-/** Minggu Sun-Sat yang memuat hari aktif (pakai minggu kalender hari ini). */
+/** Minggu Sun-Sat yang memuat hari aktif (pakai minggu kalender WIB). */
 function stripDays(activeKey: string) {
-  const now = new Date();
-  const todayIdx = now.getDay();
-  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - todayIdx);
+  const { y, m, d, dow } = wibToday();
+  const weekStart = new Date(y, m - 1, d - dow);
 
   return DOW.map((key, i) => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
     return {
       key,
       short: SHORT[i],
       long: LONG[i],
-      date: d.getDate(),
+      date: date.getDate(),
       isActive: key === activeKey,
       isToday: key === todayKey(),
     };

@@ -24,6 +24,10 @@
 
 Cap: 1 accent + neutrals.
 
+## Type
+- **UI/body:** Plus Jakarta Sans (bukan Geist/Inter — hindari vibe default AI)
+- Hierarchy via weight/size, bukan font beda
+
 ## Layout
 - **Top bar:** logo + search only
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active oranye; Browse aktif untuk route kategori (`/ongoing` dst)
@@ -39,6 +43,7 @@ Cap: 1 accent + neutrals.
 - `AnimeCard` = poster vertical (thumb 2:3 + title 2-line + ep/score)
 - `Shelf` = section head + rail flex overflow-x scroll-snap (client, **tanpa** tombol scroll)
 - `AnimeGrid` = responsive poster grid
+- `Pager` = nomor halaman pill + chevron icon-only (tanpa teks Prev/Next)
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
 - `HistoryTracker` / `lib/history.ts` = riwayat tonton lokal
 - Icons: `components/Icons.tsx` only

@@ -26,8 +26,8 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--success);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ui), system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * {
@@ -645,35 +645,75 @@ a:focus-visible {
 .pager {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   margin-top: 28px;
   flex-wrap: wrap;
 }
 
-.pager a,
-.pager span {
-  font-size: 13px;
-  min-width: 40px;
-  min-height: 40px;
+.pager-pages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pager-num {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  border-radius: 999px;
+  transition: color 120ms ease, background 120ms ease;
 }
 
-.pager a:hover {
+.pager-num:hover {
+  color: var(--foreground);
+  background: var(--surface-2);
+}
+
+.pager-num.is-current {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.pager-gap {
+  color: var(--muted);
+  font-size: 13px;
+  padding-inline: 2px;
+  user-select: none;
+}
+
+.pager-arrow {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.pager-arrow:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.pager .disabled {
-  color: var(--muted);
-  opacity: 0.45;
+.pager-arrow.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 /* —— page head —— */

@@ -1,6 +1,7 @@
 import { AnimeGrid } from "@/components/AnimeCard";
 import { IconEmpty } from "@/components/Icons";
 import { Pager } from "@/components/Pager";
+import { SearchBox } from "@/components/SearchBox";
 import { searchAnime } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +17,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   if (!q) {
     return (
       <>
-        <h1 className="page-title">Cari anime</h1>
-        <div className="state">
-          <strong>Masukkan kata kunci</strong>
-          Pakai kotak pencarian di header, misal “one piece”.
+        <h1 className="page-title">Cari</h1>
+        <p className="page-sub">Ketik judul — saran muncul saat mengetik</p>
+        <SearchBox />
+        <div className="state state-follow">
+          <strong>Mulai ketik</strong>
+          Misal “one piece”, “solo leveling”, “spy x family”.
         </div>
       </>
     );
@@ -34,22 +37,25 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <h1 className="page-title">“{q}”</h1>
+      <h1 className="page-title">Cari</h1>
       <p className="page-sub">
-        {r.total ?? r.items.length} hasil · halaman {page}
+        {r.total ?? r.items.length} hasil untuk “{q}” · halaman {page}
       </p>
-      {r.items.length === 0 ? (
-        <div className="state">
-          <span className="state-icon" aria-hidden>
-            <IconEmpty size={32} />
-          </span>
-          <strong>Gagal load / tidak ada hasil</strong>
-          API sumber lagi error atau tidak ada yang cocok. Coba refresh.
-        </div>
-      ) : (
-        <AnimeGrid items={r.items} />
-      )}
-      <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/search" searchKey="q" searchValue={q} />
+      <SearchBox />
+      <div className="search-results">
+        {r.items.length === 0 ? (
+          <div className="state">
+            <span className="state-icon" aria-hidden>
+              <IconEmpty size={32} />
+            </span>
+            <strong>Tidak ada hasil</strong>
+            Coba kata kunci lain, atau cek ejaan judulnya.
+          </div>
+        ) : (
+          <AnimeGrid items={r.items} />
+        )}
+        <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/search" searchKey="q" searchValue={q} />
+      </div>
     </>
   );
 }

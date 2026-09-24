@@ -86,6 +86,53 @@ export type ListResult = {
 
 export type Genre = { id: number; name: string; slug: string; count?: number };
 
+export type SuggestItem = {
+  slug: string;
+  title: string;
+  cover?: string;
+  ep?: string;
+  score?: string;
+  status?: string;
+};
+
+const SUGGEST_FIELDS = [
+  "id",
+  "slug",
+  "title",
+  "meta_box.ero_image",
+  "meta_box.ero_episode",
+  "meta_box.ero_episodebaru",
+  "meta_box.ero_skor",
+  "meta_box.ero_status",
+].join(",");
+
+/** Cari ringan buat dropdown suggest (tanpa hydrate berat). */
+export async function suggestAnime(q: string, limit = 8): Promise<SuggestItem[]> {
+  const term = q.trim();
+  if (!term) return [];
+  try {
+    const r = await apiFull<Anime[]>(
+      "/animes",
+      { search: term, page: 1, per_page: limit, _fields: SUGGEST_FIELDS },
+      60,
+    );
+    return (r.body ?? []).map((a) => {
+      const mb = metaOf(a);
+      const ep = episodeLabel(a);
+      return {
+        slug: a.slug,
+        title: titleOf(a),
+        cover: mb.ero_image || undefined,
+        ep: ep || undefined,
+        score: mb.ero_skor || undefined,
+        status: mb.ero_status || undefined,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 function buildUrl(path: string, params: Record<string, string | number | undefined | null> = {}) {
   const url = new URL(BASE + path);
   for (const [k, v] of Object.entries(params)) {

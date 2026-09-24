@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { BottomNav } from "@/components/BottomNav";
-import { SearchBox } from "@/components/SearchBox";
 import { IconFilm } from "@/components/Icons";
 import "./globals.css";
 
@@ -32,8 +31,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </span>
               Givime
             </Link>
-            <div className="header-spacer" />
-            <SearchBox />
           </div>
         </header>
         <main className="shell main">{children}</main>

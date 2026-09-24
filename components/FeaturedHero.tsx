@@ -50,7 +50,7 @@ function HeroContent({ anime }: { anime: Anime }) {
       <div className="featured-backdrop" aria-hidden>
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt="" width={800} height={1200} />
+          <img src={cover} alt="" width={1280} height={720} />
         ) : null}
         <div className="featured-scrim" />
       </div>

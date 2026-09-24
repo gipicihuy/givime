@@ -534,23 +534,6 @@ export function titleBaseKey(s: string): string {
     .trim();
 }
 
-/**
- * true kalau dua judul kemungkinan anime yang sama
- * (toleran format season; beda nomor season eksplisit = beda).
- */
-export function titlesLikelySame(a: string, b: string): boolean {
-  const ka = titleMatchKey(a);
-  const kb = titleMatchKey(b);
-  if (ka && ka === kb) return true;
-  const ba = titleBaseKey(a);
-  const bb = titleBaseKey(b);
-  if (!ba || ba !== bb) return false;
-  const sa = ka.match(/\bseason\s*(\d+)\b/)?.[1];
-  const sb = kb.match(/\bseason\s*(\d+)\b/)?.[1];
-  if (sa && sb && sa !== sb) return false;
-  return true;
-}
-
 export function normalizeTitle(s: string): string {
   return stripHtml(s)
     .toLowerCase()

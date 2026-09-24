@@ -10,29 +10,14 @@ import {
   getList,
   episodeLabel,
   metaOf,
-  titlesLikelySame,
-  titleMatchKey,
   titleOf,
   type Anime,
 } from "@/lib/api";
-import malSchedule from "@/lib/mal-schedule.json";
 
 export const revalidate = 3600;
 export const metadata = { title: "Jadwal" };
 
 type SP = { day?: string };
-
-type MalItem = {
-  malId: number;
-  title: string;
-  score: string;
-  eps: string;
-  cover: string;
-};
-
-type JadwalRow =
-  | { kind: "local"; key: string; a: Anime; score?: string }
-  | { kind: "mal"; key: string; m: MalItem };
 
 const DOW = [
   "minggu",
@@ -107,68 +92,15 @@ function jadwalTone(a: Anime): "aired" | "wait" | "late" {
   return "wait";
 }
 
-function rowScore(r: JadwalRow): number {
-  const raw =
-    r.kind === "local"
-      ? (r.score ?? metaOf(r.a).ero_skor ?? "")
-      : (r.m.score ?? "");
-  const n = Number(raw);
+function scoreOf(a: Anime): number {
+  const n = Number(metaOf(a).ero_skor || 0);
   return Number.isFinite(n) ? n : 0;
 }
 
-function rowLabel(r: JadwalRow): string {
-  return r.kind === "local" ? titleOf(r.a) : r.m.title;
-}
-
-/**
- * Gabung katalog lokal + jadwal MAL; judul sama (toleran season) = 1, menang lokal.
- * Skor: lokal dulu; kalau lokal kosong, pakai skor MAL hasil match.
- * Urut: skor desc, lalu judul.
- */
-function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
-  const rows: JadwalRow[] = [];
-  const usedMal = new Set<number>();
-
-  for (const a of items) {
-    const title = titleOf(a);
-    const localScore = (metaOf(a).ero_skor || "").trim();
-    let score = localScore;
-    if (!score) {
-      const hit = mal.find(
-        (m) => titlesLikelySame(title, m.title) && m.score,
-      );
-      if (hit) {
-        score = hit.score;
-        usedMal.add(hit.malId);
-      }
-    } else {
-      for (const m of mal) {
-        if (titlesLikelySame(title, m.title)) usedMal.add(m.malId);
-      }
-    }
-    rows.push({ kind: "local", key: `l-${a.id}-${a.slug}`, a, score });
-  }
-
-  for (const m of mal) {
-    if (usedMal.has(m.malId)) continue;
-    if (items.some((a) => titlesLikelySame(titleOf(a), m.title))) continue;
-    rows.push({ kind: "mal", key: `m-${m.malId}`, m });
-  }
-
-  return rows.sort(
-    (x, y) => rowScore(y) - rowScore(x) || rowLabel(x).localeCompare(rowLabel(y)),
+function byScoreThenTitle(items: Anime[]): Anime[] {
+  return [...items].sort(
+    (a, b) => scoreOf(b) - scoreOf(a) || titleOf(a).localeCompare(titleOf(b)),
   );
-}
-
-function malForDay(day: string): MalItem[] {
-  const bag = malSchedule as Record<string, MalItem[]>;
-  return bag[day] ?? [];
-}
-
-/** Query search yang lebih ramah format season ("X 2nd Season" -> "X Season 2" / base). */
-function titleBaseSearch(title: string): string {
-  const k = titleMatchKey(title);
-  return k || title;
 }
 
 export default async function JadwalPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -191,7 +123,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
     r = { items: [], total: 0, totalPages: 1 };
   }
 
-  const rows = mergeJadwal(r.items, malForDay(day));
+  const items = byScoreThenTitle(r.items);
 
   return (
     <>
@@ -226,79 +158,41 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
       </div>
 
       <p className="page-sub">
-        {rows.length} judul · {label}
+        {items.length} judul · {label}
       </p>
 
-      {rows.length ? (
+      {items.length ? (
         <ul className="jadwal-list">
-          {rows.map((row) =>
-            row.kind === "local" ? (
-              <li key={row.key}>
-                <Link
-                  href={`/anime/${row.a.slug}`}
-                  className={`jadwal-item is-${jadwalTone(row.a)}`}
-                >
+          {items.map((a) => {
+            const ep = episodeLabel(a);
+            const score = metaOf(a).ero_skor;
+            const cover = metaOf(a).ero_image;
+            const tone = jadwalTone(a);
+            return (
+              <li key={`${a.id}-${a.slug}`}>
+                <Link href={`/anime/${a.slug}`} className={`jadwal-item is-${tone}`}>
                   <span className="jadwal-thumb" aria-hidden>
-                    {metaOf(row.a).ero_image ? (
+                    {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={metaOf(row.a).ero_image}
-                        alt=""
-                        loading="lazy"
-                        width={72}
-                        height={108}
-                      />
+                      <img src={cover} alt="" loading="lazy" width={72} height={108} />
                     ) : null}
                   </span>
                   <span className="jadwal-body">
-                    <span className="jadwal-title">{titleOf(row.a)}</span>
-                    {episodeLabel(row.a) ? (
-                      <span className="jadwal-ep">Episode {episodeLabel(row.a)}</span>
-                    ) : null}
-                    {row.score ? (
+                    <span className="jadwal-title">{titleOf(a)}</span>
+                    {ep ? <span className="jadwal-ep">Episode {ep}</span> : null}
+                    {score ? (
                       <span className="jadwal-meta">
                         <span className="jadwal-meta-item">
                           <IconStar size={12} />
-                          {row.score}
+                          {score}
                         </span>
                       </span>
                     ) : null}
                   </span>
                 </Link>
               </li>
-            ) : (
-              <li key={row.key}>
-                <Link
-                  href={`/search?q=${encodeURIComponent(titleBaseSearch(row.m.title))}`}
-                  className="jadwal-item is-wait"
-                >
-                  <span className="jadwal-thumb" aria-hidden>
-                    {row.m.cover ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={row.m.cover}
-                        alt=""
-                        loading="lazy"
-                        width={72}
-                        height={108}
-                      />
-                    ) : null}
-                  </span>
-                  <span className="jadwal-body">
-                    <span className="jadwal-title">{row.m.title}</span>
-                    {row.m.score ? (
-                      <span className="jadwal-meta">
-                        <span className="jadwal-meta-item">
-                          <IconStar size={12} />
-                          {row.m.score}
-                        </span>
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-              </li>
-            ),
-          )}
+            );
+          })}
         </ul>
       ) : (
         <div className="state">

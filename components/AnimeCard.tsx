@@ -2,18 +2,9 @@ import Link from "next/link";
 import { type Anime, episodeLabel, metaOf, titleOf } from "@/lib/api";
 import { IconPlay, IconStar } from "@/components/Icons";
 
-function statusClass(status?: string) {
-  if (!status) return "chip";
-  const s = status.toLowerCase();
-  if (s === "ongoing") return "chip chip-ongoing";
-  if (s === "completed") return "chip chip-completed";
-  return "chip";
-}
-
 export function AnimeCard({ anime }: { anime: Anime }) {
   const mb = metaOf(anime);
   const title = titleOf(anime);
-  const status = mb.ero_status;
   const ep = episodeLabel(anime);
   const score = mb.ero_skor;
   const cover = mb.ero_image;
@@ -34,24 +25,19 @@ export function AnimeCard({ anime }: { anime: Anime }) {
         ) : (
           <div className="poster-placeholder">Tanpa cover</div>
         )}
-        <span className="poster-badge" aria-hidden>
-          <IconPlay size={14} />
-        </span>
-        {status ? <span className={`poster-status ${statusClass(status)}`}>{status}</span> : null}
-      </div>
-      <span className="poster-title">{title}</span>
-      <span className="poster-meta">
-        {ep ? (
-          <span className="meta-item">
-            Ep {ep}
-          </span>
-        ) : null}
         {score ? (
-          <span className="meta-item meta-score">
-            <IconStar size={11} />
+          <span className="poster-score">
+            <IconStar size={10} />
             {score}
           </span>
         ) : null}
+        <span className="poster-badge" aria-hidden>
+          <IconPlay size={14} />
+        </span>
+      </div>
+      <span className="poster-title">{title}</span>
+      <span className="poster-meta">
+        <span className="meta-item">{ep ? `Ep ${ep}` : "—"}</span>
       </span>
     </Link>
   );

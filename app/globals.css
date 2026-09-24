@@ -646,10 +646,6 @@ a:focus-visible {
   color: var(--accent);
 }
 
-.poster:hover .poster-badge {
-  opacity: 1;
-}
-
 .poster-thumb {
   position: relative;
   aspect-ratio: 2 / 3;
@@ -697,13 +693,35 @@ a:focus-visible {
   opacity: 0;
   transition: opacity 120ms ease;
   pointer-events: none;
+  z-index: 2;
 }
 
-.poster-status {
+.poster-score {
   position: absolute;
-  left: 6px;
-  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 10px;
+  font-weight: 800;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.poster:hover .poster-badge {
+  opacity: 1;
+}
+
+.poster:hover .poster-score {
+  opacity: 0;
 }
 
 .poster-title {
@@ -721,10 +739,20 @@ a:focus-visible {
   font-size: 11px;
   color: var(--muted);
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   gap: 6px;
   align-items: center;
   font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.poster-meta .meta-item {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* —— poster grid (list pages) —— */
@@ -766,6 +794,8 @@ a:focus-visible {
 
 .meta-score {
   color: var(--accent);
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
 /* —— chips —— */

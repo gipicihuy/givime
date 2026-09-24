@@ -194,3 +194,110 @@ export function IconSchedule(p: P) {
     </svg>
   );
 }
+
+export function IconPause(p: P) {
+  return (
+    <svg {...base(p)} fill="currentColor" stroke="none">
+      <rect x="6" y="5" width="4" height="14" rx="1.2" />
+      <rect x="14" y="5" width="4" height="14" rx="1.2" />
+    </svg>
+  );
+}
+
+export function IconLock(p: P) {
+  return (
+    <svg {...base(p)}>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
+export function IconUnlock(p: P) {
+  return (
+    <svg {...base(p)}>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 7.5-2" />
+    </svg>
+  );
+}
+
+export function IconBrightness(p: P) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
+
+export function IconVolume(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor" stroke="none" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M18.07 5.93a9 9 0 0 1 0 12.14" />
+    </svg>
+  );
+}
+
+export function IconVolumeMute(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor" stroke="none" />
+      <path d="m16 9 5 6M21 9l-5 6" />
+    </svg>
+  );
+}
+
+export function IconReplay(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M3 12a9 9 0 1 0 2.64-6.36" />
+      <path d="M3 4v5h5" />
+    </svg>
+  );
+}
+
+export function IconForward(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 4v5h-5" />
+    </svg>
+  );
+}
+
+export function IconPrevTrack(p: P) {
+  return (
+    <svg {...base(p)} fill="currentColor" stroke="none">
+      <rect x="5" y="6" width="2.6" height="12" rx="1" />
+      <path d="M19 6.9v10.2a1 1 0 0 1-1.55.83l-7.95-5.1a1 1 0 0 1 0-1.66l7.95-5.1A1 1 0 0 1 19 6.9z" />
+    </svg>
+  );
+}
+
+export function IconNextTrack(p: P) {
+  return (
+    <svg {...base(p)} fill="currentColor" stroke="none">
+      <path d="M5 6.9v10.2a1 1 0 0 0 1.55.83l7.95-5.1a1 1 0 0 0 0-1.66l-7.95-5.1A1 1 0 0 0 5 6.9z" />
+      <rect x="16.4" y="6" width="2.6" height="12" rx="1" />
+    </svg>
+  );
+}
+
+export function IconFullscreen(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
+export function IconFullscreenExit(p: P) {
+  return (
+    <svg {...base(p)}>
+      <path d="M8 3v3a2 2 0 0 1-2 2H3M16 3v3a2 2 0 0 0 2 2h3M8 21v-3a2 2 0 0 0-2-2H3M16 21v-3a2 2 0 0 1 2-2h3" />
+    </svg>
+  );
+}

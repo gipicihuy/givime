@@ -50,6 +50,9 @@ export default async function PlayPage({
   }
 
   const initialTime = Math.max(0, Number(sp.t) || 0);
+  const idx = eps.findIndex((e) => String(e.ab_namaep) === String(target.ab_namaep));
+  const prevEp = idx > 0 ? String(eps[idx - 1].ab_namaep) : null;
+  const nextEp = idx >= 0 && idx < eps.length - 1 ? String(eps[idx + 1].ab_namaep) : null;
 
   return (
     <>
@@ -74,6 +77,9 @@ export default async function PlayPage({
         episode={String(target.ab_namaep)}
         slug={anime.slug}
         initialTime={initialTime}
+        epSlug={slug}
+        prevEp={prevEp}
+        nextEp={nextEp}
       />
 
       <section className="section">

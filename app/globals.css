@@ -1405,49 +1405,211 @@ a:focus-visible {
   margin-bottom: 20px;
 }
 
-/* —— jadwal days —— */
-.jadwal-days {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+/* —— jadwal: date strip + list —— */
+.jadwal-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 18px;
 }
 
-.jadwal-day {
+.jadwal-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 0 2px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.jadwal-col:hover .jadwal-dow {
+  color: var(--foreground);
+}
+
+.jadwal-dow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.jadwal-num {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 12px;
-  border: 1px solid var(--border);
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
   border-radius: 999px;
-  background: var(--surface);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--foreground);
-  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  background: transparent;
 }
 
-.jadwal-day:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.jadwal-day.is-on {
+.jadwal-num.is-active {
   background: var(--accent);
-  border-color: var(--accent);
   color: var(--accent-ink);
+  font-weight: 800;
 }
 
-.jadwal-day.is-today:not(.is-on) {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.jadwal-dot {
+.jadwal-today-dot {
   width: 6px;
   height: 6px;
   border-radius: 999px;
+  background: transparent;
+}
+
+.jadwal-today-dot.is-on {
+  background: var(--accent);
+}
+
+.jadwal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jadwal-item {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 12px;
+  padding-left: 14px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.jadwal-item.is-aired {
+  border-left-color: var(--accent);
+}
+
+.jadwal-item.is-wait {
+  border-left-color: var(--muted);
+}
+
+.jadwal-item.is-late {
+  border-left-color: #f87171;
+}
+
+.jadwal-item:hover {
+  border-color: var(--accent);
+}
+
+.jadwal-item.is-aired:hover {
+  border-left-color: var(--accent);
+}
+
+.jadwal-item.is-wait:hover {
+  border-left-color: var(--muted);
+}
+
+.jadwal-item.is-late:hover {
+  border-left-color: #f87171;
+}
+
+.jadwal-thumb {
+  flex: 0 0 56px;
+  width: 56px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.jadwal-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.jadwal-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.jadwal-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jadwal-ep {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.jadwal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-height: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.jadwal-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.jadwal-meta-item svg {
+  color: var(--accent);
+}
+
+.jadwal-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.jadwal-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
   background: currentColor;
+  flex-shrink: 0;
+}
+
+.jadwal-item.is-aired .jadwal-status {
+  color: var(--accent);
+}
+
+.jadwal-item.is-wait .jadwal-status {
+  color: var(--muted);
+}
+
+.jadwal-item.is-late .jadwal-status {
+  color: #f87171;
 }
 
 /* —— genre list —— */

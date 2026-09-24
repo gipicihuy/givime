@@ -25,20 +25,19 @@ export function AnimeCard({ anime }: { anime: Anime }) {
         ) : (
           <div className="poster-placeholder">Tanpa cover</div>
         )}
+        <span className="poster-fade" aria-hidden />
         {score ? (
           <span className="poster-score">
             <IconStar size={10} />
             {score}
           </span>
         ) : null}
+        {ep ? <span className="poster-ep">Ep {ep}</span> : null}
         <span className="poster-badge" aria-hidden>
           <IconPlay size={14} />
         </span>
       </div>
       <span className="poster-title">{title}</span>
-      <span className="poster-meta">
-        <span className="meta-item">{ep ? `Ep ${ep}` : "—"}</span>
-      </span>
     </Link>
   );
 }

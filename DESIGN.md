@@ -50,7 +50,7 @@ Cap: 1 accent + neutrals.
 - `Pager` = nomor halaman pill + chevron icon-only (tanpa teks Prev/Next)
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
 - `EpisodeSection` = client, section head + 1 tombol toggle Terbaru (asc default / desc) + auto-fill grid
-- `AnimeCard` = poster vertical (thumb 2:3 **tanpa badge status**; **score `★ n.nn` lime badge kanan-bawah** (hover: play ganti score); title 2-line + `Ep N` di bawah)
+- `AnimeCard` = poster vertical (thumb 2:3 **tanpa badge status**; score `★ n.nn` lime **pojok kanan-atas** dark chip; **Ep N** di atas gradient bawah poster; title 2-line di bawah poster)
 - `HistoryPage` = timeline date-pill + vertical line + horizontal card (title/ep/jam bold/progress `00:00 / duration`); link `?t=` seek; token lime
 
 ## Motion

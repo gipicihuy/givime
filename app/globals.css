@@ -226,19 +226,11 @@ a:focus-visible {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: 4px;
   padding-bottom: 8px;
-  margin-inline: -14px;
-  padding-inline: 14px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
-}
-
-@media (min-width: 768px) {
-  .rail {
-    margin-inline: -24px;
-    padding-inline: 24px;
-  }
 }
 
 .rail:focus-visible {

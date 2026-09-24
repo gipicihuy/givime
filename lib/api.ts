@@ -506,7 +506,7 @@ async function coverFromFeatured(item: Anime): Promise<{ ero_image?: string }> {
   }
 }
 
-function normalizeTitle(s: string): string {
+export function normalizeTitle(s: string): string {
   return stripHtml(s)
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, " ")

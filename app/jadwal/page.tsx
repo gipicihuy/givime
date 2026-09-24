@@ -10,14 +10,28 @@ import {
   getList,
   episodeLabel,
   metaOf,
+  normalizeTitle,
   titleOf,
   type Anime,
 } from "@/lib/api";
+import malSchedule from "@/lib/mal-schedule.json";
 
 export const revalidate = 3600;
 export const metadata = { title: "Jadwal" };
 
 type SP = { day?: string };
+
+type MalItem = {
+  malId: number;
+  title: string;
+  score: string;
+  eps: string;
+  cover: string;
+};
+
+type JadwalRow =
+  | { kind: "local"; key: string; a: Anime }
+  | { kind: "mal"; key: string; m: MalItem };
 
 const DOW = [
   "minggu",
@@ -92,6 +106,37 @@ function jadwalTone(a: Anime): "aired" | "wait" | "late" {
   return "wait";
 }
 
+function titlesMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (a.length < 8 || b.length < 8) return false;
+  return a.includes(b) || b.includes(a);
+}
+
+/** Gabung katalog lokal + jadwal MAL; judul yang sama jadi 1 (menang lokal). */
+function mergeJadwal(items: Anime[], mal: MalItem[]): JadwalRow[] {
+  const localNorms = items.map((a) => normalizeTitle(titleOf(a)));
+  const rows: JadwalRow[] = items.map((a) => ({
+    kind: "local",
+    key: `l-${a.id}-${a.slug}`,
+    a,
+  }));
+
+  for (const m of mal) {
+    const n = normalizeTitle(m.title);
+    if (!n) continue;
+    if (localNorms.some((ln) => titlesMatch(ln, n))) continue;
+    rows.push({ kind: "mal", key: `m-${m.malId}`, m });
+  }
+
+  const label = (r: JadwalRow) => (r.kind === "local" ? titleOf(r.a) : r.m.title);
+  return rows.sort((x, y) => label(x).localeCompare(label(y)));
+}
+
+function malForDay(day: string): MalItem[] {
+  const bag = malSchedule as Record<string, MalItem[]>;
+  return bag[day] ?? [];
+}
+
 export default async function JadwalPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const today = todayKey();
@@ -111,6 +156,8 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
   } catch {
     r = { items: [], total: 0, totalPages: 1 };
   }
+
+  const rows = mergeJadwal(r.items, malForDay(day));
 
   return (
     <>
@@ -145,43 +192,82 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
       </div>
 
       <p className="page-sub">
-        {r.total ?? r.items.length} judul · {label}
+        {rows.length} judul · {label}
       </p>
 
-      {r.items.length ? (
+      {rows.length ? (
         <ul className="jadwal-list">
-          {r.items.map((a) => {
-            const ep = episodeLabel(a);
-            const score = metaOf(a).ero_skor;
-            const cover = metaOf(a).ero_image;
-            const tone = jadwalTone(a);
-            return (
-              <li key={`${a.id}-${a.slug}`}>
-                <Link href={`/anime/${a.slug}`} className={`jadwal-item is-${tone}`}>
+          {rows.map((row) =>
+            row.kind === "local" ? (
+              <li key={row.key}>
+                <Link
+                  href={`/anime/${row.a.slug}`}
+                  className={`jadwal-item is-${jadwalTone(row.a)}`}
+                >
                   <span className="jadwal-thumb" aria-hidden>
-                    {cover ? (
+                    {metaOf(row.a).ero_image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover} alt="" loading="lazy" width={72} height={108} />
+                      <img
+                        src={metaOf(row.a).ero_image}
+                        alt=""
+                        loading="lazy"
+                        width={72}
+                        height={108}
+                      />
                     ) : null}
                   </span>
                   <span className="jadwal-body">
-                    <span className="jadwal-title">{titleOf(a)}</span>
+                    <span className="jadwal-title">{titleOf(row.a)}</span>
                     <span className="jadwal-ep">
-                      {ep ? `Episode ${ep}` : "Episode —"}
+                      {episodeLabel(row.a)
+                        ? `Episode ${episodeLabel(row.a)}`
+                        : "Episode —"}
                     </span>
-                    {score ? (
+                    {metaOf(row.a).ero_skor ? (
                       <span className="jadwal-meta">
                         <span className="jadwal-meta-item">
                           <IconStar size={12} />
-                          {score}
+                          {metaOf(row.a).ero_skor}
                         </span>
                       </span>
                     ) : null}
                   </span>
                 </Link>
               </li>
-            );
-          })}
+            ) : (
+              <li key={row.key}>
+                <Link
+                  href={`/search?q=${encodeURIComponent(row.m.title)}`}
+                  className="jadwal-item is-wait"
+                >
+                  <span className="jadwal-thumb" aria-hidden>
+                    {row.m.cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={row.m.cover}
+                        alt=""
+                        loading="lazy"
+                        width={72}
+                        height={108}
+                      />
+                    ) : null}
+                  </span>
+                  <span className="jadwal-body">
+                    <span className="jadwal-title">{row.m.title}</span>
+                    <span className="jadwal-ep">Episode —</span>
+                    {row.m.score ? (
+                      <span className="jadwal-meta">
+                        <span className="jadwal-meta-item">
+                          <IconStar size={12} />
+                          {row.m.score}
+                        </span>
+                      </span>
+                    ) : null}
+                  </span>
+                </Link>
+              </li>
+            ),
+          )}
         </ul>
       ) : (
         <div className="state">

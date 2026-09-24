@@ -205,6 +205,36 @@ export function episodeLabel(x: Anime): string {
   return String(raw);
 }
 
+/**
+ * List query ga bawa ab_cdngroup; label 99999 disembunyikan.
+ * Fetch detail buat item tanpa label valid → patch ero_episode = max nomor CDN.
+ */
+async function hydrateEpCounts(items: Anime[]): Promise<Anime[]> {
+  const need = items.filter((a) => !episodeLabel(a) && a.slug);
+  if (!need.length) return items;
+
+  const patched = await Promise.all(
+    items.map(async (a) => {
+      if (episodeLabel(a) || !a.slug) return a;
+      try {
+        const full = await getDetail(a.slug);
+        if (!full) return a;
+        const eps = sortEps(metaOf(full).ab_cdngroup ?? []);
+        let max = 0;
+        for (const e of eps) {
+          const n = epNum(String(e.ab_namaep));
+          if (Number.isFinite(n) && n > max) max = n;
+        }
+        if (max <= 0) return a;
+        return { ...a, meta_box: { ...metaOf(a), ero_episode: String(max) } };
+      } catch {
+        return a;
+      }
+    }),
+  );
+  return patched;
+}
+
 export function encodeMedia(url: string): string {
   try {
     const u = new URL(url);
@@ -361,7 +391,8 @@ export async function getList(
     { _fields: LIST_FIELDS, per_page: 12, page: 1, ...params },
     revalidate,
   );
-  return { items: r.body ?? [], total: r.total, totalPages: r.totalPages };
+  const items = await hydrateEpCounts(r.body ?? []);
+  return { items, total: r.total, totalPages: r.totalPages };
 }
 
 export async function searchAnime(
@@ -437,7 +468,7 @@ export async function searchAnime(
     score: scoreSearchHit(item, qNorm, qSlug),
   }));
   withScore.sort((a, b) => b.score - a.score || a.i - b.i);
-  const items = withScore.map((x) => x.item);
+  const items = await hydrateEpCounts(withScore.map((x) => x.item));
 
   // total = header WP (source of truth buat pager); items = setelah hydrate/dedupe
   return { items, total: raw.total, totalPages: raw.totalPages };

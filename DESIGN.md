@@ -36,7 +36,7 @@ Cap: 1 accent + neutrals.
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **List pages:** `AnimeGrid` poster 3→6 kolom
-- **Detail:** cover 200px + info; CTA oranye
+- **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis → Info (fact-list) → Episode (count badge); tanpa meta-table kaku
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EpisodeGrid } from "@/components/Episode";
+import { EpisodeSection } from "@/components/Episode";
 import { IconPlay, IconStar } from "@/components/Icons";
 import {
   getDetail,
@@ -197,8 +197,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
         </section>
 
         <section className="detail-block">
-          <h2 className="section-title">Episode</h2>
-          <EpisodeGrid slug={anime.slug} eps={eps} />
+          <EpisodeSection slug={anime.slug} eps={eps} />
         </section>
       </div>
     </article>

@@ -1,7 +1,7 @@
 # DESIGN.md — Givime (situs anime)
 
 ## Direction
-**App-like dark streaming.** Bottom nav = **tujuan inti** (Home / Search / Browse / History) — **bukan** tab per-kategori. Kategori (Ongoing/Completed/Movie/Genre) di dalam `/browse`. Home = section **rail** poster vertikal (scroll native, **tanpa** tombol chevron geser). Cover 2:3. Aksen **oranye**. Tanpa credit sumber, tanpa URL CDN di UI. Icon-only bottom nav (`aria-label`).
+**App-like dark streaming.** Bottom nav = **tujuan inti** (Home / Search / Browse / History) — **bukan** tab per-kategori. Kategori (Ongoing/Completed/Movie/Genre) di dalam `/browse`. Home = section **rail** poster vertikal (scroll native, **tanpa** tombol chevron geser). Cover 2:3. Aksen **lime `#BFFF3A`**. Tanpa credit sumber, tanpa URL CDN di UI. Icon-only bottom nav (`aria-label`).
 
 ## Identity
 - **Nama:** Givime
@@ -19,8 +19,8 @@
 | Ink | `#f2f2f3` |
 | Muted | `#9b9ba3` |
 | Border | `#2c2c33` |
-| Accent | `#ff6a1a` |
-| Accent-ink | `#1a0a02` |
+| Accent | `#BFFF3A` |
+| Accent-ink | `#121a00` |
 
 Cap: 1 accent + neutrals.
 
@@ -30,13 +30,13 @@ Cap: 1 accent + neutrals.
 
 ## Layout
 - **Top bar:** logo + search only
-- **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active oranye; Browse aktif untuk route kategori (`/ongoing` dst)
+- **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
 - **Home sections (stack):** Ongoing → Top → Movie → Completed  
   masing-masing: `Shelf` = section head + rail poster vertikal 128–148px
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **List pages:** `AnimeGrid` poster 3→6 kolom
-- **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis full → Info (fact-list) → Episode (auto-fill grid); tanpa meta-table, tanpa badge angka di section head
+- **Detail:** hero (poster + title/badges/genre-chip link/CTA) → Sinopsis full → Info (fact-list) → Episode (auto-fill grid + segmented sort Terlama/Terbaru); tanpa meta-table, tanpa badge angka di section head
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components
@@ -45,6 +45,7 @@ Cap: 1 accent + neutrals.
 - `AnimeGrid` = responsive poster grid
 - `Pager` = nomor halaman pill + chevron icon-only (tanpa teks Prev/Next)
 - `BottomNav` = client, 4 tujuan inti, `aria-label` + `aria-current`
+- `EpisodeSection` = client, section head + segmented sort (Terlama/Terbaru) + auto-fill grid
 - `HistoryTracker` / `lib/history.ts` = riwayat tonton lokal
 - Icons: `components/Icons.tsx` only
 
@@ -56,4 +57,5 @@ Cap: 1 accent + neutrals.
 - Tab bottom per-kategori (Ongoing/Movie/Genre sebagai tab sendiri)
 - Tombol chevron geser di rail (jelek — pakai scroll native/swipe)
 - Aksen teal lama (`#25efcd`)
+- Aksen oranye lama (`#ff6a1a`)
 - Vertical-only home without horizontal rail

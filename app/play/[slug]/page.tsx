@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EpisodeGrid, VideoPlayer } from "@/components/Episode";
+import { EpisodeSection, VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
-import { IconChevronLeft, IconClock } from "@/components/Icons";
+import { IconChevronLeft } from "@/components/Icons";
 import { getEpisodes, metaOf, titleOf } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -67,14 +67,7 @@ export default async function PlayPage({
       <VideoPlayer src={target.ab_linkcdn} animeTitle={title} episode={String(target.ab_namaep)} />
 
       <section className="section">
-        <div className="section-head">
-          <h2 className="section-title">Episode</h2>
-          <span className="section-more meta-item">
-            <IconClock size={13} />
-            {eps.length} total
-          </span>
-        </div>
-        <EpisodeGrid slug={slug} eps={eps} current={Number(target.ab_namaep)} />
+        <EpisodeSection slug={slug} eps={eps} current={Number(target.ab_namaep)} />
       </section>
     </>
   );

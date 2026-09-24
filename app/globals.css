@@ -8,9 +8,9 @@
   --foreground: #f2f2f3;
   --muted: #9b9ba3;
   --border: #2c2c33;
-  --accent: #ff6a1a;
-  --accent-ink: #1a0a02;
-  --accent-soft: rgba(255, 106, 26, 0.14);
+  --accent: #bfff3a;
+  --accent-ink: #121a00;
+  --accent-soft: rgba(191, 255, 58, 0.14);
   --success: #4ade80;
   --radius: 8px;
   --radius-sm: 6px;
@@ -665,6 +665,44 @@ a:focus-visible {
 }
 
 /* —— episodes —— */
+.ep-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.ep-sort-btn {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.ep-sort-btn:hover {
+  color: var(--foreground);
+}
+
+.ep-sort-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.ep-sort-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .ep-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));

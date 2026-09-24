@@ -17,6 +17,8 @@ export function AnimeCard({ anime }: { anime: Anime }) {
   const ep = episodeLabel(anime);
   const score = mb.ero_skor;
   const cover = mb.ero_image;
+  // List ga punya ab_cdngroup; label 99999 disembunyikan → fallback tahun/tipe
+  const metaFallback = mb.ero_tayang || mb.ero_type || "";
 
   return (
     <Link href={`/anime/${anime.slug}`} className="poster">
@@ -45,6 +47,8 @@ export function AnimeCard({ anime }: { anime: Anime }) {
           <span className="meta-item">
             Ep {ep}
           </span>
+        ) : metaFallback ? (
+          <span className="meta-item">{metaFallback}</span>
         ) : null}
         {score ? (
           <span className="meta-item meta-score">

@@ -1,3 +1,4 @@
+import { ContinueWatching } from "@/components/ContinueWatching";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Shelf } from "@/components/Shelf";
 import { getDetail, getList, IDS, metaOf, type Anime } from "@/lib/api";
@@ -15,6 +16,23 @@ async function safeList(
   }
 }
 
+async function hydrateFeatured(base: Anime[]): Promise<Anime[]> {
+  const unique = base.filter(
+    (a, i, arr) => a.slug && arr.findIndex((x) => x.slug === a.slug) === i,
+  );
+  const hydrated = await Promise.all(
+    unique.slice(0, 4).map(async (a) => {
+      try {
+        const full = a.slug ? await getDetail(a.slug) : null;
+        return full ?? a;
+      } catch {
+        return a;
+      }
+    }),
+  );
+  return hydrated.filter((a) => metaOf(a).ero_image || a.slug);
+}
+
 export default async function HomePage() {
   const [ongoing, top, movie, completed] = await Promise.all([
     safeList(
@@ -29,33 +47,28 @@ export default async function HomePage() {
     ),
   ]);
 
-  const featuredBase =
-    top.items.find((a) => metaOf(a).ero_image) ??
-    ongoing.items.find((a) => metaOf(a).ero_image) ??
-    top.items[0] ??
-    ongoing.items[0] ??
-    null;
+  const featuredSeeds = [
+    ...top.items.filter((a) => metaOf(a).ero_image),
+    ...ongoing.items.filter((a) => metaOf(a).ero_image),
+    ...top.items,
+    ...ongoing.items,
+  ].slice(0, 4);
 
-  let featured: Anime | null = featuredBase;
-  if (featuredBase?.slug) {
-    try {
-      const full = await getDetail(featuredBase.slug);
-      if (full) featured = full;
-    } catch {
-      // list row cukup buat hero
-    }
-  }
+  const featured = await hydrateFeatured(featuredSeeds);
+  const featuredSlugs = new Set(featured.map((a) => a.slug));
 
-  const topRail = top.items.filter((a) => a.slug !== featured?.slug);
+  const topRail = top.items.filter((a) => !featuredSlugs.has(a.slug));
+  const ongoingRail = ongoing.items.filter((a) => !featuredSlugs.has(a.slug));
 
   return (
     <>
       <h1 className="sr-only">Givime — nonton anime</h1>
-      {featured ? <FeaturedHero anime={featured} /> : null}
-      <Shelf title="Ongoing" href="/ongoing" items={ongoing.items} index={1} />
-      <Shelf title="Top" items={topRail.length ? topRail : top.items} index={2} />
-      <Shelf title="Movie" href="/movies" items={movie.items} index={3} />
-      <Shelf title="Completed" href="/completed" items={completed.items} index={4} />
+      {featured.length ? <FeaturedHero items={featured} /> : null}
+      <ContinueWatching />
+      <Shelf title="Ongoing" href="/ongoing" items={ongoingRail.length ? ongoingRail : ongoing.items} />
+      <Shelf title="Top" items={topRail.length ? topRail : top.items} />
+      <Shelf title="Movie" href="/movies" items={movie.items} />
+      <Shelf title="Completed" href="/completed" items={completed.items} />
     </>
   );
 }

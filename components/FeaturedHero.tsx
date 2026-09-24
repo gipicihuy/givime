@@ -1,5 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { IconPlay, IconStar } from "@/components/Icons";
+import { useCallback, useState } from "react";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlay,
+  IconStar,
+} from "@/components/Icons";
 import {
   episodeLabel,
   metaOf,
@@ -8,7 +16,21 @@ import {
   type Anime,
 } from "@/lib/api";
 
-export function FeaturedHero({ anime }: { anime: Anime }) {
+export function FeaturedHero({ items }: { items: Anime[] }) {
+  const [i, setI] = useState(0);
+  const n = items.length;
+
+  const go = useCallback(
+    (delta: number) => {
+      if (n <= 1) return;
+      setI((prev) => (prev + delta + n) % n);
+    },
+    [n],
+  );
+
+  if (!n) return null;
+
+  const anime = items[i] ?? items[0];
   const mb = metaOf(anime);
   const title = titleOf(anime);
   const cover = mb.ero_image;
@@ -16,24 +38,43 @@ export function FeaturedHero({ anime }: { anime: Anime }) {
   const score = mb.ero_skor;
   const status = mb.ero_status;
   const type = mb.ero_type;
-  const synopsis = synopsisOf(anime, 160);
+  const sub = mb.ero_sub;
+  const tayang = mb.ero_tayang;
+  const durasi = mb.ero_durasi ? String(mb.ero_durasi).replace(/<[^>]+>/g, "").trim() : "";
+  const synopsis = synopsisOf(anime, 180);
+  const genres = (mb.ero_genreapp ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3);
   const firstEps = mb.ab_cdngroup?.[0];
+  const kicker =
+    status?.toLowerCase() === "ongoing"
+      ? "Sedang tayang"
+      : status?.toLowerCase() === "completed"
+        ? "Selesai tayang"
+        : "Pilihan editor";
 
   return (
-    <section className="featured" aria-label={title}>
+    <section className="featured" aria-roledescription="carousel" aria-label="Pilihan utama">
       <div className="featured-backdrop" aria-hidden>
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt="" width={800} height={1200} />
+          <img key={cover} src={cover} alt="" width={800} height={1200} />
         ) : null}
         <div className="featured-scrim" />
       </div>
-      <div className="featured-body">
+
+      <div className="featured-body" key={anime.id}>
+        <p className="featured-label">{kicker}</p>
         <h2 className="featured-title">{title}</h2>
         <div className="featured-meta">
           {status ? <span>{status}</span> : null}
           {type ? <span>{type}</span> : null}
+          {sub ? <span>{sub}</span> : null}
           {ep ? <span>Ep {ep}</span> : null}
+          {tayang ? <span>{tayang}</span> : null}
+          {durasi ? <span>{durasi}</span> : null}
           {score ? (
             <span className="meta-item meta-score">
               <IconStar size={12} />
@@ -41,6 +82,15 @@ export function FeaturedHero({ anime }: { anime: Anime }) {
             </span>
           ) : null}
         </div>
+        {genres.length ? (
+          <div className="featured-genres" aria-label="Genre">
+            {genres.map((g) => (
+              <span key={g} className="genre-chip">
+                {g}
+              </span>
+            ))}
+          </div>
+        ) : null}
         {synopsis ? <p className="featured-syn">{synopsis}</p> : null}
         <div className="featured-actions">
           <Link
@@ -59,6 +109,40 @@ export function FeaturedHero({ anime }: { anime: Anime }) {
           </Link>
         </div>
       </div>
+
+      {n > 1 ? (
+        <>
+          <button
+            type="button"
+            className="featured-nav featured-nav-prev"
+            aria-label="Pilihan sebelumnya"
+            onClick={() => go(-1)}
+          >
+            <IconChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            className="featured-nav featured-nav-next"
+            aria-label="Pilihan berikutnya"
+            onClick={() => go(1)}
+          >
+            <IconChevronRight size={20} />
+          </button>
+          <div className="featured-dots" role="tablist" aria-label="Pilih pilihan">
+            {items.map((a, idx) => (
+              <button
+                key={`${a.id}-${a.slug}`}
+                type="button"
+                role="tab"
+                aria-selected={idx === i}
+                aria-label={titleOf(a)}
+                className={idx === i ? "featured-dot is-on" : "featured-dot"}
+                onClick={() => setI(idx)}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

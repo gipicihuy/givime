@@ -64,8 +64,8 @@ export default async function HomePage() {
     <>
       <h1 className="sr-only">Givime — nonton anime</h1>
       {featured.length ? <FeaturedHero items={featured} /> : null}
-      <ContinueWatching />
       <Shelf title="Ongoing" href="/ongoing" items={ongoingRail.length ? ongoingRail : ongoing.items} />
+      <ContinueWatching />
       <Shelf title="Top" items={topRail.length ? topRail : top.items} />
       <Shelf title="Movie" href="/movies" items={movie.items} />
       <Shelf title="Completed" href="/completed" items={completed.items} />

@@ -5,7 +5,7 @@
 
 ## Identity
 - **Nama:** Givime
-- **Feel:** buka → hero carousel → lanjutkan menonton → scroll rail ornamen → tap → play → history lokal
+- **Feel:** buka → hero carousel → rail → lanjutkan menonton (tengah) → scroll → tap → play → history lokal
 - **Referensi:** layout magazine (ornamen 3-garis, head asymmetric) + cinematic hero (nontonime-style blur/gradient), bukan grid Netflix default
 
 ## Dials
@@ -31,7 +31,7 @@ Cap: 1 accent + neutrals.
 ## Layout
 - **Top bar:** logo saja (search pindah ke `/search`)
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
-- **Home:** hero featured carousel (≤4 judul Top/terbaru: backdrop cover terang + bottom gradient + kicker `Sedang tayang` + title + meta + genre chips + synopsis + CTA; chevron kiri/kanan + dots) → **Lanjutkan menonton** (localStorage, auto-hide kosong) → rail **Ongoing → Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime kiri judul, “Lihat semua” kanan; rail **full tanpa edge-fade**, tanpa shadow lime hover)
+- **Home:** hero featured carousel (≤4 judul: backdrop + kicker + title + meta + genre + synopsis + CTA; chevron **tanpa bulatan** di sudut bawah + dots tengah) → rail **Ongoing** → **Lanjutkan menonton** (localStorage, auto-hide, **bukan** tepat di bawah hero) → **Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime; rail full tanpa edge-fade)
 - **Browse:** hub kartu kategori → list pages
 - **History:** localStorage (di-track saat play)
 - **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score`); hasil grid di bawah

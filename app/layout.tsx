@@ -51,8 +51,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Image
                 src="/mugiwara.png"
                 alt=""
-                width={30}
-                height={30}
+                width={38}
+                height={38}
                 priority
                 className="logo-mark"
               />

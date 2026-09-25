@@ -114,9 +114,9 @@ body.watching-landscape .site-header {
 }
 
 .logo-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
   display: block;
   flex-shrink: 0;
 }
@@ -1327,6 +1327,13 @@ a:focus-visible {
 
 .cplayer[data-show="0"] .cp-fade {
   opacity: 0;
+  pointer-events: none;
+}
+
+/* pointer-events di-inherit & anak bisa override — matiin total semua isi
+   fade pas tersembunyi biar klik yang kena "posisi icon" ga nembak aksinya */
+.cplayer[data-show="0"] .cp-fade,
+.cplayer[data-show="0"] .cp-fade * {
   pointer-events: none;
 }
 

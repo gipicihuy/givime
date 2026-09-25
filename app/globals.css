@@ -1635,8 +1635,8 @@ a:focus-visible {
 /* —— double-tap seek feedback —— */
 /* top/left di-set inline lewat JS (seekFxAnchor), pas nempel di bawah
    tombol skip 10 detik yang beneran — bukan posisi ngarang.
-   Animasinya slide arah-alur: -10s masuk dari kiri keluar ke kanan,
-   +10s masuk dari kanan keluar ke kiri — biar kerasa lagi rewind/skip. */
+   Animasinya: -10s slide masuk dari kanan geser dikit ke kiri, +10s slide
+   dari kiri geser dikit ke kanan — diam bentar lalu menghilang di tempat. */
 .cp-seekfx {
   position: absolute;
   transform: translateX(-50%);
@@ -1684,49 +1684,49 @@ a:focus-visible {
   }
 }
 
-/* rewind: masuk ngebut dari kiri → diam bentar → ngebut keluar ke kanan */
+/* -10s (tombol kiri): masuk dari kanan, geser dikit ke kiri, diam, menghilang */
 @keyframes cpSeekFxLeft {
   0% {
     opacity: 0;
-    transform: translateX(calc(-50% - 46px));
+    transform: translateX(calc(-50% + 18px));
     animation-timing-function: ease-out;
   }
-  24% {
+  30% {
     opacity: 1;
     transform: translateX(-50%);
     animation-timing-function: linear;
   }
-  70% {
+  72% {
     opacity: 1;
     transform: translateX(-50%);
     animation-timing-function: ease-in;
   }
   100% {
     opacity: 0;
-    transform: translateX(calc(-50% + 46px));
+    transform: translateX(-50%);
   }
 }
 
-/* skip: kebalikannya — dari kanan ke kiri */
+/* +10s (tombol kanan): masuk dari kiri, geser dikit ke kanan, diam, menghilang */
 @keyframes cpSeekFxRight {
   0% {
     opacity: 0;
-    transform: translateX(calc(-50% + 46px));
+    transform: translateX(calc(-50% - 18px));
     animation-timing-function: ease-out;
   }
-  24% {
+  30% {
     opacity: 1;
     transform: translateX(-50%);
     animation-timing-function: linear;
   }
-  70% {
+  72% {
     opacity: 1;
     transform: translateX(-50%);
     animation-timing-function: ease-in;
   }
   100% {
     opacity: 0;
-    transform: translateX(calc(-50% - 46px));
+    transform: translateX(-50%);
   }
 }
 

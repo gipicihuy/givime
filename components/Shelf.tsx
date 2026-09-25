@@ -45,7 +45,7 @@ export function Shelf({
 }
 
 /** Ornamen 3-garis diagonal ala stalker-ff-givy (SectionDividerLabel). */
-function SectionOrnament() {
+export function SectionOrnament() {
   return (
     <svg
       width="73"

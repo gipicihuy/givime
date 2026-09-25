@@ -1,13 +1,16 @@
 import { ContinueWatching } from "@/components/ContinueWatching";
 import { FeaturedHero } from "@/components/FeaturedHero";
+import { GenreSection } from "@/components/GenreSection";
 import { Shelf } from "@/components/Shelf";
 import {
   getDetail,
+  getGenres,
   getList,
   IDS,
   isOngoingAnime,
   metaOf,
   type Anime,
+  type Genre,
 } from "@/lib/api";
 
 export const revalidate = 300;
@@ -41,18 +44,22 @@ async function hydrateFeatured(base: Anime[]): Promise<Anime[]> {
 }
 
 export default async function HomePage() {
-  const [ongoing, top, movie, completed] = await Promise.all([
+  const [ongoing, top, completed, genresAll] = await Promise.all([
     safeList(
       { animestatus: IDS.status.ongoing, orderby: "modified", order: "desc", per_page: 12 },
       300,
     ),
     safeList({ animetop: IDS.top.ya, orderby: "modified", order: "desc", per_page: 12 }, 3600),
-    safeList({ animetype: IDS.type.movie, orderby: "date", order: "desc", per_page: 12 }, 600),
     safeList(
       { animestatus: IDS.status.completed, orderby: "date", order: "desc", per_page: 12 },
       3600,
     ),
+    getGenres(100).catch(() => [] as Genre[]),
   ]);
+
+  const genreItems = [...genresAll]
+    .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+    .slice(0, 24);
 
   const ongoingItems = ongoing.items.filter(isOngoingAnime);
   const topItems = [...top.items].sort(
@@ -84,7 +91,7 @@ export default async function HomePage() {
         items={ongoingRail.length ? ongoingRail : ongoingItems}
       />
       <Shelf title="Top" items={topRail.length ? topRail : topItems} />
-      <Shelf title="Movie" href="/movies" items={movie.items} />
+      <GenreSection genres={genreItems} />
       <Shelf title="Completed" href="/completed" items={completed.items} />
     </>
   );

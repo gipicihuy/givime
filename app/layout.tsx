@@ -45,6 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="id">
       <body className={`${sans.variable} ${display.variable} min-h-screen antialiased`}>
+        <link rel="preload" href="/font/PakTzy.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
         <header className="site-header">
           <div className="shell header-inner">
             <Link href="/" className="logo">

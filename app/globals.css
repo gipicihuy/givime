@@ -1639,12 +1639,8 @@ a:focus-visible {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 12px 8px;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 6px rgba(0, 0, 0, 0.5));
   pointer-events: none;
   animation: cpSeekFx 650ms ease forwards;
 }

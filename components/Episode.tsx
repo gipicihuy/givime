@@ -229,6 +229,21 @@ export function VideoPlayer({
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
 
+  // Sembunyiin site-header pas nonton dalam orientasi landscape. Pake
+  // matchMedia (bukan nebak max-height di CSS) biar akurat di semua device.
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: landscape)");
+    const apply = () => {
+      document.body.classList.toggle("watching-landscape", mq.matches);
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => {
+      mq.removeEventListener("change", apply);
+      document.body.classList.remove("watching-landscape");
+    };
+  }, []);
+
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;

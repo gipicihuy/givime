@@ -79,10 +79,10 @@ img {
   z-index: 40;
 }
 
-@media (orientation: landscape) and (max-height: 500px) {
-  .site-header {
-    display: none;
-  }
+/* Disembunyikan lewat body.watching-landscape (di-toggle JS VideoPlayer via
+   matchMedia), bukan nebak max-height, biar akurat di semua device. */
+body.watching-landscape .site-header {
+  display: none;
 }
 
 .header-inner {
@@ -1677,15 +1677,13 @@ a:focus-visible {
   }
 }
 
-@media (orientation: landscape) and (max-height: 500px) {
-  .cp-title-name {
-    font-size: 18px;
-    max-width: 42vw;
-  }
+body.watching-landscape .cp-title-name {
+  font-size: 18px;
+  max-width: 42vw;
+}
 
-  .cp-title-ep {
-    font-size: 14px;
-  }
+body.watching-landscape .cp-title-ep {
+  font-size: 14px;
 }
 
 /* —— states —— */

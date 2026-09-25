@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconCompass, IconHistory, IconHome, IconSearch } from "@/components/Icons";
+import { IconCompass, IconHistory, IconHome, IconSchedule, IconSearch } from "@/components/Icons";
 
 /**
  * Bottom = tujuan inti app (streaming pattern: Netflix/YouTube/Spotify).
  * Kategori konten (Ongoing/Movie/Genre) di dalam /browse — bukan tab sendiri.
  */
 const items = [
-  { href: "/", label: "Home", icon: IconHome },
-  { href: "/search", label: "Search", icon: IconSearch },
-  { href: "/browse", label: "Browse", icon: IconCompass },
+  { href: "/", label: "Beranda", icon: IconHome },
+  { href: "/search", label: "Cari", icon: IconSearch },
+  { href: "/browse", label: "Jelajah", icon: IconCompass },
+  { href: "/jadwal", label: "Jadwal", icon: IconSchedule },
   { href: "/history", label: "History", icon: IconHistory },
 ];
 
@@ -26,6 +27,7 @@ function isActive(pathname: string, href: string) {
       pathname === "/movies" ||
       pathname.startsWith("/genre")
     );
+  if (href === "/jadwal") return pathname.startsWith("/jadwal");
   if (href === "/history") return pathname.startsWith("/history");
   return false;
 }
@@ -47,6 +49,7 @@ export function BottomNav() {
             aria-current={active ? "page" : undefined}
           >
             <Icon size={22} />
+            <span className="bottom-label">{n.label}</span>
           </Link>
         );
       })}

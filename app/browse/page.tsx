@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconFilm, IconFlame, IconGrid, IconSchedule, IconTag } from "@/components/Icons";
+import { IconFilm, IconFlame, IconGrid, IconTag } from "@/components/Icons";
 
 export const metadata = { title: "Browse" };
 
@@ -21,12 +21,6 @@ const cats = [
     title: "Movies",
     desc: "Film anime",
     icon: IconFilm,
-  },
-  {
-    href: "/jadwal",
-    title: "Jadwal",
-    desc: "Jadwal rilis mingguan",
-    icon: IconSchedule,
   },
   {
     href: "/genres",

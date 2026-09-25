@@ -5,6 +5,7 @@ import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
 import { fmtClock, updateProgress } from "@/lib/history";
 import {
+  IconCast,
   IconForward,
   IconFullscreen,
   IconFullscreenExit,
@@ -280,6 +281,21 @@ export function VideoPlayer({
     else void rootRef.current?.requestFullscreen().catch(() => undefined);
   };
 
+  const requestCast = useCallback(() => {
+    const v = videoRef.current as
+      | (HTMLVideoElement & {
+          remote?: { prompt: () => Promise<void> };
+          webkitShowPlaybackTargetPicker?: () => void;
+        })
+      | null;
+    if (!v) return;
+    if (v.remote?.prompt) {
+      void v.remote.prompt().catch(() => undefined);
+      return;
+    }
+    v.webkitShowPlaybackTargetPicker?.();
+  }, []);
+
   const overlayOn = locked || show || !playing;
 
   return (
@@ -295,6 +311,7 @@ export function VideoPlayer({
       <video
         ref={videoRef}
         playsInline
+        disableRemotePlayback
         preload="metadata"
         key={playable}
         src={playable}
@@ -308,18 +325,28 @@ export function VideoPlayer({
             <span className="cp-title-name">{animeTitle}</span>
             <span className="cp-title-ep">Ep {episode}</span>
           </div>
-          <button
-            type="button"
-            className="cp-btn cp-lock"
-            aria-label={locked ? "Buka kontrol" : "Kunci kontrol"}
-            aria-pressed={locked}
-            onClick={() => {
-              setLocked(!locked);
-              setShow(true);
-            }}
-          >
-            {locked ? <IconLock size={18} /> : <IconUnlock size={18} />}
-          </button>
+          <div className="cp-top-actions">
+            <button
+              type="button"
+              className="cp-btn cp-cast"
+              aria-label="Transmisi layar"
+              onClick={requestCast}
+            >
+              <IconCast size={18} />
+            </button>
+            <button
+              type="button"
+              className="cp-btn cp-lock"
+              aria-label={locked ? "Buka kontrol" : "Kunci kontrol"}
+              aria-pressed={locked}
+              onClick={() => {
+                setLocked(!locked);
+                setShow(true);
+              }}
+            >
+              {locked ? <IconLock size={18} /> : <IconUnlock size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="cp-center cp-fade">

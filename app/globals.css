@@ -1411,7 +1411,15 @@ a:focus-visible {
   cursor: default;
 }
 
-.cp-lock {
+.cp-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cp-lock,
+.cp-cast {
   background: rgba(20, 20, 22, 0.5);
 }
 

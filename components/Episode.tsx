@@ -406,6 +406,7 @@ export function VideoPlayer({
           <div
             key={seekFx.key}
             className="cp-seekfx"
+            data-side={seekFx.side}
             style={{ top: seekFx.top, left: seekFx.left }}
             aria-hidden="true"
           >

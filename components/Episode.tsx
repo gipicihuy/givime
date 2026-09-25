@@ -120,6 +120,11 @@ export function VideoPlayer({
   const [show, setShow] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [isFs, setIsFs] = useState(false);
+  const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number } | null>(null);
+
+  const lastTap = useRef<{ time: number; side: "left" | "right" } | null>(null);
+  const singleTapTimer = useRef<number | undefined>(undefined);
+  const seekFxTimer = useRef<number | undefined>(undefined);
 
   const navBase = epSlug ?? slug;
   const pct = duration > 0 ? (current / duration) * 100 : 0;
@@ -275,6 +280,48 @@ export function VideoPlayer({
     bump();
   }, [bump]);
 
+  const DOUBLE_TAP_MS = 300;
+
+  // Klik/tap kanan video 2x = maju 10s, kiri 2x = mundur 10s, sambil nampilin
+  // indikator "+10s"/"-10s". Tap ke-3, ke-4, dst yang masih beruntun di sisi
+  // yang sama bakal numpuk (+20s, +30s, ...) kaya player modern lainnya.
+  const handleVideoTap = useCallback(
+    (e: React.MouseEvent<HTMLVideoElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const side: "left" | "right" = e.clientX - rect.left < rect.width / 2 ? "left" : "right";
+      const now = Date.now();
+      const last = lastTap.current;
+
+      if (last && last.side === side && now - last.time < DOUBLE_TAP_MS) {
+        window.clearTimeout(singleTapTimer.current);
+        lastTap.current = { time: now, side };
+        skip(side === "right" ? 10 : -10);
+        setSeekFx((prev) => ({
+          side,
+          amount: prev && prev.side === side ? prev.amount + 10 : 10,
+          key: (prev?.key ?? 0) + 1,
+        }));
+        window.clearTimeout(seekFxTimer.current);
+        seekFxTimer.current = window.setTimeout(() => setSeekFx(null), 650);
+        return;
+      }
+
+      lastTap.current = { time: now, side };
+      window.clearTimeout(singleTapTimer.current);
+      singleTapTimer.current = window.setTimeout(() => {
+        toggleOverlay();
+      }, DOUBLE_TAP_MS);
+    },
+    [skip, toggleOverlay],
+  );
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(singleTapTimer.current);
+      window.clearTimeout(seekFxTimer.current);
+    };
+  }, []);
+
   const onSeek = (e: ChangeEvent<HTMLInputElement>) => {
     const v = videoRef.current;
     if (!v || duration <= 0) return;
@@ -330,11 +377,21 @@ export function VideoPlayer({
         preload="metadata"
         key={playable}
         src={playable}
-        onClick={toggleOverlay}
+        onClick={handleVideoTap}
       />
 
       <div className="cp-ov">
         <div className="cp-scrim cp-fade" aria-hidden="true" />
+
+        {seekFx && (
+          <div key={seekFx.key} className={`cp-seekfx cp-seekfx-${seekFx.side}`} aria-hidden="true">
+            {seekFx.side === "right" ? <IconForward size={26} /> : <IconReplay size={26} />}
+            <span className="cp-seekfx-label">
+              {seekFx.side === "right" ? "+" : "-"}
+              {seekFx.amount}s
+            </span>
+          </div>
+        )}
         <div className="cp-top cp-fade">
           <div className="cp-title">
             <span className="cp-title-name">{animeTitle}</span>

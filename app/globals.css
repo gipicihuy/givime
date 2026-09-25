@@ -1629,6 +1629,67 @@ a:focus-visible {
   opacity: 1;
 }
 
+/* —— double-tap seek feedback —— */
+.cp-seekfx {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 20px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  pointer-events: none;
+  animation: cpSeekFx 650ms ease forwards;
+}
+
+.cp-seekfx-left {
+  left: 6%;
+  transform: translateY(-50%);
+}
+
+.cp-seekfx-right {
+  right: 6%;
+  transform: translateY(-50%);
+}
+
+.cp-seekfx-label {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes cpSeekFx {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.94);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-seekfx {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* mobile: geser cluster tengah biar muat */
 @media (max-width: 559px) {
   .cp-center-row {

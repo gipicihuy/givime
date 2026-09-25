@@ -1005,10 +1005,60 @@ a:focus-visible {
 .detail {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 30px;
 }
 
+/* Hero: backdrop cover blur/gelap full-bleed, poster jelas di depan */
 .detail-hero {
+  position: relative;
+  margin: -16px -14px 0;
+  padding: 36px 14px 28px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(180deg, var(--surface-2), var(--background));
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .detail-hero {
+    margin-inline: -24px;
+    padding: 48px 24px 36px;
+  }
+}
+
+.detail-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.detail-hero-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  filter: blur(32px) saturate(1.2) brightness(0.55);
+  transform: scale(1.25);
+}
+
+.detail-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 10, 12, 0.4) 0%,
+      rgba(10, 10, 12, 0.6) 52%,
+      rgba(10, 10, 12, 0.93) 100%
+    ),
+    linear-gradient(90deg, rgba(10, 10, 12, 0.5), rgba(10, 10, 12, 0) 70%);
+}
+
+.detail-hero-inner {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr);
   gap: 16px;
@@ -1016,14 +1066,14 @@ a:focus-visible {
 }
 
 @media (min-width: 560px) {
-  .detail-hero {
+  .detail-hero-inner {
     grid-template-columns: 160px minmax(0, 1fr);
-    gap: 24px;
+    gap: 22px;
   }
 }
 
 @media (min-width: 768px) {
-  .detail-hero {
+  .detail-hero-inner {
     grid-template-columns: 220px minmax(0, 1fr);
     gap: 32px;
     align-items: center;
@@ -1037,10 +1087,11 @@ a:focus-visible {
 .detail-cover {
   width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   object-fit: cover;
   background: var(--surface-3);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5);
 }
 
 .detail-cover-ph {
@@ -1049,13 +1100,14 @@ a:focus-visible {
   justify-content: center;
   color: var(--muted);
   font-size: 12px;
+  border-color: var(--border);
 }
 
 .detail-info {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .detail-badges {
@@ -1066,21 +1118,28 @@ a:focus-visible {
 
 .detail-title {
   font-family: var(--font-display), var(--font-ui), system-ui, sans-serif;
-  font-size: clamp(24px, 5vw, 36px);
+  font-size: clamp(24px, 5vw, 38px);
   font-weight: 700;
   letter-spacing: -0.035em;
-  line-height: 1.12;
+  line-height: 1.1;
   text-wrap: balance;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
 }
 
 .detail-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 14px;
+  gap: 8px;
   font-size: 13px;
-  color: var(--muted);
+  color: #cfcfd6;
   font-variant-numeric: tabular-nums;
   align-items: center;
+}
+
+.detail-meta > span + span::before {
+  content: "·";
+  margin-right: 8px;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .detail-genres {
@@ -1105,6 +1164,14 @@ a:focus-visible {
   color: var(--accent);
 }
 
+/* genre chip di atas hero backdrop: kaca gelap biar nyatu */
+.detail-hero .genre-chip {
+  background: rgba(15, 15, 16, 0.55);
+  border-color: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
 .detail-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1115,14 +1182,18 @@ a:focus-visible {
 .detail-body {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 30px;
 }
 
 .detail-block {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   margin: 0;
+}
+
+.detail-block .section-head {
+  margin-bottom: 14px;
 }
 
 .detail-synopsis {
@@ -1136,39 +1207,30 @@ a:focus-visible {
 .detail-japanese {
   font-size: 13px;
   color: var(--muted);
+  margin: 8px 0 0;
+}
+
+/* Info: definition grid bersih — label mikro + nilai, tanpa kartu */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 18px 24px;
   margin: 0;
 }
 
-.fact-list {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.fact-row {
-  display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
-  gap: 12px;
-  padding: 10px 14px;
-  font-size: 14px;
-  border-top: 1px solid var(--border);
-}
-
-.fact-row:first-child {
-  border-top: none;
-}
-
-.fact-row dt {
+.info-item dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--muted);
-  font-weight: 500;
+  margin-bottom: 5px;
 }
 
-.fact-row dd {
+.info-item dd {
   margin: 0;
+  font-size: 14.5px;
+  font-weight: 500;
   color: var(--foreground);
   min-width: 0;
   overflow-wrap: anywhere;
@@ -1189,6 +1251,7 @@ a:focus-visible {
   cursor: pointer;
   transition: filter 120ms ease;
   min-height: 44px;
+  box-shadow: 0 12px 26px rgba(191, 255, 58, 0.16);
 }
 
 .btn-play:hover {
@@ -1241,20 +1304,21 @@ a:focus-visible {
 .ep-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .ep-link {
   font-size: 13px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  min-height: 40px;
+  min-height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 6px 4px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   background: var(--surface-2);
   color: var(--foreground);
   transition: border-color 120ms ease, color 120ms ease;

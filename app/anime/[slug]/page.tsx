@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeSection } from "@/components/Episode";
 import { IconPlay, IconStar } from "@/components/Icons";
+import { SectionOrnament } from "@/components/Shelf";
 import {
   getDetail,
   getGenres,
@@ -76,78 +77,95 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
   return (
     <article className="detail">
       <header className="detail-hero">
-        <div className="detail-poster">
+        <div className="detail-hero-backdrop" aria-hidden="true">
           {mb.ero_image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              className="detail-cover"
-              src={mb.ero_image}
-              alt=""
-              width={440}
-              height={660}
-            />
-          ) : (
-            <div className="detail-cover detail-cover-ph">Tanpa cover</div>
-          )}
+            <img src={mb.ero_image} alt="" width={880} height={1320} />
+          ) : null}
         </div>
+        <div className="detail-hero-scrim" aria-hidden="true" />
 
-        <div className="detail-info">
-          <div className="detail-badges">
-            {mb.ero_status ? (
-              <span
-                className={
-                  mb.ero_status === "Ongoing" ? "chip chip-ongoing" : "chip chip-completed"
-                }
-              >
-                {mb.ero_status}
-              </span>
-            ) : null}
-            {mb.ero_type ? <span className="chip">{mb.ero_type}</span> : null}
-            {mb.ero_sub ? <span className="chip">{mb.ero_sub}</span> : null}
+        <div className="detail-hero-inner">
+          <div className="detail-poster">
+            {mb.ero_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                className="detail-cover"
+                src={mb.ero_image}
+                alt=""
+                width={440}
+                height={660}
+              />
+            ) : (
+              <div className="detail-cover detail-cover-ph">Tanpa cover</div>
+            )}
           </div>
 
-          <h1 className="detail-title">{title}</h1>
+          <div className="detail-info">
+            <div className="detail-badges">
+              {mb.ero_status ? (
+                <span
+                  className={
+                    mb.ero_status === "Ongoing" ? "chip chip-ongoing" : "chip chip-completed"
+                  }
+                >
+                  {mb.ero_status}
+                </span>
+              ) : null}
+              {mb.ero_type ? <span className="chip">{mb.ero_type}</span> : null}
+              {mb.ero_sub ? <span className="chip">{mb.ero_sub}</span> : null}
+            </div>
 
-          <div className="detail-meta">
-            {mb.ero_tayang ? <span>{mb.ero_tayang}</span> : null}
-            <span>Ep {epCount}</span>
-            {mb.ero_durasi ? <span>{stripHtml(mb.ero_durasi)}</span> : null}
-            {mb.ero_skor ? (
-              <span className="meta-item meta-score">
-                <IconStar size={12} />
-                {mb.ero_skor}
-              </span>
+            <h1 className="detail-title">{title}</h1>
+
+            <div className="detail-meta">
+              {mb.ero_tayang ? <span>{mb.ero_tayang}</span> : null}
+              <span>Ep {epCount}</span>
+              {mb.ero_durasi ? <span>{stripHtml(mb.ero_durasi)}</span> : null}
+              {mb.ero_skor ? (
+                <span className="meta-item meta-score">
+                  <IconStar size={12} />
+                  {mb.ero_skor}
+                </span>
+              ) : null}
+            </div>
+
+            {genres.length ? (
+              <div className="detail-genres">
+                {genres.map((g) => (
+                  <Link key={g.slug} href={`/genre/${g.slug}`} className="genre-chip">
+                    {g.name}
+                  </Link>
+                ))}
+              </div>
             ) : null}
-          </div>
 
-          {genres.length ? (
-            <div className="detail-genres">
-              {genres.map((g) => (
-                <Link key={g.slug} href={`/genre/${g.slug}`} className="genre-chip">
-                  {g.name}
+            {firstEp ? (
+              <div className="detail-actions">
+                <Link
+                  href={`/play/${anime.slug}?ep=${encodeURIComponent(firstEp.ab_namaep)}`}
+                  className="btn-play"
+                >
+                  <IconPlay size={14} />
+                  Putar Ep {firstEp.ab_namaep}
                 </Link>
-              ))}
-            </div>
-          ) : null}
-
-          {firstEp ? (
-            <div className="detail-actions">
-              <Link
-                href={`/play/${anime.slug}?ep=${encodeURIComponent(firstEp.ab_namaep)}`}
-                className="btn-play"
-              >
-                <IconPlay size={14} />
-                Putar Ep {firstEp.ab_namaep}
-              </Link>
-            </div>
-          ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
 
       <div className="detail-body">
         {synopsis ? (
           <section className="detail-block">
-            <h2 className="section-title">Sinopsis</h2>
+            <div className="section-head">
+              <h2 className="section-title">
+                <span className="section-ornament" aria-hidden>
+                  <SectionOrnament />
+                </span>
+                Sinopsis
+              </h2>
+            </div>
             <p className="detail-synopsis">{synopsis}</p>
             {mb.ero_japanese ? (
               <p className="detail-japanese">{stripHtml(mb.ero_japanese)}</p>
@@ -156,39 +174,46 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
         ) : null}
 
         <section className="detail-block">
-          <h2 className="section-title">Info</h2>
-          <dl className="fact-list">
+          <div className="section-head">
+            <h2 className="section-title">
+              <span className="section-ornament" aria-hidden>
+                <SectionOrnament />
+              </span>
+              Info
+            </h2>
+          </div>
+          <dl className="info-grid">
             {mb.ero_status ? (
-              <div className="fact-row">
+              <div className="info-item">
                 <dt>Status</dt>
                 <dd>{mb.ero_status}</dd>
               </div>
             ) : null}
             {mb.ero_type ? (
-              <div className="fact-row">
+              <div className="info-item">
                 <dt>Tipe</dt>
                 <dd>{mb.ero_type}</dd>
               </div>
             ) : null}
             {mb.ero_tayang ? (
-              <div className="fact-row">
+              <div className="info-item">
                 <dt>Tayang</dt>
                 <dd>{mb.ero_tayang}</dd>
               </div>
             ) : null}
             {mb.ero_durasi ? (
-              <div className="fact-row">
+              <div className="info-item">
                 <dt>Durasi</dt>
                 <dd>{stripHtml(mb.ero_durasi)}</dd>
               </div>
             ) : null}
             {mb.ero_japanese ? (
-              <div className="fact-row">
+              <div className="info-item">
                 <dt>Judul JP</dt>
                 <dd>{stripHtml(mb.ero_japanese)}</dd>
               </div>
             ) : null}
-            <div className="fact-row">
+            <div className="info-item">
               <dt>Episode</dt>
               <dd>{eps.length} tersedia</dd>
             </div>

@@ -31,13 +31,13 @@ Cap: 1 accent + neutrals.
 ## Layout
 - **Top bar:** logo saja (search pindah ke `/search`)
 - **Bottom nav fixed 4 item:** icon-only Home · Search · Browse · History; active lime; Browse aktif untuk route kategori (`/ongoing` dst)
-- **Home:** hero featured carousel **tinggi tetap** (340/400px; chevron **tanpa bulatan** sisi tengah + dots; autoplay 5s track slide) → **Lanjutkan menonton** (setelah hero ala nontonime; layout **landscape 16:9 + progress bar + jam `00:00 / 24:00`**, beda dari shelf poster 2:3; localStorage auto-hide) → **Ongoing → Top → Movie → Completed** (Shelf head: ornamen 3-garis diagonal lime)
+- **Home:** hero featured carousel **tinggi tetap** (340/400px; chevron **tanpa bulatan** sisi tengah + dots; autoplay 5s track slide) → **Lanjutkan menonton** (setelah hero ala nontonime; layout **landscape 16:9 + progress bar + jam `00:00 / 24:00`**, beda dari shelf poster 2:3; localStorage auto-hide) → **Ongoing → Top → Genre (pill top-24 sort count + "Lihat semua" → `/genres`; Movie tetap di Jelajah) → Completed** (Shelf head: ornamen 3-garis diagonal lime)
 - **Browse:** hub kartu kategori (termasuk **Jadwal**) → list pages
 - **Jadwal:** `/jadwal` — date strip 7 hari (Sen–Min, aktif lime, hari ini dot) + list horizontal (border-left tone); **hanya `jadwalrilis` lokal**, urut skor desc; tanpa episode/skor disembunyikan (tanpa strip `—`)
 - **History:** localStorage; **timeline per tanggal** (badge pill date + garis vertikal) → card horizontal compact (thumb 2:3 kiri, **judul bold**, Episode secondary, **jam kanan-atas bold**, **progress bar** + `00:00 / 24:00` spasi di sekitar `/`); klik → `/play/…?ep=…&t=` (seek ke detik)
 - **Search page:** input full-width di atas + suggest dropdown (debounce ~280ms, poster thumb 36×54, flat rows, meta `{total} Eps · ★ score`); hasil grid di bawah
 - **List pages:** `AnimeGrid` poster 3→6 kolom; `page-title` display font
-- **Detail:** hero (poster + title display/badges/genre-chip/CTA) → Sinopsis → Info fact-list → Episode; tanpa meta-table, tanpa badge angka, tanpa 2-pill segmented
+- **Detail:** hero **full-bleed** (backdrop cover **blur+scrim gelap**; poster jelas di depan + shadow; chips / meta pemisah `·` / genre-chip glass / CTA lime glow) → Sinopsis → Info **definition-grid tanpa kartu** (label uppercase mikro + nilai) → Episode grid (head ornamen + hairline, grid rapat); semua data meta tetap (status/tipe/tahun/ep/durasi/skor/genre); tanpa meta-table, tanpa badge angka, tanpa 2-pill segmented
 - **Player:** 16:9; **jangan** tampilkan URL MP4 / source / credit origin
 
 ## Components

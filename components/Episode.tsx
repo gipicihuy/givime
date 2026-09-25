@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "reac
 import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
 import { fmtClock, updateProgress } from "@/lib/history";
+import { SectionOrnament } from "@/components/Shelf";
 import {
   IconCast,
   IconForward,
@@ -37,7 +38,12 @@ export function EpisodeSection({
     return (
       <>
         <div className="section-head">
-          <h2 className="section-title">Episode</h2>
+          <h2 className="section-title">
+            <span className="section-ornament" aria-hidden>
+              <SectionOrnament />
+            </span>
+            Episode
+          </h2>
         </div>
         <div className="state">
           <strong>Belum ada episode</strong>
@@ -52,7 +58,12 @@ export function EpisodeSection({
   return (
     <>
       <div className="section-head">
-        <h2 className="section-title">Episode</h2>
+        <h2 className="section-title">
+          <span className="section-ornament" aria-hidden>
+            <SectionOrnament />
+          </span>
+          Episode
+        </h2>
         <button
           type="button"
           className="ep-sort-btn"

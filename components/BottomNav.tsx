@@ -10,8 +10,8 @@ import { IconCompass, IconHistory, IconHome, IconSchedule, IconSearch } from "@/
  */
 const items = [
   { href: "/", label: "Beranda", icon: IconHome },
-  { href: "/search", label: "Cari", icon: IconSearch },
   { href: "/browse", label: "Jelajah", icon: IconCompass },
+  { href: "/search", label: "Cari", icon: IconSearch },
   { href: "/jadwal", label: "Jadwal", icon: IconSchedule },
   { href: "/history", label: "History", icon: IconHistory },
 ];

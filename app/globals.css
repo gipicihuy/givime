@@ -1304,6 +1304,12 @@ a:focus-visible {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+}
+
+.cp-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.55) 0%,
@@ -1343,7 +1349,7 @@ a:focus-visible {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .cp-title {
@@ -1406,6 +1412,7 @@ a:focus-visible {
 
 .cp-lock {
   background: rgba(20, 20, 22, 0.5);
+  pointer-events: auto;
 }
 
 .cp-center {
@@ -1488,7 +1495,7 @@ a:focus-visible {
   right: 0;
   bottom: 0;
   padding: 8px 12px 10px;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .cp-bottom-row {
@@ -1518,6 +1525,7 @@ a:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  pointer-events: auto;
 }
 
 .cp-speed {
@@ -1535,6 +1543,7 @@ a:focus-visible {
   height: 18px;
   display: flex;
   align-items: center;
+  pointer-events: auto;
 }
 
 .cp-progress-track {

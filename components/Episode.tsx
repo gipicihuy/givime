@@ -302,6 +302,7 @@ export function VideoPlayer({
       />
 
       <div className="cp-ov">
+        <div className="cp-scrim cp-fade" aria-hidden="true" />
         <div className="cp-top cp-fade">
           <div className="cp-title">
             <span className="cp-title-name">{animeTitle}</span>

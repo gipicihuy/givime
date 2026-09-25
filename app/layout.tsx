@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import { BottomNav } from "@/components/BottomNav";
-import { IconFilm } from "@/components/Icons";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -48,9 +48,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header className="site-header">
           <div className="shell header-inner">
             <Link href="/" className="logo">
-              <span className="logo-mark" aria-hidden>
-                <IconFilm size={16} />
-              </span>
+              <Image
+                src="/mugiwara.png"
+                alt=""
+                width={30}
+                height={30}
+                priority
+                className="logo-mark"
+              />
               <span className="logo-word">Givime</span>
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconChevronRight, IconTag } from "@/components/Icons";
+import { IconChevronRight } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
 import type { Genre } from "@/lib/api";
 
@@ -23,7 +23,6 @@ export function GenreSection({ genres }: { genres: Genre[] }) {
       <div className="genre-list">
         {genres.map((g) => (
           <Link key={g.id} href={`/genre/${g.slug}`} className="genre-tag">
-            <IconTag size={13} />
             {g.name}
           </Link>
         ))}

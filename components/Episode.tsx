@@ -120,11 +120,13 @@ export function VideoPlayer({
   const [show, setShow] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [isFs, setIsFs] = useState(false);
-  const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number } | null>(null);
+  const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number; top: number; left: number } | null>(null);
 
   const lastTap = useRef<{ time: number; side: "left" | "right" } | null>(null);
   const singleTapTimer = useRef<number | undefined>(undefined);
   const seekFxTimer = useRef<number | undefined>(undefined);
+  const skipBackRef = useRef<HTMLButtonElement>(null);
+  const skipFwdRef = useRef<HTMLButtonElement>(null);
 
   const navBase = epSlug ?? slug;
   const pct = duration > 0 ? (current / duration) * 100 : 0;
@@ -282,9 +284,24 @@ export function VideoPlayer({
 
   const DOUBLE_TAP_MS = 300;
 
+  // Posisi indikator ngikutin tombol skip 10 detik yang beneran (bukan angka
+  // ngarang), biar tetep pas nempel di bawah tombolnya di ukuran layar apapun.
+  const seekFxAnchor = useCallback((side: "left" | "right") => {
+    const btn = (side === "right" ? skipFwdRef : skipBackRef).current;
+    const root = rootRef.current;
+    if (!btn || !root) return { top: 0, left: 0 };
+    const b = btn.getBoundingClientRect();
+    const r = root.getBoundingClientRect();
+    return {
+      top: b.bottom - r.top + 8,
+      left: b.left + b.width / 2 - r.left,
+    };
+  }, []);
+
   // Klik/tap kanan video 2x = maju 10s, kiri 2x = mundur 10s, sambil nampilin
-  // indikator "+10s"/"-10s". Tap ke-3, ke-4, dst yang masih beruntun di sisi
-  // yang sama bakal numpuk (+20s, +30s, ...) kaya player modern lainnya.
+  // indikator "+10s"/"-10s" nempel di bawah tombol skip. Tap ke-3, ke-4, dst
+  // yang masih beruntun di sisi yang sama bakal numpuk (+20s, +30s, ...) kaya
+  // player modern lainnya.
   const handleVideoTap = useCallback(
     (e: React.MouseEvent<HTMLVideoElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -296,10 +313,12 @@ export function VideoPlayer({
         window.clearTimeout(singleTapTimer.current);
         lastTap.current = { time: now, side };
         skip(side === "right" ? 10 : -10);
+        const anchor = seekFxAnchor(side);
         setSeekFx((prev) => ({
           side,
           amount: prev && prev.side === side ? prev.amount + 10 : 10,
           key: (prev?.key ?? 0) + 1,
+          ...anchor,
         }));
         window.clearTimeout(seekFxTimer.current);
         seekFxTimer.current = window.setTimeout(() => setSeekFx(null), 650);
@@ -312,7 +331,7 @@ export function VideoPlayer({
         toggleOverlay();
       }, DOUBLE_TAP_MS);
     },
-    [skip, toggleOverlay],
+    [skip, toggleOverlay, seekFxAnchor],
   );
 
   useEffect(() => {
@@ -384,8 +403,13 @@ export function VideoPlayer({
         <div className="cp-scrim cp-fade" aria-hidden="true" />
 
         {seekFx && (
-          <div key={seekFx.key} className={`cp-seekfx cp-seekfx-${seekFx.side}`} aria-hidden="true">
-            {seekFx.side === "right" ? <IconForward size={26} /> : <IconReplay size={26} />}
+          <div
+            key={seekFx.key}
+            className="cp-seekfx"
+            style={{ top: seekFx.top, left: seekFx.left }}
+            aria-hidden="true"
+          >
+            {seekFx.side === "right" ? <IconForward size={22} /> : <IconReplay size={22} />}
             <span className="cp-seekfx-label">
               {seekFx.side === "right" ? "+" : "-"}
               {seekFx.amount}s
@@ -446,6 +470,7 @@ export function VideoPlayer({
                 className="cp-btn cp-skip"
                 aria-label="Mundur 10 detik"
                 disabled={locked}
+                ref={skipBackRef}
                 onClick={() => skip(-10)}
               >
                 <IconReplay size={22} />
@@ -476,6 +501,7 @@ export function VideoPlayer({
                 className="cp-btn cp-skip"
                 aria-label="Maju 10 detik"
                 disabled={locked}
+                ref={skipFwdRef}
                 onClick={() => skip(10)}
               >
                 <IconForward size={22} />

@@ -1436,10 +1436,10 @@ a:focus-visible {
 }
 
 .cp-nav-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.78);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.55);
   max-width: 84px;
   white-space: nowrap;
   overflow: hidden;
@@ -1634,7 +1634,7 @@ a:focus-visible {
 
   .cp-nav-label {
     max-width: 64px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .cp-title-name {
@@ -1645,7 +1645,8 @@ a:focus-visible {
 
 @media (max-width: 379px) {
   .cp-nav-label {
-    display: none;
+    max-width: 44px;
+    font-size: 9px;
   }
 
   .cp-center-row {

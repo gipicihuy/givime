@@ -235,6 +235,22 @@ export function VideoPlayer({
     else v.pause();
   }, []);
 
+  // Tap di area kosong video = toggle overlay kontrol aja, bukan play/pause
+  const toggleOverlay = useCallback(() => {
+    if (locked) return;
+    setShow((prev) => {
+      const next = !prev;
+      window.clearTimeout(hideTimer.current);
+      if (next) {
+        hideTimer.current = window.setTimeout(() => {
+          const v = videoRef.current;
+          if (v && !v.paused && !locked) setShow(false);
+        }, 3200);
+      }
+      return next;
+    });
+  }, [locked]);
+
   const skip = useCallback((delta: number) => {
     const v = videoRef.current;
     if (!v) return;
@@ -274,7 +290,6 @@ export function VideoPlayer({
       data-locked={locked ? "1" : "0"}
       data-fs={isFs ? "1" : "0"}
       onPointerMove={bump}
-      onPointerDown={bump}
     >
       {/* URL CDN hanya di src — jangan ditampilkan ke UI */}
       <video
@@ -283,7 +298,7 @@ export function VideoPlayer({
         preload="metadata"
         key={playable}
         src={playable}
-        onClick={togglePlay}
+        onClick={toggleOverlay}
       />
 
       <div className="cp-ov">

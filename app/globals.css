@@ -79,6 +79,12 @@ img {
   z-index: 40;
 }
 
+@media (orientation: landscape) and (max-height: 500px) {
+  .site-header {
+    display: none;
+  }
+}
+
 .header-inner {
   display: flex;
   align-items: center;
@@ -1511,7 +1517,7 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .cp-time {
@@ -1668,6 +1674,17 @@ a:focus-visible {
 
   .cp-center-row {
     padding-inline: 30px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .cp-title-name {
+    font-size: 18px;
+    max-width: 42vw;
+  }
+
+  .cp-title-ep {
+    font-size: 14px;
   }
 }
 

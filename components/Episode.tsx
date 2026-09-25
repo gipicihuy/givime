@@ -296,7 +296,7 @@ export function VideoPlayer({
     v.webkitShowPlaybackTargetPicker?.();
   }, []);
 
-  const overlayOn = locked || show || !playing;
+  const overlayOn = locked || show;
 
   return (
     <div

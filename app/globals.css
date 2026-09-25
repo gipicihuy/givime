@@ -1322,7 +1322,6 @@ a:focus-visible {
   pointer-events: none;
 }
 
-.cplayer[data-locked="1"] .cp-side,
 .cplayer[data-locked="1"] .cp-center,
 .cplayer[data-locked="1"] .cp-bottom {
   opacity: 0;
@@ -1407,98 +1406,6 @@ a:focus-visible {
 
 .cp-lock {
   background: rgba(20, 20, 22, 0.5);
-}
-
-.cp-side {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  pointer-events: auto;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.cp-side-l {
-  left: 8px;
-}
-
-.cp-side-r {
-  right: 8px;
-}
-
-.cp-pct {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-  min-width: 32px;
-  text-align: center;
-}
-
-.cp-vtrack {
-  width: 36px;
-  height: 120px;
-  display: grid;
-  place-items: center;
-}
-
-.cp-vslider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 110px;
-  height: 4px;
-  background: transparent;
-  transform: rotate(-90deg);
-  cursor: pointer;
-  accent-color: var(--accent);
-}
-
-.cp-vslider::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.cp-vslider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  margin-top: -5px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: none;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
-}
-
-.cp-vslider::-moz-range-track {
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.cp-vslider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: none;
-}
-
-.cp-vslider:disabled {
-  opacity: 0.35;
-}
-
-.cp-mute {
-  width: 34px;
-  height: 34px;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .cp-center {
@@ -1699,29 +1606,8 @@ a:focus-visible {
   opacity: 1;
 }
 
-/* mobile: geser cluster tengah, slider lebih ramping */
+/* mobile: geser cluster tengah biar muat */
 @media (max-width: 559px) {
-  .cp-side-l {
-    left: 2px;
-  }
-
-  .cp-side-r {
-    right: 2px;
-  }
-
-  .cp-vtrack {
-    width: 30px;
-    height: 96px;
-  }
-
-  .cp-vslider {
-    width: 88px;
-  }
-
-  .cp-pct {
-    font-size: 10px;
-  }
-
   .cp-center-row {
     gap: 6px;
     padding-inline: 36px;

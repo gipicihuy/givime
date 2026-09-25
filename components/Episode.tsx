@@ -5,7 +5,6 @@ import Link from "next/link";
 import { type Episode, encodeMedia } from "@/lib/api";
 import { fmtClock, updateProgress } from "@/lib/history";
 import {
-  IconBrightness,
   IconForward,
   IconFullscreen,
   IconFullscreenExit,
@@ -116,7 +115,6 @@ export function VideoPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [brightness, setBrightness] = useState(100);
   const [locked, setLocked] = useState(false);
   const [show, setShow] = useState(true);
   const [speed, setSpeed] = useState(1);
@@ -205,7 +203,27 @@ export function VideoPlayer({
   }, [slug, playable, src, bump]);
 
   useEffect(() => {
-    const onFs = () => setIsFs(document.fullscreenElement === rootRef.current);
+    const onFs = () => {
+      const active = document.fullscreenElement === rootRef.current;
+      setIsFs(active);
+
+      // Auto-rotate ke landscape pas fullscreen (kalau browser dukung Screen Orientation API)
+      const orientation = (screen as Screen & {
+        orientation?: {
+          lock?: (o: string) => Promise<void>;
+          unlock?: () => void;
+        };
+      }).orientation;
+      if (active) {
+        orientation?.lock?.("landscape").catch(() => undefined);
+      } else {
+        try {
+          orientation?.unlock?.();
+        } catch {
+          /* ignore, ga semua browser support */
+        }
+      }
+    };
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
@@ -231,20 +249,6 @@ export function VideoPlayer({
     const t = (Number(e.target.value) / 1000) * duration;
     v.currentTime = t;
     setCurrent(t);
-  };
-
-  const onVolume = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setVolume(val);
-    const v = videoRef.current;
-    if (v) {
-      v.volume = val;
-      v.muted = val === 0;
-    }
-  };
-
-  const onBrightness = (e: ChangeEvent<HTMLInputElement>) => {
-    setBrightness(Number(e.target.value));
   };
 
   const cycleSpeed = () => {
@@ -279,7 +283,6 @@ export function VideoPlayer({
         preload="metadata"
         key={playable}
         src={playable}
-        style={{ filter: `brightness(${brightness}%)` }}
         onClick={togglePlay}
       />
 
@@ -300,58 +303,6 @@ export function VideoPlayer({
             }}
           >
             {locked ? <IconLock size={18} /> : <IconUnlock size={18} />}
-          </button>
-        </div>
-
-        <div className="cp-side cp-side-l cp-fade" aria-hidden={locked}>
-          <span className="cp-pct">{Math.round(brightness)}%</span>
-          <div className="cp-vtrack">
-            <input
-              className="cp-vslider"
-              type="range"
-              min={20}
-              max={100}
-              step={1}
-              value={brightness}
-              onChange={onBrightness}
-              aria-label="Kecerahan"
-              disabled={locked}
-            />
-          </div>
-          <IconBrightness size={18} />
-        </div>
-
-        <div className="cp-side cp-side-r cp-fade" aria-hidden={locked}>
-          <span className="cp-pct">{Math.round(volume * 100)}%</span>
-          <div className="cp-vtrack">
-            <input
-              className="cp-vslider"
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={onVolume}
-              aria-label="Volume"
-              disabled={locked}
-            />
-          </div>
-          <button
-            type="button"
-            className="cp-btn cp-mute"
-            aria-label={volume === 0 ? "Bunyikan" : "Bisukan"}
-            disabled={locked}
-            onClick={() => {
-              const next = volume === 0 ? 1 : 0;
-              setVolume(next);
-              const v = videoRef.current;
-              if (v) {
-                v.volume = next;
-                v.muted = next === 0;
-              }
-            }}
-          >
-            {volume === 0 ? <IconVolumeMute size={18} /> : <IconVolume size={18} />}
           </button>
         </div>
 
@@ -455,6 +406,23 @@ export function VideoPlayer({
                 onClick={cycleSpeed}
               >
                 {speed}x
+              </button>
+              <button
+                type="button"
+                className="cp-btn"
+                aria-label={volume === 0 ? "Bunyikan" : "Bisukan"}
+                disabled={locked}
+                onClick={() => {
+                  const next = volume === 0 ? 1 : 0;
+                  setVolume(next);
+                  const v = videoRef.current;
+                  if (v) {
+                    v.volume = next;
+                    v.muted = next === 0;
+                  }
+                }}
+              >
+                {volume === 0 ? <IconVolumeMute size={18} /> : <IconVolume size={18} />}
               </button>
               <button
                 type="button"

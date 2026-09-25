@@ -1393,6 +1393,7 @@ a:focus-visible {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   flex-shrink: 0;
+  pointer-events: auto;
 }
 
 .cp-btn:hover:not(:disabled) {
@@ -1412,7 +1413,6 @@ a:focus-visible {
 
 .cp-lock {
   background: rgba(20, 20, 22, 0.5);
-  pointer-events: auto;
 }
 
 .cp-center {
@@ -1428,7 +1428,7 @@ a:focus-visible {
   align-items: center;
   justify-content: center;
   gap: clamp(8px, 3vw, 18px);
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .cp-item {

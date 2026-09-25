@@ -51,12 +51,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Image
                 src="/mugiwara.png"
                 alt=""
-                width={38}
-                height={38}
+                width={44}
+                height={44}
                 priority
                 className="logo-mark"
               />
-              <span className="logo-word">Givime</span>
+              <span className="logo-word">GIVIME</span>
             </Link>
           </div>
         </header>

@@ -105,9 +105,9 @@ body.watching-landscape .site-header {
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 22px;
   letter-spacing: -0.02em;
   flex-shrink: 0;
   color: var(--foreground);
@@ -123,9 +123,9 @@ body.watching-landscape .site-header {
 }
 
 .logo-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 9px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: block;
   flex-shrink: 0;
 }

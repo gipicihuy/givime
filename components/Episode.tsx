@@ -357,66 +357,81 @@ export function VideoPlayer({
 
         <div className="cp-center cp-fade">
           <div className="cp-center-row">
-            <div className="cp-nav">
+            <div className="cp-item cp-nav">
               {prevEp ? (
                 <Link
                   className="cp-btn cp-nav-btn"
                   href={`/play/${navBase}?ep=${encodeURIComponent(prevEp)}`}
                   aria-label={`Episode sebelumnya ${prevEp}`}
                 >
-                  <IconPrevTrack size={22} />
+                  <IconPrevTrack size={20} />
                 </Link>
               ) : (
                 <span className="cp-btn cp-nav-btn is-off" aria-hidden>
-                  <IconPrevTrack size={22} />
+                  <IconPrevTrack size={20} />
                 </span>
               )}
               <span className="cp-nav-label">{prevEp ? `Ep ${prevEp}` : ""}</span>
             </div>
 
-            <button
-              type="button"
-              className="cp-btn cp-skip"
-              aria-label="Mundur 10 detik"
-              disabled={locked}
-              onClick={() => skip(-10)}
-            >
-              <IconReplay size={22} />
-              <span className="cp-skip-n">10</span>
-            </button>
+            <div className="cp-item">
+              <button
+                type="button"
+                className="cp-btn cp-skip"
+                aria-label="Mundur 10 detik"
+                disabled={locked}
+                onClick={() => skip(-10)}
+              >
+                <IconReplay size={22} />
+                <span className="cp-skip-n">10</span>
+              </button>
+              <span className="cp-nav-label" aria-hidden="true">
+                &nbsp;
+              </span>
+            </div>
 
-            <button
-              type="button"
-              className="cp-btn cp-play"
-              aria-label={playing ? "Jeda" : "Putar"}
-              onClick={togglePlay}
-            >
-              {playing ? <IconPause size={28} /> : <IconPlay size={28} />}
-            </button>
+            <div className="cp-item">
+              <button
+                type="button"
+                className="cp-btn cp-play"
+                aria-label={playing ? "Jeda" : "Putar"}
+                onClick={togglePlay}
+              >
+                {playing ? <IconPause size={30} /> : <IconPlay size={30} />}
+              </button>
+              <span className="cp-nav-label" aria-hidden="true">
+                &nbsp;
+              </span>
+            </div>
 
-            <button
-              type="button"
-              className="cp-btn cp-skip"
-              aria-label="Maju 10 detik"
-              disabled={locked}
-              onClick={() => skip(10)}
-            >
-              <IconForward size={22} />
-              <span className="cp-skip-n">10</span>
-            </button>
+            <div className="cp-item">
+              <button
+                type="button"
+                className="cp-btn cp-skip"
+                aria-label="Maju 10 detik"
+                disabled={locked}
+                onClick={() => skip(10)}
+              >
+                <IconForward size={22} />
+                <span className="cp-skip-n">10</span>
+              </button>
+              <span className="cp-nav-label" aria-hidden="true">
+                &nbsp;
+              </span>
+            </div>
 
-            <div className="cp-nav is-next">
+            <div className="cp-item cp-nav is-next">
               {nextEp ? (
                 <Link
                   className="cp-btn cp-nav-btn"
                   href={`/play/${navBase}?ep=${encodeURIComponent(nextEp)}`}
                   aria-label={`Episode berikutnya ${nextEp}`}
                 >
-                  <IconNextTrack size={22} />
+                  <IconNextTrack size={20} />
                 </Link>
               ) : (
                 <span className="cp-btn cp-nav-btn is-off" aria-hidden>
-                  <IconNextTrack size={22} />
+                  <IconNextTrack size={20} />
                 </span>
               )}
               <span className="cp-nav-label">{nextEp ? `Ep ${nextEp}` : ""}</span>

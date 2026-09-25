@@ -1391,8 +1391,8 @@ a:focus-visible {
 }
 
 .cp-btn:hover:not(:disabled) {
-  background: rgba(191, 255, 58, 0.16);
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
 .cp-btn:disabled {
@@ -1517,11 +1517,14 @@ a:focus-visible {
   pointer-events: auto;
 }
 
-.cp-nav {
+.cp-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
+}
+
+.cp-nav {
   min-width: 64px;
 }
 
@@ -1562,13 +1565,13 @@ a:focus-visible {
 .cp-play {
   width: 72px;
   height: 72px;
-  background: rgba(191, 255, 58, 0.92);
-  color: var(--accent-ink);
+  background: rgba(255, 255, 255, 0.95);
+  color: #121214;
 }
 
 .cp-play:hover:not(:disabled) {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: #fff;
+  color: #121214;
   transform: scale(1.04);
 }
 

@@ -73,7 +73,7 @@ function ContinueThumb({ h }: { h: HistoryEntry }) {
         <img src={h.cover} alt="" loading="lazy" width={480} height={270} />
       ) : null}
       <span className="continue-play">
-        <IconPlay size={14} />
+        <IconPlay size={12} />
       </span>
       {hasDur ? (
         <span className="continue-bar">

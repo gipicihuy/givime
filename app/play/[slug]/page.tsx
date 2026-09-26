@@ -67,7 +67,7 @@ export default async function PlayPage({
       <p style={{ marginBottom: 12, fontSize: 14 }}>
         <Link href={`/anime/${slug}`} className="muted meta-item">
           <IconChevronLeft size={14} />
-          {title}
+          Kembali
         </Link>
       </p>
 

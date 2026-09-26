@@ -29,27 +29,39 @@ export function EpisodeSection({
   slug,
   eps,
   current,
+  persistOrder = false,
 }: {
   slug: string;
   eps: Episode[];
   current?: string;
+  /** Urutan disimpen di localStorage & dibaca lagi pas refresh — cuma buat halaman detail. */
+  persistOrder?: boolean;
 }) {
   const [order, setOrder] = useState<Order>("asc");
 
-  // Preferensi urutan (mis. "Terbaru") disimpen biar awet pas refresh —
-  // hydrate di effect biar server & client pass pertama sama (asc).
+  // Urutan "Terbaru" cuma nahan pilihan pas refresh (F5) di halaman ini.
+  // Cleanup ngapus storage pas pindah halaman → balik lagi = default lagi.
   useEffect(() => {
+    if (!persistOrder) return;
     try {
       const saved = window.localStorage.getItem(EP_ORDER_KEY);
       if (saved === "asc" || saved === "desc") setOrder(saved);
     } catch {
       /* storage bisa ditolak (private mode) */
     }
-  }, []);
+    return () => {
+      try {
+        window.localStorage.removeItem(EP_ORDER_KEY);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [persistOrder]);
 
   const toggleOrder = () => {
     const next: Order = order === "asc" ? "desc" : "asc";
     setOrder(next);
+    if (!persistOrder) return;
     try {
       window.localStorage.setItem(EP_ORDER_KEY, next);
     } catch {

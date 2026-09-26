@@ -221,7 +221,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
         </section>
 
         <section className="detail-block">
-          <EpisodeSection slug={anime.slug} eps={eps} />
+          <EpisodeSection slug={anime.slug} eps={eps} persistOrder />
         </section>
       </div>
     </article>

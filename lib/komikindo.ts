@@ -27,10 +27,52 @@ export type KomikHome = {
   latest: KomikItem[];
 };
 
+export type KomikChapter = {
+  /** "68" — teks tag <chapter> */
+  label: string;
+  href: string;
+  date: string;
+};
+
+export type KomikDetail = {
+  slug: string;
+  title: string;
+  image: string | null;
+  rating: string;
+  synopsis: string;
+  genres: { name: string; slug: string }[];
+  info: { label: string; value: string }[];
+  chapters: KomikChapter[];
+};
+
+export type KomikReader = {
+  detail: KomikDetail;
+  chapter: KomikChapter;
+  title: string;
+  images: string[];
+  prev: KomikChapter | null;
+  next: KomikChapter | null;
+};
+
 let cache: { at: number; data: KomikHome } | null = null;
+const detailCache = new Map<string, { at: number; data: KomikDetail }>();
+const readerCache = new Map<string, { at: number; images: string[]; title: string }>();
+
+const INFO_LABELS = ["Status", "Pengarang", "Jenis Komik", "Dirilis", "Terakhir Diupdate"];
+
+function cacheGet<T>(map: Map<string, { at: number; data: T }>, key: string): T | null {
+  const hit = map.get(key);
+  return hit && Date.now() - hit.at < CACHE_MS ? hit.data : null;
+}
+
+function cacheSet<T>(map: Map<string, { at: number; data: T }>, key: string, data: T) {
+  if (map.size > 40) map.clear();
+  map.set(key, { at: Date.now(), data });
+}
 
 async function fetchHtml(path: string): Promise<string> {
-  const res = await fetch(BASE + path, {
+  const url = path.startsWith("http") ? path : BASE + path;
+  const res = await fetch(url, {
     headers: {
       "user-agent": UA,
       accept: "text/html",
@@ -50,6 +92,11 @@ function fullRes(url?: string | null): string | null {
 function slugOf(href: string): string {
   const m = href.match(/\/komik\/([^/]+)\/?$/);
   return m ? m[1] : href;
+}
+
+/** Segmen terakhir URL chapter (mis. "magic-emperor-chapter-914"). */
+export function chapterSlugOf(href: string): string {
+  return href.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop() || "";
 }
 
 function parseCards($: cheerio.CheerioAPI, widgetSelector: string): KomikItem[] {
@@ -89,6 +136,117 @@ export async function fetchKomikHome(): Promise<KomikHome | null> {
     if (!data.popular.length && !data.latest.length) throw new Error("empty parse");
     cache = { at: Date.now(), data };
     return data;
+  } catch {
+    return null;
+  }
+}
+
+function parseDetail($: cheerio.CheerioAPI, slug: string): KomikDetail {
+  const info: { label: string; value: string }[] = [];
+  $(".spe span").each((_, el) => {
+    const b = $(el).find("b").first();
+    if (!b.length) return;
+    const label = b.text().replace(/[:：]\s*$/, "").trim();
+    if (!INFO_LABELS.includes(label)) return;
+    const value = $(el).text().replace(b.text(), "").trim();
+    if (value) info.push({ label, value });
+  });
+
+  const genres: { name: string; slug: string }[] = [];
+  $(".genre-info a").each((_, el) => {
+    const name = $(el).text().trim();
+    const href = $(el).attr("href") || "";
+    const m = href.match(/\/genres\/([^/]+)\/?$/);
+    if (name && m) genres.push({ name, slug: m[1] });
+  });
+
+  const chapters: KomikChapter[] = [];
+  $("#chapter_list li").each((_, el) => {
+    const $el = $(el);
+    const label = $el.find("chapter").first().text().trim();
+    const href = $el.find("a").first().attr("href");
+    if (label && href) {
+      chapters.push({ label, href, date: $el.find(".dt a").first().text().trim() });
+    }
+  });
+
+  const title = $(".entry-title")
+    .first()
+    .text()
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/^Komik\s+/i, "");
+
+  return {
+    slug,
+    title,
+    image: fullRes($(".thumb img").first().attr("src")),
+    rating: $(".archiveanime-rating i, .ratingmanga i").first().text().trim(),
+    synopsis: $(".entry-content-single p, .desc .entry-content p")
+      .first()
+      .text()
+      .trim()
+      .replace(/\s+/g, " "),
+    genres,
+    info,
+    chapters,
+  };
+}
+
+export async function fetchKomikDetail(slug: string): Promise<KomikDetail | null> {
+  const hit = cacheGet(detailCache, slug);
+  if (hit) return hit;
+  try {
+    const $ = cheerio.load(await fetchHtml(`/komik/${slug}/`));
+    const data = parseDetail($, slug);
+    if (!data.title || !data.chapters.length) throw new Error("empty detail");
+    cacheSet(detailCache, slug, data);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchKomikReader(
+  slug: string,
+  chSlug: string,
+): Promise<KomikReader | null> {
+  try {
+    const detail = await fetchKomikDetail(slug);
+    if (!detail) return null;
+    const idx = detail.chapters.findIndex((c) => chapterSlugOf(c.href) === chSlug);
+    if (idx < 0) return null;
+    const chapter = detail.chapters[idx];
+
+    let cached = readerCache.get(chapter.href);
+    if (!cached || Date.now() - cached.at >= CACHE_MS) {
+      const $ = cheerio.load(await fetchHtml(chapter.href));
+      const images: string[] = [];
+      $("#chimg-auh img").each((_, el) => {
+        const src = ($(el).attr("src") || "").trim();
+        if (src && !src.includes("blogger") && !src.includes("google")) images.push(src);
+      });
+      if (!images.length) throw new Error("empty images");
+      const title = $(".entry-title")
+        .first()
+        .text()
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/^Komik\s+/i, "");
+      if (readerCache.size > 30) readerCache.clear();
+      cached = { at: Date.now(), images, title };
+      readerCache.set(chapter.href, cached);
+    }
+
+    return {
+      detail,
+      chapter,
+      title: cached.title,
+      images: cached.images,
+      // urutan daftar = terbaru dulu → "prev" (lebih tua) di index bawah
+      prev: detail.chapters[idx + 1] ?? null,
+      next: detail.chapters[idx - 1] ?? null,
+    };
   } catch {
     return null;
   }

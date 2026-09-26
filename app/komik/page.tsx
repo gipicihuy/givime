@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SectionOrnament } from "@/components/Shelf";
 import { type KomikHome, type KomikItem, fetchKomikHome } from "@/lib/komikindo";
 
@@ -6,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 function KomikPoster({ k }: { k: KomikItem }) {
   return (
-    <div className="poster">
+    <Link className="poster" href={`/komik/${k.slug}`}>
       <div className="poster-thumb">
         {k.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -24,7 +25,7 @@ function KomikPoster({ k }: { k: KomikItem }) {
           <span className="meta-item">★ {k.rating}</span>
         </div>
       ) : null}
-    </div>
+    </Link>
   );
 }
 

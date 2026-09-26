@@ -57,6 +57,7 @@ export type KomikReader = {
 let cache: { at: number; data: KomikHome } | null = null;
 const detailCache = new Map<string, { at: number; data: KomikDetail }>();
 const readerCache = new Map<string, { at: number; images: string[]; title: string }>();
+const searchCache = new Map<string, { at: number; data: KomikItem[] }>();
 
 const INFO_LABELS = ["Status", "Pengarang", "Jenis Komik", "Dirilis", "Terakhir Diupdate"];
 
@@ -191,6 +192,24 @@ function parseDetail($: cheerio.CheerioAPI, slug: string): KomikDetail {
     info,
     chapters,
   };
+}
+
+export async function fetchKomikSearch(q: string): Promise<KomikItem[] | null> {
+  const key = q.trim().toLowerCase();
+  if (!key) return [];
+  const hit = searchCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  try {
+    const $ = cheerio.load(await fetchHtml(`/?s=${encodeURIComponent(q)}`));
+    let items = parseCards($, ".search-results");
+    if (!items.length) items = parseCards($, "");
+    items = items.slice(0, 24);
+    if (searchCache.size > 40) searchCache.clear();
+    searchCache.set(key, { at: Date.now(), data: items });
+    return items;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchKomikDetail(slug: string): Promise<KomikDetail | null> {

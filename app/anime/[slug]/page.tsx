@@ -167,9 +167,6 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
               </h2>
             </div>
             <p className="detail-synopsis">{synopsis}</p>
-            {mb.ero_japanese ? (
-              <p className="detail-japanese">{stripHtml(mb.ero_japanese)}</p>
-            ) : null}
           </section>
         ) : null}
 

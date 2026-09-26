@@ -3,13 +3,46 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { IconSearch } from "@/components/Icons";
-import type { SuggestItem } from "@/lib/api";
 
-function SearchForm() {
+type SuggestRow = { slug: string; title: string; cover?: string | null; sub: string };
+
+type RawSuggest = {
+  slug: string;
+  title: string;
+  cover?: string | null;
+  meta?: string;
+  totalEps?: number | string;
+  status?: string;
+  score?: string | number;
+};
+
+function toRow(it: RawSuggest): SuggestRow {
+  const sub =
+    it.meta ??
+    [
+      it.totalEps ? `${it.totalEps} Eps` : it.status || "—",
+      it.score ? `★ ${it.score}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  return { slug: it.slug, title: it.title, cover: it.cover, sub };
+}
+
+function SearchForm({
+  endpoint,
+  hrefBase,
+  placeholder,
+  label,
+}: {
+  endpoint: string;
+  hrefBase: string;
+  placeholder: string;
+  label: string;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
-  const [items, setItems] = useState<SuggestItem[]>([]);
+  const [items, setItems] = useState<SuggestRow[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [loading, setLoading] = useState(false);
@@ -58,12 +91,12 @@ function SearchForm() {
       const ac = new AbortController();
       abortRef.current = ac;
       try {
-        const res = await fetch(`/api/suggest?q=${encodeURIComponent(term)}`, {
+        const res = await fetch(`${endpoint}?q=${encodeURIComponent(term)}`, {
           signal: ac.signal,
         });
         if (!res.ok) throw new Error("suggest failed");
-        const data = (await res.json()) as { items: SuggestItem[] };
-        setItems(data.items);
+        const data = (await res.json()) as { items: RawSuggest[] };
+        setItems(data.items.map(toRow));
         setOpen(true);
         setActive(-1);
       } catch {
@@ -74,7 +107,7 @@ function SearchForm() {
         if (!ac.signal.aborted) setLoading(false);
       }
     }, 280);
-  }, []);
+  }, [endpoint]);
 
   function onChange(value: string) {
     setQ(value);
@@ -86,7 +119,7 @@ function SearchForm() {
     if (!t) return;
     setOpen(false);
     setActive(-1);
-    router.push(`/search?q=${encodeURIComponent(t)}`);
+    router.push(`${hrefBase}?q=${encodeURIComponent(t)}`);
   }
 
   function goAnime(slug: string) {
@@ -124,7 +157,7 @@ function SearchForm() {
     <div className="search-wrap" ref={boxRef}>
       <form className="search-form" role="search" onSubmit={onSubmit}>
         <label htmlFor="q" className="sr-only">
-          Cari anime
+          {label}
         </label>
         <span className="search-icon" aria-hidden>
           <IconSearch size={16} />
@@ -134,7 +167,7 @@ function SearchForm() {
           className="search-input"
           type="search"
           name="q"
-          placeholder="Cari judul anime…"
+          placeholder={placeholder}
           value={q}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => {
@@ -186,10 +219,7 @@ function SearchForm() {
                 )}
                 <span className="suggest-body">
                   <span className="suggest-title">{item.title}</span>
-                  <span className="suggest-meta">
-                    {item.totalEps ? `${item.totalEps} Eps` : item.status || "—"}
-                    {item.score ? ` · ★ ${item.score}` : ""}
-                  </span>
+                  <span className="suggest-meta">{item.sub}</span>
                 </span>
               </button>
             ))
@@ -200,10 +230,20 @@ function SearchForm() {
   );
 }
 
-export function SearchBox() {
+export function SearchBox({
+  endpoint = "/api/suggest",
+  hrefBase = "/search",
+  placeholder = "Cari judul anime…",
+  label = "Cari anime",
+}: {
+  endpoint?: string;
+  hrefBase?: string;
+  placeholder?: string;
+  label?: string;
+}) {
   return (
     <Suspense fallback={<div className="search-wrap" aria-hidden="true" />}>
-      <SearchForm />
+      <SearchForm endpoint={endpoint} hrefBase={hrefBase} placeholder={placeholder} label={label} />
     </Suspense>
   );
 }

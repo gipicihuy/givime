@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconFilm, IconFlame, IconGrid, IconTag } from "@/components/Icons";
+import { IconFilm, IconFlame, IconGrid, IconLayers, IconTag } from "@/components/Icons";
 
 export const metadata = { title: "Browse" };
 
@@ -27,6 +27,12 @@ const cats = [
     title: "Genres",
     desc: "Jelajah per genre",
     icon: IconTag,
+  },
+  {
+    href: "/komik",
+    title: "Komik",
+    desc: "Manga, Manhwa & Manhua",
+    icon: IconLayers,
   },
 ];
 

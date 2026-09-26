@@ -1266,12 +1266,6 @@ a:focus-visible {
   margin: 0;
 }
 
-.detail-japanese {
-  font-size: 13px;
-  color: var(--muted);
-  margin: 8px 0 0;
-}
-
 /* Info: definition grid bersih — label mikro + nilai, tanpa kartu */
 .info-grid {
   display: grid;
@@ -1399,38 +1393,11 @@ a:focus-visible {
   font-weight: 700;
 }
 
-/* —— komik (list / detail / reader) —— */
+/* —— komik (list / reader) —— */
 .ep-count {
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
-}
-
-.komik-detail {
-  display: grid;
-  grid-template-columns: 118px 1fr;
-  gap: 14px 16px;
-  margin-top: 8px;
-}
-
-.komik-detail-cover {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.komik-detail-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.komik-detail-title {
-  margin-bottom: 10px;
 }
 
 .chapter-title {
@@ -1495,13 +1462,6 @@ a:focus-visible {
   width: 100%;
   height: auto;
   display: block;
-}
-
-@media (min-width: 768px) {
-  .komik-detail {
-    grid-template-columns: 180px 1fr;
-    gap: 24px;
-  }
 }
 
 /* —— player (cinematic overlay) —— */

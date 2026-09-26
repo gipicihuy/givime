@@ -1393,6 +1393,7 @@ a:focus-visible {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+  transition: opacity 200ms ease;
 }
 
 .cp-scrim {
@@ -1433,6 +1434,115 @@ a:focus-visible {
 .cplayer[data-locked="1"] .cp-top {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Loading overlay (pola Nefusoft: mascot+teks sebelum metadata, spinner pas
+   buffering) — aksen tetep lime givime. Di atas kontrol (z 3) & klik tembus. */
+.cp-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+  animation: cp-load-in 180ms ease;
+}
+
+.cplayer[data-loading="initial"] .cp-loading {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+/* Sebelum metadata: kontrol ga keliatan & ga bisa diklik (durasi masih 00:00) */
+.cplayer[data-loading="initial"] .cp-ov {
+  opacity: 0;
+}
+
+.cplayer[data-loading="initial"] .cp-ov,
+.cplayer[data-loading="initial"] .cp-ov * {
+  pointer-events: none;
+}
+
+.cp-load-mascot {
+  width: 96px;
+  max-width: 42vw;
+  object-fit: contain;
+  animation: cp-pulse 1.6s ease-in-out infinite;
+}
+
+.cp-load-text {
+  margin: 0;
+  max-width: 92%;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  animation: cp-pulse 1.6s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .cp-load-mascot {
+    width: 128px;
+  }
+
+  .cp-load-text {
+    font-size: 14px;
+  }
+}
+
+.cp-load-spinner {
+  position: relative;
+  width: 54px;
+  height: 54px;
+}
+
+.cp-load-spinner i {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: 8%;
+  height: 24%;
+  opacity: 0;
+  border-radius: 50px;
+  background: var(--accent);
+  box-shadow: 0 0 3px rgba(191, 255, 58, 0.35);
+  animation: cp-load-bar 1s linear infinite;
+}
+
+@keyframes cp-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes cp-load-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cp-load-bar {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.25;
+  }
 }
 
 .cp-top {

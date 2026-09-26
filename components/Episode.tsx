@@ -131,6 +131,7 @@ export function VideoPlayer({
   const [show, setShow] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [isFs, setIsFs] = useState(false);
+  const [buffering, setBuffering] = useState(true);
   const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number; top: number; left: number } | null>(null);
 
   const lastTap = useRef<{ time: number; side: "left" | "right" } | null>(null);
@@ -155,6 +156,14 @@ export function VideoPlayer({
     bump();
     return () => window.clearTimeout(hideTimer.current);
   }, [bump, playing]);
+
+  // Ganti episode = src baru → reset posisi & tampilin loading lagi sampai
+  // metadata siap (durasi valid), biar ga kelihatan 00:00/00:00.
+  useEffect(() => {
+    setBuffering(true);
+    setCurrent(0);
+    setDuration(0);
+  }, [playable]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -191,7 +200,13 @@ export function VideoPlayer({
       save();
     };
 
-    const onMeta = () => setDuration(Number.isFinite(v.duration) ? v.duration : 0);
+    const onMeta = () => {
+      setDuration(Number.isFinite(v.duration) ? v.duration : 0);
+      setBuffering(false);
+    };
+    const onWaiting = () => setBuffering(true);
+    const onCanPlay = () => setBuffering(false);
+    const onPlaying = () => setBuffering(false);
     const onPlay = () => {
       setPlaying(true);
       bump();
@@ -205,6 +220,9 @@ export function VideoPlayer({
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("durationchange", onMeta);
     v.addEventListener("loadedmetadata", onMeta);
+    v.addEventListener("waiting", onWaiting);
+    v.addEventListener("canplay", onCanPlay);
+    v.addEventListener("playing", onPlaying);
     v.addEventListener("play", onPlay);
     v.addEventListener("pause", onPause);
     v.addEventListener("ended", save);
@@ -214,6 +232,9 @@ export function VideoPlayer({
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("durationchange", onMeta);
       v.removeEventListener("loadedmetadata", onMeta);
+      v.removeEventListener("waiting", onWaiting);
+      v.removeEventListener("canplay", onCanPlay);
+      v.removeEventListener("playing", onPlaying);
       v.removeEventListener("play", onPlay);
       v.removeEventListener("pause", onPause);
       v.removeEventListener("ended", save);
@@ -389,6 +410,9 @@ export function VideoPlayer({
   }, []);
 
   const overlayOn = locked || show;
+  // "initial" = sebelum metadata (durasi belum ada) → overlay penuh + kontrol
+  // disembunyiin; "wait" = buffering di tengah putar → spinner di atas frame.
+  const loadState = !buffering ? "0" : duration > 0 ? "wait" : "initial";
 
   return (
     <div
@@ -397,6 +421,7 @@ export function VideoPlayer({
       data-show={overlayOn ? "1" : "0"}
       data-locked={locked ? "1" : "0"}
       data-fs={isFs ? "1" : "0"}
+      data-loading={loadState}
       onPointerMove={bump}
     >
       {/* URL CDN hanya di src — jangan ditampilkan ke UI */}
@@ -612,6 +637,31 @@ export function VideoPlayer({
           </div>
         </div>
       </div>
+
+      {/* Loading ala Nefusoft — sebelum metadata: mascot + teks; buffering: spinner. Aksen lime. */}
+      {buffering && (
+        <div className="cp-loading" role="status">
+          {duration > 0 ? (
+            <span className="cp-load-spinner" aria-hidden="true">
+              {Array.from({ length: 12 }, (_, i) => (
+                <i
+                  key={i}
+                  style={{
+                    transform: `rotate(${i * 30}deg) translate(0, -130%)`,
+                    animationDelay: i === 0 ? "0s" : `-${(12 - i) / 10}s`,
+                  }}
+                />
+              ))}
+            </span>
+          ) : (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="cp-load-mascot" src="/loading.webp" alt="" aria-hidden="true" />
+              <p className="cp-load-text">sabar yaa, server kami butuh waktu untuk merespon 😖</p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

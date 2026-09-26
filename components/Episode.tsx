@@ -23,6 +23,8 @@ import {
 
 type Order = "asc" | "desc";
 
+const EP_ORDER_KEY = "givime:epOrder";
+
 export function EpisodeSection({
   slug,
   eps,
@@ -33,6 +35,27 @@ export function EpisodeSection({
   current?: string;
 }) {
   const [order, setOrder] = useState<Order>("asc");
+
+  // Preferensi urutan (mis. "Terbaru") disimpen biar awet pas refresh —
+  // hydrate di effect biar server & client pass pertama sama (asc).
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(EP_ORDER_KEY);
+      if (saved === "asc" || saved === "desc") setOrder(saved);
+    } catch {
+      /* storage bisa ditolak (private mode) */
+    }
+  }, []);
+
+  const toggleOrder = () => {
+    const next: Order = order === "asc" ? "desc" : "asc";
+    setOrder(next);
+    try {
+      window.localStorage.setItem(EP_ORDER_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  };
 
   if (!eps.length) {
     return (
@@ -68,7 +91,7 @@ export function EpisodeSection({
           type="button"
           className="ep-sort-btn"
           aria-pressed={order === "desc"}
-          onClick={() => setOrder(order === "asc" ? "desc" : "asc")}
+          onClick={toggleOrder}
         >
           Terbaru
         </button>
@@ -122,6 +145,8 @@ export function VideoPlayer({
   const lastSave = useRef(0);
   const hideTimer = useRef<number | undefined>(undefined);
   const scrubbing = useRef(false);
+  const skipWait = useRef(false);
+  const skipWaitTimer = useRef<number | undefined>(undefined);
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -204,9 +229,19 @@ export function VideoPlayer({
       setDuration(Number.isFinite(v.duration) ? v.duration : 0);
       setBuffering(false);
     };
-    const onWaiting = () => setBuffering(true);
+    const onWaiting = () => {
+      if (skipWait.current) return;
+      setBuffering(true);
+    };
     const onCanPlay = () => setBuffering(false);
-    const onPlaying = () => setBuffering(false);
+    const onPlaying = () => {
+      skipWait.current = false;
+      setBuffering(false);
+    };
+    const onSeeked = () => {
+      skipWait.current = false;
+      setBuffering(false);
+    };
     const onPlay = () => {
       setPlaying(true);
       bump();
@@ -223,6 +258,7 @@ export function VideoPlayer({
     v.addEventListener("waiting", onWaiting);
     v.addEventListener("canplay", onCanPlay);
     v.addEventListener("playing", onPlaying);
+    v.addEventListener("seeked", onSeeked);
     v.addEventListener("play", onPlay);
     v.addEventListener("pause", onPause);
     v.addEventListener("ended", save);
@@ -235,6 +271,7 @@ export function VideoPlayer({
       v.removeEventListener("waiting", onWaiting);
       v.removeEventListener("canplay", onCanPlay);
       v.removeEventListener("playing", onPlaying);
+      v.removeEventListener("seeked", onSeeked);
       v.removeEventListener("play", onPlay);
       v.removeEventListener("pause", onPause);
       v.removeEventListener("ended", save);
@@ -311,6 +348,13 @@ export function VideoPlayer({
     if (!v) return;
     const d = Number.isFinite(v.duration) ? v.duration : 0;
     v.currentTime = Math.max(0, Math.min(d || Number.MAX_SAFE_INTEGER, v.currentTime + delta));
+    // Hasil seek kilat (double-tap / tombol ±10s) bukan buffering beneran —
+    // suppress spinner buffering sesaat setelah skip.
+    skipWait.current = true;
+    window.clearTimeout(skipWaitTimer.current);
+    skipWaitTimer.current = window.setTimeout(() => {
+      skipWait.current = false;
+    }, 1500);
     bump();
   }, [bump]);
 

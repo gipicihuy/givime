@@ -39,7 +39,7 @@ export function EpisodeSection({
   /** Urutan disimpen di localStorage & dibaca lagi pas refresh — cuma buat halaman detail. */
   persistOrder?: boolean;
 }) {
-  const [order, setOrder] = useState<Order>("asc");
+  const [order, setOrder] = useState<Order>("desc");
 
   // Urutan "Terbaru" cuma nahan pilihan pas refresh (F5) di halaman ini.
   // Cleanup ngapus storage pas pindah halaman → balik lagi = default lagi.
@@ -104,7 +104,6 @@ export function EpisodeSection({
         <button
           type="button"
           className="ep-sort-btn"
-          aria-pressed={order === "desc"}
           aria-label={order === "desc" ? "Urutan: terbaru" : "Urutan: terlama"}
           title={order === "desc" ? "Urutan terbaru" : "Urutan terlama"}
           onClick={toggleOrder}

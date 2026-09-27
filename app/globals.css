@@ -1297,12 +1297,6 @@ a:focus-visible {
   border-color: var(--muted);
 }
 
-.ep-sort-btn[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-}
-
 .ep-sort-btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

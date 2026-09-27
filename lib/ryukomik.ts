@@ -586,6 +586,10 @@ async function fetchEmbed(url: string, tries = 2, deadline?: number): Promise<st
       if (res.ok) {
         const html = await res.text();
         if (html) return html;
+      } else if (res.status >= 400 && res.status < 500) {
+        // 403 Cloudflare (challenge) gak bakal ilang dengan retry → nyerah
+        // sekarang biar server lain keburu dicoba sebelum deadline.
+        return null;
       }
     } catch {
       /* lanjut retry */
@@ -637,7 +641,7 @@ async function resolveEmbed(
 ): Promise<{ url: string; type: "hls" | "mp4" } | null> {
   const isPlaymogo = /playmogo\.com/i.test(link.embedUrl);
   const rounds = isPlaymogo ? 1 : 2;
-  const maxAttempt = isPlaymogo ? 3 : 2;
+  const maxAttempt = 2;
 
   const tryOnce = async (): Promise<{ url: string; type: "hls" | "mp4" } | null> => {
     const html = await fetchEmbed(link.embedUrl, 2, deadline);
@@ -683,16 +687,20 @@ export async function resolveHentaiStream(
     if (Date.now() - hit.at < fresh) return hit.data;
   }
 
-  const prefer = (s: StreamLink) => !/playmogo\.com/i.test(s.embedUrl);
+  // MP4 (playmogo/dood) didahulukan karena paling ramah di HP (tanpa hls.js),
+  // tapi dicoba paralel dengan jeda — Ryu-lokal (HLS) tetap jalan kalau
+  // playmogo kena blokir Cloudflare kayak di server lokal.
+  const prefer = (s: StreamLink) => /playmogo\.com/i.test(s.embedUrl);
   const order = detail.streams
     .map((s, index) => ({ s, index }))
     .filter(({ s }) => s.embedUrl && !/ouo\./i.test(s.embedUrl))
     .sort((a, b) => Number(prefer(b.s)) - Number(prefer(a.s)))
     .slice(0, 3);
   const candidates = order.filter(({ index }) => !skip.has(index));
-  // Server yang di-skip tetap dicoba ulang sebagai cadangan kalau sisanya
-  // pada gagal — buat tetep punya jalan kalau server andalan lagi error.
-  const passes = skip.size > 0 ? [candidates, order] : [candidates];
+  // Kalau user skip sebagian server, yang di-skip dicoba ulang sebagai
+  // cadangan setelah sisanya gagal (bukan ulang dari awal — hemat deadline).
+  const skippedOnly = order.filter(({ index }) => skip.has(index));
+  const passes = skippedOnly.length > 0 ? [candidates, skippedOnly] : [candidates];
 
   let result: Stream | null = null;
   const deadline = Date.now() + RESOLVE_MS;
@@ -700,18 +708,35 @@ export async function resolveHentaiStream(
     `[resolve] ${detail.slug} skip=[${[...skip].join(",")}] kandidat=${candidates.map((c) => c.index).join(",")}`,
   );
 
-  for (let pass = 0; pass < passes.length && !result; pass++) {
-    for (const { s, index } of passes[pass]) {
-      if (Date.now() > deadline) break;
+  // 1 kandidat pertama langsung; sisanya nyusul setelah jeda biar yang
+  // didahulukan menang kalau semuanya beres, tapi gak ngantri kalau dia error.
+  const tryPass = async (list: { s: StreamLink; index: number }[]): Promise<Stream | null> => {
+    const runs = list.map(async ({ s, index }, i) => {
+      // Kandidat 0 (didahulukan) jalan duluan; yang lain menyusul biar
+      // tetep menang kalau sehat, tapi gak ngantri lama kalau dia error.
+      if (i > 0) await sleep(i === 1 ? 500 : 1_200);
       const t0 = Date.now();
       const video = await resolveEmbed(s, deadline);
       console.log(
         `[resolve] idx=${index} (${s.server}) → ${video ? "OK" : "FAIL"} ${Date.now() - t0}ms`,
       );
-      if (video) {
-        result = { ...video, index };
-        break;
-      }
+      if (!video) throw new Error(`server ${index} gagal`);
+      return { ...video, index };
+    });
+    try {
+      return await Promise.any(runs);
+    } catch {
+      return null;
+    }
+  };
+
+  for (const pass of passes) {
+    if (Date.now() > deadline) break;
+    if (!pass.length) continue;
+    const got = await tryPass(pass);
+    if (got) {
+      result = got;
+      break;
     }
   }
 

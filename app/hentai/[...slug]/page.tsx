@@ -86,6 +86,12 @@ export default async function HentaiDetailPage({
     nextHref: detail.next ? `/hentai/${detail.next.slug}` : null,
     streamApi: `/api/hentai-stream?slug=${encodeURIComponent(path)}`,
     streamIndex: stream?.index ?? null,
+    // Embed mentah per server → jaring pengaman tombol "server asal" (iframe).
+    // playmogo (MP4) duluan, sama kayak preferensi resolve.
+    servers: detail.streams
+      .filter((s) => s.embedUrl && !/ouo\./i.test(s.embedUrl))
+      .sort((a, b) => Number(/playmogo\.com/i.test(b.embedUrl)) - Number(/playmogo\.com/i.test(a.embedUrl)))
+      .map((s) => ({ label: s.server, embed: s.embedUrl })),
   };
 
   const info: { label: string; value: string }[] = [];

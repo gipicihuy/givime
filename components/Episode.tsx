@@ -147,6 +147,7 @@ export function VideoPlayer({
   nextHref,
   streamApi,
   streamIndex,
+  servers,
 }: {
   src: string;
   animeTitle: string;
@@ -164,6 +165,8 @@ export function VideoPlayer({
   streamApi?: string | null;
   /** Index server hasil resolve SSR — biar "server lain" gak balik ke server yang sama. */
   streamIndex?: number | null;
+  /** Embed mentah tiap server (label + url) buat fallback iframe "server asal". */
+  servers?: { label: string; embed: string }[];
 }) {
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
   const [triedServers, setTriedServers] = useState<number[]>(
@@ -171,6 +174,9 @@ export function VideoPlayer({
   );
   const [switching, setSwitching] = useState(false);
   const [noMoreServers, setNoMoreServers] = useState(false);
+  // Fallback: nampilin embed server asal via iframe kalau resolve/putar gagal.
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
+  const embedIdx = useRef(0);
   const src = streamUrl ?? srcProp;
   const playable = encodeMedia(src);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -252,7 +258,17 @@ export function VideoPlayer({
     setStreamUrl(null);
     setTriedServers(streamIndex != null ? [streamIndex] : []);
     setNoMoreServers(false);
+    setEmbedUrl(null);
   }, [srcProp, streamIndex]);
+
+  // "Server asal" → tampilin embed provider asli lewat iframe. Browser user
+  // yang muter, jadi tetep jalan walau resolve URL di server lagi mati.
+  const openEmbed = useCallback(() => {
+    if (!servers?.length) return;
+    const pick = servers[embedIdx.current % servers.length];
+    embedIdx.current += 1;
+    setEmbedUrl(pick.embed);
+  }, [servers]);
 
   // "Server lain" → minta resolve server yang belum dicoba, terus ganti src.
   const switchServer = useCallback(async () => {
@@ -881,6 +897,11 @@ export function VideoPlayer({
                 {switching ? "Nyari server…" : "Server lain"}
               </button>
             ) : null}
+            {servers?.length ? (
+              <button type="button" className="cp-retry" onClick={openEmbed}>
+                Putar server asal
+              </button>
+            ) : null}
           </div>
         </div>
       ) : (
@@ -908,6 +929,22 @@ export function VideoPlayer({
           </div>
         )
       )}
+
+      {/* Fallback "server asal": iframe embed provider — browser user yang muter. */}
+      {embedUrl ? (
+        <div className="cp-embed" role="dialog" aria-label="Player server asal">
+          <iframe
+            key={embedUrl}
+            src={embedUrl}
+            title="Player server asal"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowFullScreen
+          />
+          <button type="button" className="cp-embed-close" onClick={() => setEmbedUrl(null)}>
+            Tutup ✕
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

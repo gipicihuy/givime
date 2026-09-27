@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { IconTag } from "@/components/Icons";
+import { SectionOrnament } from "@/components/Shelf";
 import { getGenres } from "@/lib/api";
 
 export const revalidate = 86400;
@@ -15,7 +16,12 @@ export default async function GenresPage() {
 
   return (
     <>
-      <h1 className="page-title">Genres ({genres.length})</h1>
+      <h1 className="page-title">
+      <span className="section-ornament" aria-hidden>
+        <SectionOrnament />
+      </span>
+        Genres ({genres.length})
+      </h1>
       <div className="genre-list">
         {genres.map((g) => (
           <Link key={g.id} href={`/genre/${g.slug}`} className="genre-tag">

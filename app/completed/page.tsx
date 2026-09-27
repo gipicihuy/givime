@@ -1,5 +1,6 @@
 import { AnimeGrid } from "@/components/AnimeCard";
 import { Pager } from "@/components/Pager";
+import { SectionOrnament } from "@/components/Shelf";
 import { getList, IDS } from "@/lib/api";
 
 export const revalidate = 3600;
@@ -28,7 +29,12 @@ export default async function CompletedPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <h1 className="page-title">Completed ({r.total ?? r.items.length})</h1>
+      <h1 className="page-title">
+      <span className="section-ornament" aria-hidden>
+        <SectionOrnament />
+      </span>
+        Completed ({r.total ?? r.items.length})
+      </h1>
       <AnimeGrid items={r.items} />
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/completed" />
     </>

@@ -1,5 +1,6 @@
 import { AnimeGrid } from "@/components/AnimeCard";
 import { Pager } from "@/components/Pager";
+import { SectionOrnament } from "@/components/Shelf";
 import { getList, IDS, isOngoingAnime } from "@/lib/api";
 
 export const revalidate = 300;
@@ -30,7 +31,12 @@ export default async function OngoingPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <h1 className="page-title">Ongoing ({r.total ?? items.length})</h1>
+      <h1 className="page-title">
+      <span className="section-ornament" aria-hidden>
+        <SectionOrnament />
+      </span>
+        Ongoing ({r.total ?? items.length})
+      </h1>
       <AnimeGrid items={items} />
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/ongoing" />
     </>

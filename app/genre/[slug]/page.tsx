@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AnimeGrid } from "@/components/AnimeCard";
 import { Pager } from "@/components/Pager";
+import { SectionOrnament } from "@/components/Shelf";
 import { getList, resolveGenre } from "@/lib/api";
 
 export const revalidate = 600;
@@ -56,6 +57,9 @@ export default async function GenrePage({
   return (
     <>
       <h1 className="page-title">
+        <span className="section-ornament" aria-hidden>
+          <SectionOrnament />
+        </span>
         {genre.name} ({r.total ?? r.items.length})
       </h1>
       <AnimeGrid items={r.items} />

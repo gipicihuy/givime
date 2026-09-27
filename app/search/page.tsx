@@ -1,6 +1,7 @@
 import { AnimeGrid } from "@/components/AnimeCard";
 import { IconEmpty } from "@/components/Icons";
 import { Pager } from "@/components/Pager";
+import { SectionOrnament } from "@/components/Shelf";
 import { SearchBox } from "@/components/SearchBox";
 import { searchAnime } from "@/lib/api";
 
@@ -17,7 +18,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   if (!q) {
     return (
       <>
-        <h1 className="page-title">Cari</h1>
+        <h1 className="page-title">
+        <span className="section-ornament" aria-hidden>
+          <SectionOrnament />
+        </span>
+        Cari
+      </h1>
         <p className="page-sub">Ketik judul, saran muncul saat mengetik</p>
         <SearchBox />
         <div className="state state-follow">
@@ -37,7 +43,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <h1 className="page-title">Cari</h1>
+      <h1 className="page-title">
+        <span className="section-ornament" aria-hidden>
+          <SectionOrnament />
+        </span>
+        Cari
+      </h1>
       <p className="page-sub">
         {r.total ?? r.items.length} hasil untuk “{q}”
       </p>

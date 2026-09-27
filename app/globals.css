@@ -2164,6 +2164,13 @@ body.watching-landscape .cp-title-ep {
   margin-bottom: 4px;
 }
 
+/* List tanpa page-sub (count udah di judul) — kasih napas ke grid. */
+.page-title + .poster-grid,
+.page-title + .genre-list,
+.page-title + .state {
+  margin-top: 26px;
+}
+
 .page-title-icon {
   display: inline-flex;
   color: var(--accent);

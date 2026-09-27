@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconPlay, IconStar } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
-import { chapterSlugOf, fetchKomikDetail } from "@/lib/komikindo";
+import { chapterSlugOf, chapterTotal, fetchKomikDetail } from "@/lib/komikindo";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +38,7 @@ export default async function KomikDetailPage({ params }: Params) {
   const released = infoOf("Dirilis");
   // chapter_list dari situs: terbaru dulu → bab pertama = elemen terakhir
   const firstChapter = d.chapters[d.chapters.length - 1];
+  const total = chapterTotal(d.chapters);
 
   const chHref = (href: string) =>
     `/komik/${slug}/baca/${encodeURIComponent(chapterSlugOf(href))}`;
@@ -81,7 +82,6 @@ export default async function KomikDetailPage({ params }: Params) {
 
             <div className="detail-meta">
               {released ? <span>{released}</span> : null}
-              <span>{d.chapters.length} Chapter</span>
               {d.rating ? (
                 <span className="meta-item meta-score">
                   <IconStar size={12} />
@@ -143,10 +143,6 @@ export default async function KomikDetailPage({ params }: Params) {
                 <dd>{row.value}</dd>
               </div>
             ))}
-            <div className="info-item">
-              <dt>Chapter</dt>
-              <dd>{d.chapters.length} tersedia</dd>
-            </div>
           </dl>
         </section>
 
@@ -156,9 +152,8 @@ export default async function KomikDetailPage({ params }: Params) {
               <span className="section-ornament" aria-hidden>
                 <SectionOrnament />
               </span>
-              Chapter
+              Chapter ({total})
             </h2>
-            <span className="ep-count">{d.chapters.length} chapter</span>
           </div>
           <div className="ep-grid">
             {d.chapters.map((c) => (

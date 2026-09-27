@@ -59,6 +59,7 @@ function KomikSearch() {
       endpoint="/api/komik-suggest"
       hrefBase="/komik"
       itemBase="/komik"
+      showCover={false}
       placeholder="Cari judul komik…"
       label="Cari komik"
     />

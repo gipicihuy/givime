@@ -30,12 +30,14 @@ function SearchForm({
   endpoint,
   hrefBase,
   itemBase,
+  showCover,
   placeholder,
   label,
 }: {
   endpoint: string;
   hrefBase: string;
   itemBase: string;
+  showCover: boolean;
   placeholder: string;
   label: string;
 }) {
@@ -280,12 +282,14 @@ function SearchForm({
                 onMouseEnter={() => setActive(i)}
                 onClick={() => goAnime(item.slug)}
               >
-                {item.cover ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img className="suggest-thumb" src={item.cover} alt="" loading="lazy" width={36} height={54} />
-                ) : (
-                  <span className="suggest-thumb suggest-thumb-ph" aria-hidden />
-                )}
+                {showCover ? (
+                  item.cover ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="suggest-thumb" src={item.cover} alt="" loading="lazy" width={36} height={54} />
+                  ) : (
+                    <span className="suggest-thumb suggest-thumb-ph" aria-hidden />
+                  )
+                ) : null}
                 <span className="suggest-body">
                   <span className="suggest-title">{item.title}</span>
                   <span className="suggest-meta">{item.sub}</span>
@@ -305,12 +309,14 @@ export function SearchBox({
   endpoint = "/api/suggest",
   hrefBase = "/search",
   itemBase = "/anime",
+  showCover = true,
   placeholder = "Cari judul anime…",
   label = "Cari anime",
 }: {
   endpoint?: string;
   hrefBase?: string;
   itemBase?: string;
+  showCover?: boolean;
   placeholder?: string;
   label?: string;
 }) {
@@ -320,6 +326,7 @@ export function SearchBox({
         endpoint={endpoint}
         hrefBase={hrefBase}
         itemBase={itemBase}
+        showCover={showCover}
         placeholder={placeholder}
         label={label}
       />

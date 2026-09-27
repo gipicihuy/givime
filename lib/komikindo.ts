@@ -100,6 +100,20 @@ export function chapterSlugOf(href: string): string {
   return href.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop() || "";
 }
 
+/**
+ * Total chapter = nomor bab tertinggi, bukan jumlah item.
+ * Daftar bisa lebih banyak dari nomor (part "1054A", "1122.1", "00.1"),
+ * jadi length bikin count meleset — One Piece: 1240 item tapi bab 1194.
+ */
+export function chapterTotal(chapters: KomikChapter[]): number {
+  let max = 0;
+  for (const c of chapters) {
+    const n = parseInt(c.label, 10);
+    if (!Number.isNaN(n) && n > max) max = n;
+  }
+  return max || chapters.length;
+}
+
 function parseCards($: cheerio.CheerioAPI, widgetSelector: string): KomikItem[] {
   const out: KomikItem[] = [];
   $(`${widgetSelector} .animepost`).each((_, el) => {

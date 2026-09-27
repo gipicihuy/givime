@@ -28,8 +28,7 @@ export default async function MoviesPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <h1 className="page-title">Movies</h1>
-      <p className="page-sub">{r.total ?? r.items.length} judul · halaman {page}</p>
+      <h1 className="page-title">Movies ({r.total ?? r.items.length})</h1>
       <AnimeGrid items={r.items} />
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/movies" />
     </>

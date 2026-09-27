@@ -15,8 +15,7 @@ export default async function GenresPage() {
 
   return (
     <>
-      <h1 className="page-title">Genres</h1>
-      <p className="page-sub">{genres.length} genre</p>
+      <h1 className="page-title">Genres ({genres.length})</h1>
       <div className="genre-list">
         {genres.map((g) => (
           <Link key={g.id} href={`/genre/${g.slug}`} className="genre-tag">

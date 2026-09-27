@@ -55,8 +55,9 @@ export default async function GenrePage({
 
   return (
     <>
-      <h1 className="page-title">{genre.name}</h1>
-      <p className="page-sub">{r.total ?? r.items.length} judul · halaman {page}</p>
+      <h1 className="page-title">
+        {genre.name} ({r.total ?? r.items.length})
+      </h1>
       <AnimeGrid items={r.items} />
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath={`/genre/${genre.slug}`} />
     </>

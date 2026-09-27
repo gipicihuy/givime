@@ -30,8 +30,7 @@ export default async function OngoingPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <h1 className="page-title">Ongoing</h1>
-      <p className="page-sub">{r.total ?? items.length} judul · halaman {page}</p>
+      <h1 className="page-title">Ongoing ({r.total ?? items.length})</h1>
       <AnimeGrid items={items} />
       <Pager page={page} totalPages={r.totalPages ?? 1} basePath="/ongoing" />
     </>

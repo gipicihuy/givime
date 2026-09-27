@@ -62,6 +62,12 @@ export default async function KomikDetailPage({ params }: Params) {
             ) : (
               <div className="detail-cover detail-cover-ph">Tanpa cover</div>
             )}
+            {d.rating ? (
+              <span className="poster-score">
+                <IconStar size={13} />
+                {d.rating}
+              </span>
+            ) : null}
           </div>
 
           <div className="detail-info">
@@ -82,12 +88,6 @@ export default async function KomikDetailPage({ params }: Params) {
 
             <div className="detail-meta">
               {released ? <span>{released}</span> : null}
-              {d.rating ? (
-                <span className="meta-item meta-score">
-                  <IconStar size={12} />
-                  {d.rating}
-                </span>
-              ) : null}
             </div>
 
             {d.genres.length ? (

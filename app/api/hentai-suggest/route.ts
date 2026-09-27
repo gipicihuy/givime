@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchHentaiSearch } from "@/lib/nekopoi";
+import { fetchHentaiSearch } from "@/lib/ryukomik";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         slug: k.slug,
         title: k.title,
         cover: k.thumb,
-        meta: k.date || "18+",
+        meta: k.date || (k.ep != null ? `EP ${k.ep}` : "18+"),
       })),
     });
   } catch {

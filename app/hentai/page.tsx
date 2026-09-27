@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Pager } from "@/components/Pager";
 import { SearchBox } from "@/components/SearchBox";
-import { type HentaiItem, fetchHentaiList, fetchHentaiSearch } from "@/lib/nekopoi";
+import { type HentaiItem, fetchHentaiList, fetchHentaiSearch } from "@/lib/ryukomik";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Hentai" };
@@ -20,7 +20,9 @@ function HentaiCard({ item }: { item: HentaiItem }) {
         )}
       </span>
       <span className="hentai-title">{item.title}</span>
-      {item.date ? <span className="hentai-meta">{item.date}</span> : null}
+      {item.ep != null || item.date ? (
+        <span className="hentai-meta">{item.ep != null ? `EP ${item.ep}` : item.date}</span>
+      ) : null}
     </Link>
   );
 }
@@ -41,7 +43,7 @@ function HentaiSearch() {
     <SearchBox
       endpoint="/api/hentai-suggest"
       hrefBase="/hentai"
-      itemBase=""
+      itemBase="/hentai"
       showCover
       placeholder="Cari judul…"
       label="Cari video"

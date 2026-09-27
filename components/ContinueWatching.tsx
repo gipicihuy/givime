@@ -5,15 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { IconChevronRight, IconHistory, IconPlay } from "@/components/Icons";
 import { encodeMedia } from "@/lib/api";
 import {
+  hentaiHref,
   fmtProgress,
   readHistory,
   type HistoryEntry,
 } from "@/lib/history";
 
 function hrefOf(h: HistoryEntry) {
-  // slug hentai sudah termasuk prefix rute ("hentai/…") → tinggal kasih "/"
   const base =
-    h.kind === "hentai" ? `/${h.slug}` : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+    h.kind === "hentai" ? hentaiHref(h.slug) : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
   if (!h.t || h.t <= 0) return base;
   return `${base}${h.kind === "hentai" ? "?" : "&"}t=${Math.floor(h.t)}`;
 }

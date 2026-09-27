@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { IconEmpty } from "@/components/Icons";
 import {
+  hentaiHref,
   clearHistory,
   fmtProgress,
   readHistory,
@@ -42,9 +43,8 @@ function clockLabel(at: number): string {
 }
 
 function hrefOf(h: HistoryEntry) {
-  // slug hentai sudah termasuk prefix rute ("hentai/…") → tinggal kasih "/"
   const base =
-    h.kind === "hentai" ? `/${h.slug}` : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+    h.kind === "hentai" ? hentaiHref(h.slug) : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
   if (!h.t || h.t <= 0) return base;
   return `${base}${h.kind === "hentai" ? "?" : "&"}t=${Math.floor(h.t)}`;
 }

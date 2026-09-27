@@ -83,6 +83,14 @@ export function clearHistory() {
   }
 }
 
+/**
+ * URL lokal buat entri hentai. Slug lama ("hentai/…", dari sumber sebelumnya)
+ * tinggal kasih "/", slug baru ("episode/…" / "detail/…") → /hentai/….
+ */
+export function hentaiHref(slug: string): string {
+  return slug.startsWith("hentai/") ? `/${slug}` : `/hentai/${slug}`;
+}
+
 /** 00:00 / 1:02:03 */
 export function fmtClock(sec: number): string {
   if (!Number.isFinite(sec) || sec < 0) return "00:00";

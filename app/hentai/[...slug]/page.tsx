@@ -5,7 +5,7 @@ import { VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft, IconChevronRight, IconPlay } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
-import { fetchHentaiDetail, resolveHentaiStream } from "@/lib/nekopoi";
+import { fetchHentaiDetail, resolveHentaiStream } from "@/lib/ryukomik";
 
 export const dynamic = "force-dynamic";
 
@@ -74,11 +74,16 @@ export default async function HentaiDetailPage({
   const latestEp = detail.episodes.length ? detail.episodes[detail.episodes.length - 1] : null;
 
   const info: { label: string; value: string }[] = [];
-  if (detail.views) info.push({ label: "Ditonton", value: detail.views });
-  if (detail.date) info.push({ label: "Tanggal", value: detail.date });
+  if (detail.score) info.push({ label: "Rating", value: detail.score });
+  if (detail.status) info.push({ label: "Status", value: detail.status });
+  if (detail.aired) info.push({ label: "Tayang", value: detail.aired });
   if (detail.duration) info.push({ label: "Durasi", value: detail.duration });
+  if (detail.date) info.push({ label: "Tanggal", value: detail.date });
+  if (detail.producer) info.push({ label: "Producer", value: detail.producer });
+  if (detail.size) info.push({ label: "Ukuran", value: detail.size });
   info.push({ label: "Tipe", value: "Video 18+" });
-  if (detail.episodes.length) info.push({ label: "Episode", value: String(detail.episodes.length) });
+  if (detail.totalEpisodes) info.push({ label: "Episode", value: detail.totalEpisodes });
+  else if (detail.episodes.length) info.push({ label: "Episode", value: String(detail.episodes.length) });
   if (isEpisode && detail.streams.length) {
     info.push({ label: "Server", value: detail.streams.map((s) => s.server).join(" · ") });
   }
@@ -118,15 +123,17 @@ export default async function HentaiDetailPage({
             <div className="detail-info">
               <div className="detail-badges">
                 <span className="chip">18+</span>
-                <span className="chip">{isEpisode ? `Ep ${epNo ?? "?"}` : "Seri"}</span>
+                <span className="chip">{isEpisode ? detail.label || `Ep ${epNo ?? "?"}` : "Seri"}</span>
               </div>
 
               <h1 className="detail-title">{detail.title}</h1>
 
               <div className="detail-meta">
-                {detail.views ? <span>{detail.views}</span> : null}
+                {detail.score ? <span>★ {detail.score}</span> : null}
                 {detail.duration ? <span>{detail.duration}</span> : null}
-                {detail.episodes.length ? <span>Ep {detail.episodes.length}</span> : null}
+                {detail.totalEpisodes || detail.episodes.length ? (
+                  <span>Ep {detail.totalEpisodes || detail.episodes.length}</span>
+                ) : null}
               </div>
 
               {detail.genres.length ? (
@@ -143,7 +150,7 @@ export default async function HentaiDetailPage({
                 <div className="detail-actions">
                   <Link href={`/hentai/${latestEp.slug}`} className="btn-play">
                     <IconPlay size={14} />
-                    Putar Ep {latestEp.ep}
+                    Putar {latestEp.label || `Ep ${latestEp.ep ?? ""}`}
                   </Link>
                 </div>
               ) : null}
@@ -226,7 +233,7 @@ export default async function HentaiDetailPage({
                     className="ep-link"
                     aria-current={isEpisode && e.slug === path ? "page" : undefined}
                   >
-                    Ep {e.ep}
+                    {e.label || `Ep ${e.ep ?? ""}`}
                   </Link>
                 ))}
               </div>

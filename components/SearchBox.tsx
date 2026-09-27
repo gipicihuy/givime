@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { IconSearch } from "@/components/Icons";
+import { MascotLoading } from "@/components/MascotLoading";
 
 type SuggestRow = { slug: string; title: string; cover?: string | null; sub: string };
 
@@ -19,10 +20,7 @@ type RawSuggest = {
 function toRow(it: RawSuggest): SuggestRow {
   const sub =
     it.meta ??
-    [
-      it.totalEps ? `${it.totalEps} Eps` : it.status || "—",
-      it.score ? `★ ${it.score}` : "",
-    ]
+    [it.totalEps ? `${it.totalEps} Eps` : it.status || "-", it.score ? `★ ${it.score}` : ""]
       .filter(Boolean)
       .join(" · ");
   return { slug: it.slug, title: it.title, cover: it.cover, sub };
@@ -31,11 +29,13 @@ function toRow(it: RawSuggest): SuggestRow {
 function SearchForm({
   endpoint,
   hrefBase,
+  itemBase,
   placeholder,
   label,
 }: {
   endpoint: string;
   hrefBase: string;
+  itemBase: string;
   placeholder: string;
   label: string;
 }) {
@@ -46,15 +46,58 @@ function SearchForm({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+  const [overlay, setOverlay] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Sinkron dari URL (back/forward, navigasi luar) — kalau input lagi fokus,
+  // biarin state lokal menang (live search lagi jalan).
   useEffect(() => {
-    setQ(params.get("q") ?? "");
-    setOpen(false);
+    const v = params.get("q") ?? "";
+    setNavigating(false);
     setActive(-1);
+    if (document.activeElement !== inputRef.current) setQ(v);
   }, [params]);
+
+  // Overlay muncul setelah 180ms (hindari flicker saat respons cepat);
+  // safety 6s biar ga nyangkut kalau navigasi ga terjadi.
+  useEffect(() => {
+    if (!navigating) {
+      setOverlay(false);
+      return;
+    }
+    const show = window.setTimeout(() => setOverlay(true), 180);
+    const hide = window.setTimeout(() => setNavigating(false), 6000);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hide);
+    };
+  }, [navigating]);
+
+  // Live search: ketik → debounce → push (tanpa Enter).
+  useEffect(() => {
+    const t = q.trim();
+    const cur = params.get("q") ?? "";
+    if (t.length < 2) {
+      if (!t && cur) {
+        const id = setTimeout(() => {
+          setNavigating(true);
+          router.push(hrefBase);
+        }, 350);
+        return () => clearTimeout(id);
+      }
+      return;
+    }
+    if (t === cur) return;
+    const id = setTimeout(() => {
+      setNavigating(true);
+      router.push(`${hrefBase}?q=${encodeURIComponent(t)}`);
+    }, 450);
+    return () => clearTimeout(id);
+  }, [q, params, router, hrefBase]);
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {
@@ -74,44 +117,59 @@ function SearchForm({
     };
   }, []);
 
-  const fetchSuggest = useCallback((term: string) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    abortRef.current?.abort();
+  const fetchSuggest = useCallback(
+    (term: string) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      abortRef.current?.abort();
 
-    if (term.trim().length < 2) {
-      setItems([]);
-      setOpen(false);
-      setActive(-1);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    timerRef.current = setTimeout(async () => {
-      const ac = new AbortController();
-      abortRef.current = ac;
-      try {
-        const res = await fetch(`${endpoint}?q=${encodeURIComponent(term)}`, {
-          signal: ac.signal,
-        });
-        if (!res.ok) throw new Error("suggest failed");
-        const data = (await res.json()) as { items: RawSuggest[] };
-        setItems(data.items.map(toRow));
-        setOpen(true);
-        setActive(-1);
-      } catch {
-        if (ac.signal.aborted) return;
+      if (term.trim().length < 2) {
         setItems([]);
         setOpen(false);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        setActive(-1);
+        setLoading(false);
+        return;
       }
-    }, 280);
-  }, [endpoint]);
+
+      setLoading(true);
+      timerRef.current = setTimeout(async () => {
+        const ac = new AbortController();
+        abortRef.current = ac;
+        try {
+          const res = await fetch(`${endpoint}?q=${encodeURIComponent(term)}`, {
+            signal: ac.signal,
+          });
+          if (!res.ok) throw new Error("suggest failed");
+          const data = (await res.json()) as { items: RawSuggest[] };
+          setItems(data.items.map(toRow));
+          setOpen(true);
+          setActive(-1);
+        } catch {
+          if (ac.signal.aborted) return;
+          setItems([]);
+          setOpen(false);
+        } finally {
+          if (!ac.signal.aborted) setLoading(false);
+        }
+      }, 280);
+    },
+    [endpoint],
+  );
 
   function onChange(value: string) {
     setQ(value);
     fetchSuggest(value);
+  }
+
+  function onClear() {
+    setQ("");
+    setItems([]);
+    setOpen(false);
+    setActive(-1);
+    inputRef.current?.focus();
+    if (params.get("q")) {
+      setNavigating(true);
+      router.push(hrefBase);
+    }
   }
 
   function goSearch(term: string) {
@@ -119,13 +177,16 @@ function SearchForm({
     if (!t) return;
     setOpen(false);
     setActive(-1);
+    if (t === (params.get("q") ?? "")) return;
+    setNavigating(true);
     router.push(`${hrefBase}?q=${encodeURIComponent(t)}`);
   }
 
   function goAnime(slug: string) {
     setOpen(false);
     setActive(-1);
-    router.push(`/anime/${slug}`);
+    setNavigating(true);
+    router.push(`${itemBase}/${slug}`);
   }
 
   function onSubmit(e: FormEvent) {
@@ -164,6 +225,7 @@ function SearchForm({
         </span>
         <input
           id="q"
+          ref={inputRef}
           className="search-input"
           type="search"
           name="q"
@@ -182,6 +244,13 @@ function SearchForm({
           autoComplete="off"
           spellCheck={false}
         />
+        {q ? (
+          <button type="button" className="search-clear" aria-label="Hapus pencarian" onClick={onClear}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        ) : null}
       </form>
 
       {showList ? (
@@ -226,6 +295,8 @@ function SearchForm({
           )}
         </div>
       ) : null}
+
+      {overlay ? <MascotLoading className="search-loading" /> : null}
     </div>
   );
 }
@@ -233,17 +304,25 @@ function SearchForm({
 export function SearchBox({
   endpoint = "/api/suggest",
   hrefBase = "/search",
+  itemBase = "/anime",
   placeholder = "Cari judul anime…",
   label = "Cari anime",
 }: {
   endpoint?: string;
   hrefBase?: string;
+  itemBase?: string;
   placeholder?: string;
   label?: string;
 }) {
   return (
     <Suspense fallback={<div className="search-wrap" aria-hidden="true" />}>
-      <SearchForm endpoint={endpoint} hrefBase={hrefBase} placeholder={placeholder} label={label} />
+      <SearchForm
+        endpoint={endpoint}
+        hrefBase={hrefBase}
+        itemBase={itemBase}
+        placeholder={placeholder}
+        label={label}
+      />
     </Suspense>
   );
 }

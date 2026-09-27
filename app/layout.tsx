@@ -20,7 +20,7 @@ const display = Bricolage_Grotesque({
 export const metadata: Metadata = {
   metadataBase: new URL("https://givime.dpdns.org"),
   title: {
-    default: "Givime — daftar & tonton anime",
+    default: "Givime · daftar & tonton anime",
     template: "%s · Givime",
   },
   description: "Browse anime ongoing, completed, movie. Cari judul, buka episode, putar video.",
@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "id_ID",
     siteName: "Givime",
-    title: "Givime — daftar & tonton anime",
+    title: "Givime · daftar & tonton anime",
     description: "Browse anime ongoing, completed, movie. Cari judul, buka episode, putar video.",
     url: "https://givime.dpdns.org",
     images: [{ url: "/logo.png", width: 512, height: 512, alt: "Givime" }],
   },
   twitter: {
     card: "summary",
-    title: "Givime — daftar & tonton anime",
+    title: "Givime · daftar & tonton anime",
     description: "Browse anime ongoing, completed, movie. Cari judul, buka episode, putar video.",
     images: ["/logo.png"],
   },

@@ -893,7 +893,7 @@ a:focus-visible {
   width: 100%;
   font: inherit;
   font-size: 15px;
-  padding: 12px 14px 12px 40px;
+  padding: 12px 44px 12px 40px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -970,30 +970,6 @@ a:focus-visible {
 @keyframes spin-rotate {
   to {
     transform: rotate(360deg);
-  }
-}
-
-/* Skeleton hasil search (app/search/loading.tsx) */
-.skel-poster {
-  aspect-ratio: 2 / 3;
-  border-radius: var(--radius);
-  background: linear-gradient(
-    100deg,
-    var(--surface) 40%,
-    var(--surface-2) 50%,
-    var(--surface) 60%
-  );
-  background-size: 200% 100%;
-  animation: skel-shimmer 1.3s ease infinite;
-}
-
-@keyframes skel-shimmer {
-  from {
-    background-position: 120% 0;
-  }
-
-  to {
-    background-position: -80% 0;
   }
 }
 
@@ -2756,4 +2732,82 @@ body.watching-landscape .cp-title-ep {
 .text-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+/* —— Search: tombol X manual (native cancel button webkit biru) —— */
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.search-clear:hover {
+  color: var(--foreground);
+  background: var(--surface);
+}
+
+/* —— Loading ala Nefusoft: mascot + teks lime berdenyut —— */
+.mascot-loading-img {
+  width: 96px;
+  height: auto;
+  animation: cp-pulse 1.6s ease-in-out infinite;
+}
+
+.mascot-loading-text {
+  margin: 0;
+  max-width: 92%;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  animation: cp-pulse 1.6s ease-in-out infinite;
+}
+
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 40vh;
+  padding: 40px 16px;
+}
+
+.search-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: rgba(8, 8, 10, 0.85);
+}
+
+@media (min-width: 768px) {
+  .mascot-loading-img {
+    width: 120px;
+  }
 }

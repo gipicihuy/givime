@@ -18,7 +18,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     return (
       <>
         <h1 className="page-title">Cari</h1>
-        <p className="page-sub">Ketik judul — saran muncul saat mengetik</p>
+        <p className="page-sub">Ketik judul, saran muncul saat mengetik</p>
         <SearchBox />
         <div className="state state-follow">
           <strong>Mulai ketik</strong>

@@ -21,7 +21,7 @@ export default function Error({
         <IconEmpty size={36} />
       </span>
       <strong>Terjadi kesalahan</strong>
-      Gagal memuat halaman. Coba lagi — kalau masih error, buka dari menu lain.
+      Gagal memuat halaman. Coba lagi. Kalau masih error, buka dari menu lain.
       <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap", justifyContent: "center" }}>
         <button type="button" className="btn-play" onClick={reset}>
           Coba lagi

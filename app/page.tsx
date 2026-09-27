@@ -82,7 +82,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 className="sr-only">Givime — nonton anime</h1>
+      <h1 className="sr-only">Givime · nonton anime</h1>
       {featured.length ? <FeaturedHero items={featured} /> : null}
       <ContinueWatching />
       <Shelf

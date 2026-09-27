@@ -156,7 +156,7 @@ export default function HistoryPage() {
                               style={{ width: `${pct}%` }}
                             />
                           </span>
-                          <span className="history-times">{prog ?? "—"}</span>
+                          <span className="history-times">{prog ?? "0:00"}</span>
                         </span>
                       </Link>
                     </li>

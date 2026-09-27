@@ -36,7 +36,8 @@ export default async function KomikDetailPage({ params }: Params) {
   const status = infoOf("Status");
   const type = infoOf("Jenis Komik");
   const released = infoOf("Dirilis");
-  const firstChapter = d.chapters[0];
+  // chapter_list dari situs: terbaru dulu → bab pertama = elemen terakhir
+  const firstChapter = d.chapters[d.chapters.length - 1];
 
   const chHref = (href: string) =>
     `/komik/${slug}/baca/${encodeURIComponent(chapterSlugOf(href))}`;

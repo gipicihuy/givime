@@ -58,6 +58,7 @@ function KomikSearch() {
     <SearchBox
       endpoint="/api/komik-suggest"
       hrefBase="/komik"
+      itemBase="/komik"
       placeholder="Cari judul komik…"
       label="Cari komik"
     />
@@ -101,7 +102,7 @@ export default async function KomikPage({ searchParams }: PageProps) {
   return (
     <>
       <h1 className="page-title">Komik</h1>
-      <p className="page-sub">Manga · Manhwa · Manhua — populer & terbaru</p>
+      <p className="page-sub">Manga · Manhwa · Manhua, populer & terbaru</p>
       <KomikSearch />
 
       {!data ? (

@@ -16,6 +16,8 @@ import {
   IconPlay,
   IconPrevTrack,
   IconReplay,
+  IconSortNew,
+  IconSortOld,
   IconUnlock,
   IconVolume,
   IconVolumeMute,
@@ -103,9 +105,11 @@ export function EpisodeSection({
           type="button"
           className="ep-sort-btn"
           aria-pressed={order === "desc"}
+          aria-label={order === "desc" ? "Urutan: terbaru" : "Urutan: terlama"}
+          title={order === "desc" ? "Urutan terbaru" : "Urutan terlama"}
           onClick={toggleOrder}
         >
-          Terbaru
+          {order === "desc" ? <IconSortNew size={17} /> : <IconSortOld size={17} />}
         </button>
       </div>
 

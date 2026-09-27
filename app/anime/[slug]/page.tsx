@@ -100,6 +100,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
             ) : (
               <div className="detail-cover detail-cover-ph">Tanpa cover</div>
             )}
+            {mb.ero_skor ? (
+              <span className="poster-score">
+                <IconStar size={13} />
+                {mb.ero_skor}
+              </span>
+            ) : null}
           </div>
 
           <div className="detail-info">
@@ -123,12 +129,6 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
               {mb.ero_tayang ? <span>{mb.ero_tayang}</span> : null}
               <span>Ep {epCount}</span>
               {mb.ero_durasi ? <span>{durasiShort(mb.ero_durasi)}</span> : null}
-              {mb.ero_skor ? (
-                <span className="meta-item meta-score">
-                  <IconStar size={12} />
-                  {mb.ero_skor}
-                </span>
-              ) : null}
             </div>
 
             {genres.length ? (

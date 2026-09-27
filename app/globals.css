@@ -1096,6 +1096,11 @@ a:focus-visible {
   box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5);
 }
 
+/* Skor di pojok cover detail — radius ngikutin cover (12px), bukan poster card. */
+.detail-poster .poster-score {
+  border-radius: 0 12px 0 6px;
+}
+
 .detail-cover-ph {
   display: flex;
   align-items: center;
@@ -1275,7 +1280,10 @@ a:focus-visible {
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
-  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 9px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-2);

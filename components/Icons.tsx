@@ -92,6 +92,28 @@ export function IconChevronDown(p: P) {
   );
 }
 
+/** Urutan terbaru: bar memanjang ke atas (rata kiri). */
+export function IconSortNew(p: P) {
+  return (
+    <svg {...base(p)} fill="currentColor" stroke="none">
+      <rect x="3" y="5" width="18" height="2.5" rx="1.25" />
+      <rect x="3" y="11" width="12" height="2.5" rx="1.25" />
+      <rect x="3" y="17" width="6" height="2.5" rx="1.25" />
+    </svg>
+  );
+}
+
+/** Urutan terlama: bar memanjang ke bawah (rata kanan). */
+export function IconSortOld(p: P) {
+  return (
+    <svg {...base(p)} fill="currentColor" stroke="none">
+      <rect x="15" y="5" width="6" height="2.5" rx="1.25" />
+      <rect x="9" y="11" width="12" height="2.5" rx="1.25" />
+      <rect x="3" y="17" width="18" height="2.5" rx="1.25" />
+    </svg>
+  );
+}
+
 export function IconFlame(p: P) {
   return (
     <svg {...base(p)}>

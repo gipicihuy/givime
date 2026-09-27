@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChapterImages } from "@/components/ChapterImages";
 import { IconChevronLeft, IconChevronRight } from "@/components/Icons";
 import { chapterSlugOf, fetchKomikReader } from "@/lib/komikindo";
 
@@ -75,18 +76,7 @@ export default async function KomikReaderPage({ params }: Params) {
 
       {pager}
 
-      <div className="chapter-images">
-        {r.images.map((src, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={`${i}-${src.slice(-24)}`}
-            src={src}
-            alt={`Halaman ${i + 1}`}
-            loading={i < 2 ? "eager" : "lazy"}
-            referrerPolicy="no-referrer"
-          />
-        ))}
-      </div>
+      <ChapterImages images={r.images} key={ch} />
 
       {pager}
     </>

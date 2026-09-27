@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { IconSearch } from "@/components/Icons";
-import { MascotLoading } from "@/components/MascotLoading";
 
 type SuggestRow = { slug: string; title: string; cover?: string | null; sub: string };
 
@@ -48,8 +47,6 @@ function SearchForm({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [loading, setLoading] = useState(false);
-  const [navigating, setNavigating] = useState(false);
-  const [overlay, setOverlay] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -59,25 +56,9 @@ function SearchForm({
   // biarin state lokal menang (live search lagi jalan).
   useEffect(() => {
     const v = params.get("q") ?? "";
-    setNavigating(false);
     setActive(-1);
     if (document.activeElement !== inputRef.current) setQ(v);
   }, [params]);
-
-  // Overlay muncul setelah 180ms (hindari flicker saat respons cepat);
-  // safety 6s biar ga nyangkut kalau navigasi ga terjadi.
-  useEffect(() => {
-    if (!navigating) {
-      setOverlay(false);
-      return;
-    }
-    const show = window.setTimeout(() => setOverlay(true), 180);
-    const hide = window.setTimeout(() => setNavigating(false), 6000);
-    return () => {
-      window.clearTimeout(show);
-      window.clearTimeout(hide);
-    };
-  }, [navigating]);
 
   // Live search: ketik → debounce → push (tanpa Enter).
   useEffect(() => {
@@ -86,7 +67,6 @@ function SearchForm({
     if (t.length < 2) {
       if (!t && cur) {
         const id = setTimeout(() => {
-          setNavigating(true);
           router.push(hrefBase);
         }, 350);
         return () => clearTimeout(id);
@@ -95,7 +75,6 @@ function SearchForm({
     }
     if (t === cur) return;
     const id = setTimeout(() => {
-      setNavigating(true);
       router.push(`${hrefBase}?q=${encodeURIComponent(t)}`);
     }, 450);
     return () => clearTimeout(id);
@@ -168,10 +147,7 @@ function SearchForm({
     setOpen(false);
     setActive(-1);
     inputRef.current?.focus();
-    if (params.get("q")) {
-      setNavigating(true);
-      router.push(hrefBase);
-    }
+    if (params.get("q")) router.push(hrefBase);
   }
 
   function goSearch(term: string) {
@@ -180,14 +156,12 @@ function SearchForm({
     setOpen(false);
     setActive(-1);
     if (t === (params.get("q") ?? "")) return;
-    setNavigating(true);
     router.push(`${hrefBase}?q=${encodeURIComponent(t)}`);
   }
 
   function goAnime(slug: string) {
     setOpen(false);
     setActive(-1);
-    setNavigating(true);
     router.push(`${itemBase}/${slug}`);
   }
 
@@ -299,8 +273,6 @@ function SearchForm({
           )}
         </div>
       ) : null}
-
-      {overlay ? <MascotLoading className="search-loading" /> : null}
     </div>
   );
 }

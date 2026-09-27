@@ -1,9 +1,17 @@
 import Link from "next/link";
-import { IconFilm, IconFlame, IconGrid, IconLayers, IconTag } from "@/components/Icons";
+import { IconBook, IconFilm, IconFlame, IconGrid, IconTag } from "@/components/Icons";
 
 export const metadata = { title: "Browse" };
 
-const cats = [
+type Cat = {
+  href: string;
+  title: string;
+  desc: string;
+  icon: typeof IconFilm;
+  badge?: string;
+};
+
+const cats: Cat[] = [
   {
     href: "/ongoing",
     title: "Ongoing",
@@ -32,7 +40,8 @@ const cats = [
     href: "/komik",
     title: "Komik",
     desc: "Manga, Manhwa & Manhua",
-    icon: IconLayers,
+    icon: IconBook,
+    badge: "NEW",
   },
 ];
 
@@ -50,7 +59,10 @@ export default function BrowsePage() {
                 <Icon size={22} />
               </span>
               <span className="browse-body">
-                <span className="browse-title">{c.title}</span>
+                <span className="browse-title">
+                  {c.title}
+                  {c.badge ? <span className="badge-new">{c.badge}</span> : null}
+                </span>
                 <span className="browse-desc">{c.desc}</span>
               </span>
             </Link>

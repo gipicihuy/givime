@@ -116,9 +116,10 @@ export function IconSortOld(p: P) {
 
 export function IconBook(p: P) {
   return (
-    <svg {...base(p)}>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    <svg {...base(p)} strokeWidth={1.5}>
+      <path d="M12 6C12 6 10.5 4.5 7 4.5C5.5 4.5 4.5 4.8 4 5V17.5C4.5 17.2 5.5 17 7 17C10.5 17 12 18.5 12 18.5" />
+      <path d="M12 6C12 6 13.5 4.5 17 4.5C18.5 4.5 19.5 4.8 20 5V17.5C19.5 17.2 18.5 17 17 17C13.5 17 12 18.5 12 18.5" />
+      <path d="M12 6V18.5" />
     </svg>
   );
 }

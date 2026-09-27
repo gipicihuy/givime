@@ -155,7 +155,7 @@ a:focus-visible {
   background: #121214;
   border-top: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
   padding-bottom: max(6px, env(safe-area-inset-bottom));
 }
@@ -176,23 +176,22 @@ a:focus-visible {
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1;
-  white-space: nowrap;
 }
 
-/* Label NEW nempel kanan tulisan — merah biar ngehype fitur baru. */
-.bottom-new {
+/* Label NEW nempel kanan judul — merah biar ngehype fitur baru. */
+.badge-new {
   position: relative;
-  top: -5px;
+  top: -6px;
   display: inline-block;
-  margin-left: 2px;
-  padding: 1.5px 3px;
-  font-size: 7px;
+  margin-left: 5px;
+  padding: 2px 5px;
+  font-size: 8px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   line-height: 1;
   color: #fff;
   background: linear-gradient(180deg, #ff5a5f, #e11d48);
-  border-radius: 3px;
+  border-radius: 4px;
   box-shadow: 0 1px 3px rgba(225, 29, 72, 0.45);
 }
 

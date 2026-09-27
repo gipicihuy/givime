@@ -301,6 +301,14 @@ export function stripHtml(s = ""): string {
     .trim();
 }
 
+/** "24 min. per ep." → "24 min" — buang "per ep." & titik gantung. */
+export function durasiShort(s = ""): string {
+  return stripHtml(s)
+    .replace(/\s*per\s*ep\.?/gi, "")
+    .replace(/[\s.]+$/, "")
+    .trim();
+}
+
 export function metaOf(x: Anime): MetaBox {
   const mb = x.meta_box;
   if (!mb || Array.isArray(mb)) return {};

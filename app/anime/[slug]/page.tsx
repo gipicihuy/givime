@@ -4,6 +4,7 @@ import { EpisodeSection } from "@/components/Episode";
 import { IconPlay, IconStar } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
 import {
+  durasiShort,
   getDetail,
   getGenres,
   metaOf,
@@ -121,7 +122,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
             <div className="detail-meta">
               {mb.ero_tayang ? <span>{mb.ero_tayang}</span> : null}
               <span>Ep {epCount}</span>
-              {mb.ero_durasi ? <span>{stripHtml(mb.ero_durasi)}</span> : null}
+              {mb.ero_durasi ? <span>{durasiShort(mb.ero_durasi)}</span> : null}
               {mb.ero_skor ? (
                 <span className="meta-item meta-score">
                   <IconStar size={12} />
@@ -201,7 +202,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<Para
             {mb.ero_durasi ? (
               <div className="info-item">
                 <dt>Durasi</dt>
-                <dd>{stripHtml(mb.ero_durasi)}</dd>
+                <dd>{durasiShort(mb.ero_durasi)}</dd>
               </div>
             ) : null}
             {mb.ero_japanese ? (

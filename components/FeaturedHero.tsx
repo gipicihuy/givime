@@ -9,6 +9,7 @@ import {
   IconStar,
 } from "@/components/Icons";
 import {
+  durasiShort,
   episodeLabel,
   metaOf,
   synopsisOf,
@@ -28,9 +29,7 @@ function HeroContent({ anime }: { anime: Anime }) {
   const type = mb.ero_type;
   const sub = mb.ero_sub;
   const tayang = mb.ero_tayang;
-  const durasi = mb.ero_durasi
-    ? String(mb.ero_durasi).replace(/<[^>]+>/g, "").trim()
-    : "";
+  const durasi = mb.ero_durasi ? durasiShort(mb.ero_durasi) : "";
   const synopsis = synopsisOf(anime, 180);
   const genres = (mb.ero_genreapp ?? "")
     .split(",")

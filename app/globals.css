@@ -1275,26 +1275,24 @@ a:focus-visible {
 }
 
 /* —— episodes —— */
+/* Icon doang — tanpa border/pill biar klik gak nambah "bingkai". */
 .ep-sort-btn {
   font: inherit;
-  font-size: 12px;
-  font-weight: 600;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 7px 9px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface-2);
+  padding: 4px;
+  border: 0;
+  background: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 120ms ease;
 }
 
 .ep-sort-btn:hover {
   color: var(--foreground);
-  border-color: var(--muted);
 }
 
 .ep-sort-btn:focus-visible {

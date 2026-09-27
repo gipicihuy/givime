@@ -1562,6 +1562,42 @@ a:focus-visible {
   animation: cp-pulse 1.6s ease-in-out infinite;
 }
 
+/* State error stream (gagal total) — .cp-loading pointer-events: none,
+   jadi tombolnya harus di-nyalain lagi biar bisa diklik. */
+.cp-retry {
+  pointer-events: auto;
+  margin-top: 2px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.cp-retry:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cp-retry:active {
+  transform: scale(0.96);
+}
+
+.cp-retry:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.cp-retry-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
 @media (min-width: 768px) {
   .cp-load-mascot {
     width: 128px;

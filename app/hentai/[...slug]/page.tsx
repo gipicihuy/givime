@@ -5,6 +5,7 @@ import { VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft, IconChevronRight, IconPlay } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
+import StreamBusy from "@/components/StreamBusy";
 import { fetchHentaiDetail, resolveHentaiStream } from "@/lib/ryukomik";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +73,20 @@ export default async function HentaiDetailPage({
   const initialTime = Math.max(0, Number(sp.t) || 0);
   const cover = detail.thumb ?? detail.poster ?? undefined;
   const latestEp = detail.episodes.length ? detail.episodes[detail.episodes.length - 1] : null;
+
+  const playerProps = {
+    src: stream?.url ?? "",
+    animeTitle: detail.title,
+    episode: epLabel,
+    slug: path,
+    initialTime,
+    prevEp: detail.prev ? epNumberOf(detail.prev.title) ?? "?" : null,
+    nextEp: detail.next ? epNumberOf(detail.next.title) ?? "?" : null,
+    prevHref: detail.prev ? `/hentai/${detail.prev.slug}` : null,
+    nextHref: detail.next ? `/hentai/${detail.next.slug}` : null,
+    streamApi: `/api/hentai-stream?slug=${encodeURIComponent(path)}`,
+    streamIndex: stream?.index ?? null,
+  };
 
   const info: { label: string; value: string }[] = [];
   if (detail.score) info.push({ label: "Rating", value: detail.score });
@@ -171,24 +186,13 @@ export default async function HentaiDetailPage({
                     src={stream.url}
                     kind="hentai"
                   />
-                  <VideoPlayer
-                    src={stream.url}
-                    animeTitle={detail.title}
-                    episode={epLabel}
-                    slug={path}
-                    initialTime={initialTime}
-                    prevEp={detail.prev ? epNumberOf(detail.prev.title) ?? "?" : null}
-                    nextEp={detail.next ? epNumberOf(detail.next.title) ?? "?" : null}
-                    prevHref={detail.prev ? `/hentai/${detail.prev.slug}` : null}
-                    nextHref={detail.next ? `/hentai/${detail.next.slug}` : null}
-                  />
+                  <VideoPlayer {...playerProps} />
                 </>
               ) : (
-                <div className="state">
-                  <strong>Server lagi sibuk</strong>
-                  Streaming belum bisa diambil sekarang. Coba lagi beberapa saat, atau pilih
-                  server lain lewat halaman detail sumber.
-                </div>
+                <StreamBusy
+                  player={playerProps}
+                  history={{ slug: path, title: detail.title, ep: epLabel, cover }}
+                />
               )}
 
               {detail.prev || detail.next || detail.series ? (

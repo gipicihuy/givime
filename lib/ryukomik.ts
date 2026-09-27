@@ -25,7 +25,15 @@ const SEARCH_MS = 2 * 60_000;
 const DETAIL_MS = 3 * 60_000;
 const SERIES_MS = 5 * 60_000;
 const STREAM_OK_MS = 3 * 60_000;
-const STREAM_MISS_MS = 20_000;
+const STREAM_MISS_MS = 10_000;
+// Batas total resolve 1 server-per-server biar tombol "server lain" gak muter.
+const RESOLVE_MS = 25_000;
+
+/** AbortSignal.timeout (Node 18+) — null kalau runtime gak punya. */
+function tSignal(ms: number): AbortSignal | undefined {
+  const t = (AbortSignal as { timeout?: (n: number) => AbortSignal }).timeout;
+  return typeof t === "function" ? t(ms) : undefined;
+}
 
 export type HentaiItem = {
   slug: string;
@@ -82,7 +90,8 @@ export type HentaiDetail = {
   series: { slug: string; title: string } | null;
 };
 
-export type Stream = { url: string; type: "hls" | "mp4" };
+/** resolveHentaiStream juga nembalin index server yang kepilih (buat "server lain"). */
+export type Stream = { url: string; type: "hls" | "mp4"; index?: number };
 
 type Cache<T> = { at: number; data: T };
 
@@ -127,6 +136,7 @@ async function fetchHtml(path: string, tries = 3): Promise<string> {
           referer: `${BASE}/`,
         },
         cache: "no-store",
+        signal: tSignal(12_000),
       });
       if (res.ok) return res.text();
       last = `HTTP ${res.status}`;
@@ -558,8 +568,11 @@ function extractVideoUrl(html: string): Stream | null {
   return null;
 }
 
-async function fetchEmbed(url: string, tries = 2): Promise<string | null> {
+async function fetchEmbed(url: string, tries = 2, deadline?: number): Promise<string | null> {
   for (let i = 0; i < tries; i++) {
+    if (deadline && Date.now() > deadline) return null;
+    // Embed streampoi bisa ~12 detik pas cold → jangan potong kependekan.
+    const budget = deadline ? Math.max(2_000, Math.min(15_000, deadline - Date.now())) : 15_000;
     try {
       const res = await fetch(url, {
         headers: {
@@ -568,6 +581,7 @@ async function fetchEmbed(url: string, tries = 2): Promise<string | null> {
           referer: `${BASE}/`,
         },
         cache: "no-store",
+        signal: tSignal(budget),
       });
       if (res.ok) {
         const html = await res.text();
@@ -599,6 +613,7 @@ async function resolveDood(embedUrl: string, html: string): Promise<string | nul
       const res = await fetch(`${origin}/pass_md5/${m[1]}`, {
         headers: { "user-agent": UA, referer: embedUrl },
         cache: "no-store",
+        signal: tSignal(8_000),
       });
       base = res.ok ? (await res.text()).trim() : "";
     } catch {
@@ -615,54 +630,91 @@ async function resolveDood(embedUrl: string, html: string): Promise<string | nul
   return `${base}${rand}?token=${encodeURIComponent(token)}&expiry=${Date.now()}`;
 }
 
+/** Coba satu embed → URL video (retry pendek buat playmogo yang gampang 403). */
+async function resolveEmbed(
+  link: StreamLink,
+  deadline?: number,
+): Promise<{ url: string; type: "hls" | "mp4" } | null> {
+  const isPlaymogo = /playmogo\.com/i.test(link.embedUrl);
+  const rounds = isPlaymogo ? 1 : 2;
+  const maxAttempt = isPlaymogo ? 3 : 2;
+
+  const tryOnce = async (): Promise<{ url: string; type: "hls" | "mp4" } | null> => {
+    const html = await fetchEmbed(link.embedUrl, 2, deadline);
+    if (!html) return null;
+    const video = extractVideoUrl(html);
+    if (video) return video;
+    const dood = await resolveDood(link.embedUrl, html);
+    return dood ? { url: dood, type: "mp4" } : null;
+  };
+
+  for (let attempt = 0; attempt < maxAttempt; attempt++) {
+    if (deadline && Date.now() > deadline) return null;
+    const got = await tryOnce();
+    if (got) return got;
+    if (attempt < maxAttempt - 1) await sleep(isPlaymogo ? 2000 : 1400);
+  }
+  for (let round = 1; round < rounds; round++) {
+    if (deadline && Date.now() > deadline) return null;
+    await sleep(1500);
+    const got = await tryOnce();
+    if (got) return got;
+  }
+  return null;
+}
+
 /**
  * Players → URL video. "Ryu-lokal" (streampoi/streamruby) dicoba dulu karena
  * paling stabil, playmogo (Server 1/2) gampang 403 → coba pendek aja;
  * ouo.io dilewatin tanpa request (Cloudflare).
+ *
+ * `opts.skip` = index server yang udah dicoba — dipake tombol "server lain"
+ * di player biar gak balik ke server yang sama terus.
  */
-export async function resolveHentaiStream(detail: HentaiDetail): Promise<Stream | null> {
-  const hit = streamCache.get(detail.slug);
+export async function resolveHentaiStream(
+  detail: HentaiDetail,
+  opts?: { skip?: number[] },
+): Promise<Stream | null> {
+  const skip = new Set((opts?.skip ?? []).filter((n) => Number.isInteger(n)));
+  const key = `${detail.slug}#${[...skip].sort((a, b) => a - b).join(",")}`;
+  const hit = streamCache.get(key);
   if (hit) {
     const fresh = hit.data ? STREAM_OK_MS : STREAM_MISS_MS;
     if (Date.now() - hit.at < fresh) return hit.data;
   }
 
   const prefer = (s: StreamLink) => !/playmogo\.com/i.test(s.embedUrl);
-  const candidates = [...detail.streams.filter(prefer), ...detail.streams.filter((s) => !prefer(s))]
-    .filter((s) => s.embedUrl && !/ouo\./i.test(s.embedUrl))
+  const order = detail.streams
+    .map((s, index) => ({ s, index }))
+    .filter(({ s }) => s.embedUrl && !/ouo\./i.test(s.embedUrl))
+    .sort((a, b) => Number(prefer(b.s)) - Number(prefer(a.s)))
     .slice(0, 3);
+  const candidates = order.filter(({ index }) => !skip.has(index));
+  // Server yang di-skip tetap dicoba ulang sebagai cadangan kalau sisanya
+  // pada gagal — buat tetep punya jalan kalau server andalan lagi error.
+  const passes = skip.size > 0 ? [candidates, order] : [candidates];
 
   let result: Stream | null = null;
+  const deadline = Date.now() + RESOLVE_MS;
+  console.log(
+    `[resolve] ${detail.slug} skip=[${[...skip].join(",")}] kandidat=${candidates.map((c) => c.index).join(",")}`,
+  );
 
-  for (const s of candidates) {
-    const isPlaymogo = /playmogo\.com/i.test(s.embedUrl);
-    const rounds = isPlaymogo ? 1 : 2;
-    const maxAttempt = isPlaymogo ? 3 : 2;
-    for (let attempt = 0; attempt < maxAttempt && !result; attempt++) {
-      const html = await fetchEmbed(s.embedUrl, 2);
-      if (html) {
-        result = extractVideoUrl(html);
-        if (!result) {
-          const dood = await resolveDood(s.embedUrl, html);
-          if (dood) result = { url: dood, type: "mp4" };
-        }
-      }
-      if (!result && attempt < maxAttempt - 1) await sleep(isPlaymogo ? 2000 : 1400);
-    }
-    for (let round = 1; round < rounds && !result; round++) {
-      await sleep(1500);
-      const html = await fetchEmbed(s.embedUrl, 2);
-      if (html) {
-        result = extractVideoUrl(html);
-        if (!result) {
-          const dood = await resolveDood(s.embedUrl, html);
-          if (dood) result = { url: dood, type: "mp4" };
-        }
+  for (let pass = 0; pass < passes.length && !result; pass++) {
+    for (const { s, index } of passes[pass]) {
+      if (Date.now() > deadline) break;
+      const t0 = Date.now();
+      const video = await resolveEmbed(s, deadline);
+      console.log(
+        `[resolve] idx=${index} (${s.server}) → ${video ? "OK" : "FAIL"} ${Date.now() - t0}ms`,
+      );
+      if (video) {
+        result = { ...video, index };
+        break;
       }
     }
-    if (result) break;
   }
 
-  cacheSet(streamCache, detail.slug, result);
+  cacheSet(streamCache, key, result);
   return result;
 }

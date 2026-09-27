@@ -135,7 +135,7 @@ export function EpisodeSection({
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export function VideoPlayer({
-  src,
+  src: srcProp,
   animeTitle,
   episode,
   slug,
@@ -145,6 +145,8 @@ export function VideoPlayer({
   nextEp,
   prevHref,
   nextHref,
+  streamApi,
+  streamIndex,
 }: {
   src: string;
   animeTitle: string;
@@ -158,7 +160,18 @@ export function VideoPlayer({
   /** Link prev/next custom (mis. /hentai/…) — fallback ke `/play/…?ep=`. */
   prevHref?: string | null;
   nextHref?: string | null;
+  /** Endpoint resolve server lain (/api/hentai-stream?slug=…) buat tombol "server lain". */
+  streamApi?: string | null;
+  /** Index server hasil resolve SSR — biar "server lain" gak balik ke server yang sama. */
+  streamIndex?: number | null;
 }) {
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const [triedServers, setTriedServers] = useState<number[]>(
+    streamIndex != null ? [streamIndex] : [],
+  );
+  const [switching, setSwitching] = useState(false);
+  const [noMoreServers, setNoMoreServers] = useState(false);
+  const src = streamUrl ?? srcProp;
   const playable = encodeMedia(src);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -177,8 +190,13 @@ export function VideoPlayer({
   const [speed, setSpeed] = useState(1);
   const [isFs, setIsFs] = useState(false);
   const [buffering, setBuffering] = useState(true);
-  // .m3u8 di Chrome/Firefox butuh hls.js (Safari/iOS native) → src di-drop
-  const [useHls, setUseHls] = useState(false);
+  // .m3u8 di Chrome/Firefox butuh hls.js (Safari/iOS native).
+  // Mode-nya diputus di effect (bukan render pertama) biar gak ada percobaan
+  // native yang langsung error (MEDIA_ERR_SRC_NOT_SUPPORTED) di Chrome.
+  const [hlsMode, setHlsMode] = useState<"none" | "native" | "hls">("none");
+  const [mediaErr, setMediaErr] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const isHlsUrl = /\.m3u8(\?|$)/i.test(playable);
   const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number; top: number; left: number } | null>(null);
 
   const lastTap = useRef<{ time: number; side: "left" | "right" } | null>(null);
@@ -210,37 +228,114 @@ export function VideoPlayer({
     setBuffering(true);
     setCurrent(0);
     setDuration(0);
+    setMediaErr(false);
+    setRetryKey(0);
   }, [playable]);
 
-  // HLS: browser non-Safari gak bisa putar .m3u8 native → attach hls.js
-  // (dynamic import, jadi cuma ke-load di halaman yang stream-nya HLS).
-  useEffect(() => {
+  const retryStream = useCallback(() => {
+    setMediaErr(false);
+    setBuffering(true);
+    setDuration(0);
     const v = videoRef.current;
-    if (!v) return;
-    if (!/\.m3u8(\?|$)/i.test(playable) || v.canPlayType("application/vnd.apple.mpegurl")) {
-      setUseHls(false);
+    try {
+      v?.load();
+    } catch {
+      /* ignore */
+    }
+    setRetryKey((k) => k + 1);
+  }, []);
+
+  // Episode diganti (srcProp baru) → buang override stream & daftar server
+  // yang udah dicoba. Sengaja nempel ke srcProp, bukan playable, biar pas
+  // ganti server lewat tombol datanya gak ikut ke-reset.
+  useEffect(() => {
+    setStreamUrl(null);
+    setTriedServers(streamIndex != null ? [streamIndex] : []);
+    setNoMoreServers(false);
+  }, [srcProp, streamIndex]);
+
+  // "Server lain" → minta resolve server yang belum dicoba, terus ganti src.
+  const switchServer = useCallback(async () => {
+    if (!streamApi || switching || noMoreServers) return;
+    setSwitching(true);
+    setBuffering(true);
+    try {
+      const res = await fetch(`${streamApi}&skip=${encodeURIComponent(triedServers.join(","))}`);
+      const data = (await res.json()) as { ok?: boolean; stream?: { url?: string; index?: number } };
+      if (data.ok && data.stream?.url) {
+        const idx = data.stream.index;
+        setTriedServers((prev) =>
+          idx != null && Number.isInteger(idx) && !prev.includes(idx) ? [...prev, idx] : prev,
+        );
+        setStreamUrl(data.stream.url);
+      } else {
+        setNoMoreServers(true);
+        setMediaErr(true);
+      }
+    } catch {
+      setNoMoreServers(true);
+      setMediaErr(true);
+    } finally {
+      setSwitching(false);
+    }
+  }, [streamApi, switching, noMoreServers, triedServers]);
+
+  // Putuskan mode HLS: Safari/iOS bisa native, sisanya hls.js.
+  useEffect(() => {
+    if (!isHlsUrl) {
+      setHlsMode("none");
       return;
     }
+    const v = videoRef.current;
+    setHlsMode(v && v.canPlayType("application/vnd.apple.mpegurl") ? "native" : "hls");
+  }, [isHlsUrl, playable]);
+
+  // hls.js: attach + tangani fatal error dengan retry (jangan langsung nyerah
+  // ke src native — Chrome gak bisa putar .m3u8, jadinya loading selamanya).
+  useEffect(() => {
+    if (hlsMode !== "hls") return;
+    const v = videoRef.current;
+    if (!v) return;
 
     let cancelled = false;
     let hls: import("hls.js").default | null = null;
-    setUseHls(true);
+    let netRetries = 0;
+    let mediaRetries = 0;
 
     import("hls.js")
       .then(({ default: Hls }) => {
-        if (cancelled || !Hls.isSupported()) return;
+        if (cancelled) return;
+        if (!Hls.isSupported()) {
+          setMediaErr(true);
+          return;
+        }
         hls = new Hls({ enableWorker: true, lowLatencyMode: false });
         hls.loadSource(playable);
         hls.attachMedia(v);
         hls.on(Hls.Events.ERROR, (_evt, data) => {
-          if (!data?.fatal) return;
+          if (cancelled || !data?.fatal) return;
+          // jaringan (manifest/segment gagal) → coba lagi pelan-pelan
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && netRetries < 3) {
+            netRetries += 1;
+            const delay = 900 * netRetries;
+            setTimeout(() => {
+              if (!cancelled) hls?.startLoad();
+            }, delay);
+            return;
+          }
+          // media (codec/decode) → recover dua kali dulu
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR && mediaRetries < 2) {
+            mediaRetries += 1;
+            hls?.recoverMediaError();
+            return;
+          }
           hls?.destroy();
           hls = null;
-          setUseHls(false);
+          setMediaErr(true);
         });
       })
       .catch(() => {
-        if (!cancelled) setUseHls(false);
+        if (!cancelled) setMediaErr(true);
       });
 
     return () => {
@@ -248,7 +343,15 @@ export function VideoPlayer({
       hls?.destroy();
       hls = null;
     };
-  }, [playable]);
+  }, [hlsMode, playable, retryKey]);
+
+  // Jaringan lagi ngambek → metadata gak pernah datang. Biar gak muter di
+  // loading tanpa akhir, lempar ke state error (ada tombol coba lagi).
+  useEffect(() => {
+    if (mediaErr || duration > 0) return;
+    const t = window.setTimeout(() => setMediaErr(true), 30_000);
+    return () => window.clearTimeout(t);
+  }, [mediaErr, duration, playable, retryKey]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -288,12 +391,17 @@ export function VideoPlayer({
     const onMeta = () => {
       setDuration(Number.isFinite(v.duration) ? v.duration : 0);
       setBuffering(false);
+      // video akhirnya kebaca → state error (mis. dari timeout) batal
+      setMediaErr(false);
     };
     const onWaiting = () => {
       if (skipWait.current) return;
       setBuffering(true);
     };
-    const onCanPlay = () => setBuffering(false);
+    const onCanPlay = () => {
+      setBuffering(false);
+      setMediaErr(false);
+    };
     const onPlaying = () => {
       skipWait.current = false;
       setBuffering(false);
@@ -544,8 +652,11 @@ export function VideoPlayer({
         disableRemotePlayback
         preload="metadata"
         key={playable}
-        src={useHls ? undefined : playable}
+        src={isHlsUrl ? (hlsMode === "native" ? playable : undefined) : playable}
         onClick={handleVideoTap}
+        onError={() => {
+          if (hlsMode !== "hls") setMediaErr(true);
+        }}
       />
 
       <div className="cp-ov">
@@ -751,29 +862,51 @@ export function VideoPlayer({
         </div>
       </div>
 
-      {/* Loading ala Nefusoft — sebelum metadata: mascot + teks; buffering: spinner. Aksen lime. */}
-      {buffering && (
-        <div className="cp-loading" role="status">
-          {duration > 0 ? (
-            <span className="cp-load-spinner" aria-hidden="true">
-              {Array.from({ length: 12 }, (_, i) => (
-                <i
-                  key={i}
-                  style={{
-                    transform: `rotate(${i * 30}deg) translate(0, -130%)`,
-                    animationDelay: i === 0 ? "0s" : `-${(12 - i) / 10}s`,
-                  }}
-                />
-              ))}
-            </span>
-          ) : (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="cp-load-mascot" src="/loading.webp" alt="" aria-hidden="true" />
-              <p className="cp-load-text">sabar yaa, server kami butuh waktu untuk merespon 😖</p>
-            </>
-          )}
+      {/* Loading ala Nefusoft — sebelum metadata: mascot + teks; buffering: spinner.
+          Gagal total (hls mati / timeout / error media) → state error + tombol retry,
+          jangan muter di loading tanpa akhir. */}
+      {mediaErr ? (
+        <div className="cp-loading" role="alert">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="cp-load-mascot" src="/loading.webp" alt="" aria-hidden="true" />
+          <p className="cp-load-text">
+            {noMoreServers ? "server lainnya juga lagi nganggur 😥" : "yaa gagal dimuat 😥 servernya lagi ngambek nih"}
+          </p>
+          <div className="cp-retry-row">
+            <button type="button" className="cp-retry" onClick={retryStream}>
+              Coba lagi
+            </button>
+            {streamApi && !noMoreServers ? (
+              <button type="button" className="cp-retry" onClick={switchServer} disabled={switching}>
+                {switching ? "Nyari server…" : "Server lain"}
+              </button>
+            ) : null}
+          </div>
         </div>
+      ) : (
+        buffering && (
+          <div className="cp-loading" role="status">
+            {duration > 0 ? (
+              <span className="cp-load-spinner" aria-hidden="true">
+                {Array.from({ length: 12 }, (_, i) => (
+                  <i
+                    key={i}
+                    style={{
+                      transform: `rotate(${i * 30}deg) translate(0, -130%)`,
+                      animationDelay: i === 0 ? "0s" : `-${(12 - i) / 10}s`,
+                    }}
+                  />
+                ))}
+              </span>
+            ) : (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="cp-load-mascot" src="/loading.webp" alt="" aria-hidden="true" />
+                <p className="cp-load-text">sabar yaa, server kami butuh waktu untuk merespon 😖</p>
+              </>
+            )}
+          </div>
+        )
       )}
     </div>
   );

@@ -10,6 +10,7 @@ export function HistoryTracker({
   cover,
   src,
   t,
+  kind,
 }: {
   slug: string;
   title: string;
@@ -17,10 +18,11 @@ export function HistoryTracker({
   cover?: string;
   src?: string;
   t?: number;
+  kind?: "anime" | "hentai";
 }) {
   useEffect(() => {
-    pushHistory({ slug, title, ep, cover, src, t });
-  }, [slug, title, ep, cover, src, t]);
+    pushHistory({ slug, title, ep, cover, src, t, kind });
+  }, [slug, title, ep, cover, src, t, kind]);
 
   return null;
 }

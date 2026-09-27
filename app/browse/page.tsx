@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconBook, IconFilm, IconFlame, IconGrid, IconTag } from "@/components/Icons";
+import { IconBook, IconFilm, IconFlame, IconGrid, IconHeart, IconTag } from "@/components/Icons";
 
 export const metadata = { title: "Browse" };
 
@@ -41,6 +41,13 @@ const cats: Cat[] = [
     title: "Komik",
     desc: "Manga, Manhwa & Manhua",
     icon: IconBook,
+    badge: "NEW",
+  },
+  {
+    href: "/hentai",
+    title: "Hentai",
+    desc: "Video anime dewasa · 18+",
+    icon: IconHeart,
     badge: "NEW",
   },
 ];

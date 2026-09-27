@@ -10,6 +10,8 @@ export type HistoryEntry = {
   t?: number;
   /** detik total durasi video */
   d?: number;
+  /** anime (default) → /play/… · hentai → /hentai/… */
+  kind?: "anime" | "hentai";
 };
 
 const KEY = "givime:history";
@@ -43,6 +45,7 @@ export function pushHistory(entry: Omit<HistoryEntry, "at">) {
       d: entry.d ?? prev?.d,
       src: entry.src ?? prev?.src,
       cover: entry.cover ?? prev?.cover,
+      kind: entry.kind ?? prev?.kind,
       at: Date.now(),
     });
     writeList(list);

@@ -42,8 +42,11 @@ function clockLabel(at: number): string {
 }
 
 function hrefOf(h: HistoryEntry) {
-  const base = `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
-  return h.t && h.t > 0 ? `${base}&t=${Math.floor(h.t)}` : base;
+  // slug hentai sudah termasuk prefix rute ("hentai/…") → tinggal kasih "/"
+  const base =
+    h.kind === "hentai" ? `/${h.slug}` : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+  if (!h.t || h.t <= 0) return base;
+  return `${base}${h.kind === "hentai" ? "?" : "&"}t=${Math.floor(h.t)}`;
 }
 
 type DayGroup = { key: string; label: string; items: HistoryEntry[] };

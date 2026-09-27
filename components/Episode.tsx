@@ -143,6 +143,8 @@ export function VideoPlayer({
   epSlug,
   prevEp,
   nextEp,
+  prevHref,
+  nextHref,
 }: {
   src: string;
   animeTitle: string;
@@ -153,6 +155,9 @@ export function VideoPlayer({
   epSlug?: string;
   prevEp?: string | null;
   nextEp?: string | null;
+  /** Link prev/next custom (mis. /hentai/…) — fallback ke `/play/…?ep=`. */
+  prevHref?: string | null;
+  nextHref?: string | null;
 }) {
   const playable = encodeMedia(src);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -172,6 +177,8 @@ export function VideoPlayer({
   const [speed, setSpeed] = useState(1);
   const [isFs, setIsFs] = useState(false);
   const [buffering, setBuffering] = useState(true);
+  // .m3u8 di Chrome/Firefox butuh hls.js (Safari/iOS native) → src di-drop
+  const [useHls, setUseHls] = useState(false);
   const [seekFx, setSeekFx] = useState<{ side: "left" | "right"; amount: number; key: number; top: number; left: number } | null>(null);
 
   const lastTap = useRef<{ time: number; side: "left" | "right" } | null>(null);
@@ -203,6 +210,44 @@ export function VideoPlayer({
     setBuffering(true);
     setCurrent(0);
     setDuration(0);
+  }, [playable]);
+
+  // HLS: browser non-Safari gak bisa putar .m3u8 native → attach hls.js
+  // (dynamic import, jadi cuma ke-load di halaman yang stream-nya HLS).
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (!/\.m3u8(\?|$)/i.test(playable) || v.canPlayType("application/vnd.apple.mpegurl")) {
+      setUseHls(false);
+      return;
+    }
+
+    let cancelled = false;
+    let hls: import("hls.js").default | null = null;
+    setUseHls(true);
+
+    import("hls.js")
+      .then(({ default: Hls }) => {
+        if (cancelled || !Hls.isSupported()) return;
+        hls = new Hls({ enableWorker: true, lowLatencyMode: false });
+        hls.loadSource(playable);
+        hls.attachMedia(v);
+        hls.on(Hls.Events.ERROR, (_evt, data) => {
+          if (!data?.fatal) return;
+          hls?.destroy();
+          hls = null;
+          setUseHls(false);
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setUseHls(false);
+      });
+
+    return () => {
+      cancelled = true;
+      hls?.destroy();
+      hls = null;
+    };
   }, [playable]);
 
   useEffect(() => {
@@ -499,7 +544,7 @@ export function VideoPlayer({
         disableRemotePlayback
         preload="metadata"
         key={playable}
-        src={playable}
+        src={useHls ? undefined : playable}
         onClick={handleVideoTap}
       />
 
@@ -556,7 +601,7 @@ export function VideoPlayer({
               {prevEp ? (
                 <Link
                   className="cp-btn cp-nav-btn"
-                  href={`/play/${navBase}?ep=${encodeURIComponent(prevEp)}`}
+                  href={prevHref ?? `/play/${navBase}?ep=${encodeURIComponent(prevEp)}`}
                   aria-label={`Episode sebelumnya ${prevEp}`}
                 >
                   <IconPrevTrack size={20} />
@@ -621,7 +666,7 @@ export function VideoPlayer({
               {nextEp ? (
                 <Link
                   className="cp-btn cp-nav-btn"
-                  href={`/play/${navBase}?ep=${encodeURIComponent(nextEp)}`}
+                  href={nextHref ?? `/play/${navBase}?ep=${encodeURIComponent(nextEp)}`}
                   aria-label={`Episode berikutnya ${nextEp}`}
                 >
                   <IconNextTrack size={20} />

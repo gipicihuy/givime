@@ -254,7 +254,9 @@ export function VideoPlayer({
       setBuffering(false);
     };
     const onSeeked = () => {
-      skipWait.current = false;
+      // Jangan reset skipWait di sini — seeked datang sebelum data siap,
+      // waiting (fetch chunk) menyusul & bakal nyalain spinner lagi.
+      // Timer dari skip()/onSeek() yang ngatur kapan suppress berakhir.
       setBuffering(false);
     };
     const onPlay = () => {
@@ -363,13 +365,13 @@ export function VideoPlayer({
     if (!v) return;
     const d = Number.isFinite(v.duration) ? v.duration : 0;
     v.currentTime = Math.max(0, Math.min(d || Number.MAX_SAFE_INTEGER, v.currentTime + delta));
-    // Hasil seek kilat (double-tap / tombol ±10s) bukan buffering beneran —
-    // suppress spinner buffering sesaat setelah skip.
+    // Hasil seek kilat (double-tap / tombol ±10s / scrub) bukan buffering
+    // beneran — suppress spinner; onPlaying nge-reset duluan kalo udah jalan.
     skipWait.current = true;
     window.clearTimeout(skipWaitTimer.current);
     skipWaitTimer.current = window.setTimeout(() => {
       skipWait.current = false;
-    }, 1500);
+    }, 5000);
     bump();
   }, [bump]);
 
@@ -438,6 +440,12 @@ export function VideoPlayer({
     const t = (Number(e.target.value) / 1000) * duration;
     v.currentTime = t;
     setCurrent(t);
+    // Scrub juga nge-trigger waiting → suppress spinner yang sama.
+    skipWait.current = true;
+    window.clearTimeout(skipWaitTimer.current);
+    skipWaitTimer.current = window.setTimeout(() => {
+      skipWait.current = false;
+    }, 5000);
   };
 
   const cycleSpeed = () => {
@@ -486,6 +494,7 @@ export function VideoPlayer({
       {/* URL CDN hanya di src — jangan ditampilkan ke UI */}
       <video
         ref={videoRef}
+        autoPlay
         playsInline
         disableRemotePlayback
         preload="metadata"

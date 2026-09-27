@@ -188,7 +188,7 @@ function SearchForm({
     }
   }
 
-  const showList = open && (loading || items.length > 0);
+  const showList = open && (items.length > 0 || !loading);
 
   return (
     <div className="search-wrap" ref={boxRef}>
@@ -231,18 +231,7 @@ function SearchForm({
 
       {showList ? (
         <div className="search-suggest" id="search-suggest" role="listbox" aria-label="Saran pencarian">
-          {loading && items.length > 0 && (
-            <div className="suggest-busy">
-              <span className="suggest-spin" aria-hidden />
-              Mencari…
-            </div>
-          )}
-          {loading && items.length === 0 ? (
-            <div className="suggest-empty">
-              <span className="suggest-spin" aria-hidden />
-              Mencari…
-            </div>
-          ) : items.length === 0 ? (
+          {items.length === 0 ? (
             <div className="suggest-empty">Tidak ada saran</div>
           ) : (
             items.map((item, i) => (

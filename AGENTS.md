@@ -3,6 +3,7 @@
 ## Project
 - **Web (fokus):** Next.js app di **root** repo (`app/`, `lib/`, `components/`)
 - **CLI (opsional):** `animehub.js` — reverse-engineered karanime.com WP REST
+- **CLI (opsional):** `hanime.go` — scraper hanime.tv (`go mod tidy && go run hanime.go -video <slug>`); butuh Chrome buat handshake stream
 - **Base API:** `https://karanime.com/wp-json/wp/v2` (GET, no auth)
 
 ## Design & UI

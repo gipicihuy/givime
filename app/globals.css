@@ -1275,20 +1275,21 @@ a:focus-visible {
 }
 
 /* —— episodes —— */
-/* Icon doang — tanpa border/pill biar klik gak nambah "bingkai". */
+/* Buletan solid tanpa border — klik gak nambah bingkai nyala. */
 .ep-sort-btn {
   font: inherit;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 7px;
   border: 0;
-  background: none;
+  border-radius: 999px;
+  background: var(--surface-2);
   color: var(--muted);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color 120ms ease;
+  transition: color 120ms ease, background 120ms ease;
 }
 
 .ep-sort-btn:hover {

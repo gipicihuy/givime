@@ -33,7 +33,7 @@ lib/api.ts    # client karanime + hydrate + encodeMedia
 DESIGN.md     # arah desain UI
 AGENTS.md     # aturan agent
 animehub.js   # CLI reference (opsional)
-hanime.go     # CLI scraper hanime.tv (Go, butuh Chrome — opsional)
+lib/anichin.ts # scraper donghua anichin.moe (server-side, opsional)
 docs/         # catatan endpoint (opsional)
 ```
 

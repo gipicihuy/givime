@@ -102,3 +102,58 @@ export function Pager({
     </nav>
   );
 }
+
+/**
+ * Pager "Sebelumnya / Berikutnya" buat sumber yang gak nunjukin total halaman
+ * (mis. katalog donghua anichin.moe — cuma ada link prev/next).
+ */
+export function StepPager({
+  page,
+  hasPrev,
+  hasNext,
+  basePath,
+}: {
+  page: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+  basePath: string;
+}) {
+  if (!hasPrev && !hasNext) return null;
+
+  function href(p: number) {
+    const qs = p > 1 ? `?page=${p}` : "";
+    return `${basePath}${qs}`;
+  }
+
+  return (
+    <nav className="pager" aria-label="Halaman">
+      {hasPrev ? (
+        <Link href={href(page - 1)} className="pager-arrow" aria-label="Halaman sebelumnya">
+          <IconChevronLeft size={16} />
+        </Link>
+      ) : (
+        <span className="pager-arrow is-disabled" aria-hidden>
+          <IconChevronLeft size={16} />
+        </span>
+      )}
+
+      <ol className="pager-pages">
+        <li>
+          <span className="pager-num is-current" aria-current="page">
+            {page}
+          </span>
+        </li>
+      </ol>
+
+      {hasNext ? (
+        <Link href={href(page + 1)} className="pager-arrow" aria-label="Halaman berikutnya">
+          <IconChevronRight size={16} />
+        </Link>
+      ) : (
+        <span className="pager-arrow is-disabled" aria-hidden>
+          <IconChevronRight size={16} />
+        </span>
+      )}
+    </nav>
+  );
+}

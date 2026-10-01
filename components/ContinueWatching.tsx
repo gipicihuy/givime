@@ -5,18 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { IconChevronRight, IconHistory, IconPlay } from "@/components/Icons";
 import { encodeMedia } from "@/lib/api";
 import {
-  hentaiHref,
   fmtProgress,
+  hrefOf,
   readHistory,
   type HistoryEntry,
 } from "@/lib/history";
-
-function hrefOf(h: HistoryEntry) {
-  const base =
-    h.kind === "hentai" ? hentaiHref(h.slug) : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
-  if (!h.t || h.t <= 0) return base;
-  return `${base}${h.kind === "hentai" ? "?" : "&"}t=${Math.floor(h.t)}`;
-}
 
 /**
  * Thumb Continue Watching: coba resume frame (video di detik terakhir);

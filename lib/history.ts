@@ -10,8 +10,13 @@ export type HistoryEntry = {
   t?: number;
   /** detik total durasi video */
   d?: number;
-  /** anime (default) → /play/… · hentai → /hentai/… */
-  kind?: "anime" | "hentai";
+  /** slug episode (khusus donghua, buat link player) */
+  epSlug?: string;
+  /**
+   * anime (default) → /play/… · donghua → /donghua/watch/… ·
+   * "hentai" = entri lama di localStorage (sumbernya udah dihapus) → "/"
+   */
+  kind?: "anime" | "donghua" | "hentai";
 };
 
 const KEY = "givime:history";
@@ -45,6 +50,7 @@ export function pushHistory(entry: Omit<HistoryEntry, "at">) {
       d: entry.d ?? prev?.d,
       src: entry.src ?? prev?.src,
       cover: entry.cover ?? prev?.cover,
+      epSlug: entry.epSlug ?? prev?.epSlug,
       kind: entry.kind ?? prev?.kind,
       at: Date.now(),
     });
@@ -84,11 +90,24 @@ export function clearHistory() {
 }
 
 /**
- * URL lokal buat entri hentai. Slug lama ("hentai/…", dari sumber sebelumnya)
- * tinggal kasih "/", slug baru ("episode/…" / "detail/…") → /hentai/….
+ * URL lokal buat entri donghua. `epSlug` ada → langsung ke player
+ * (`/donghua/watch/…`), cuma `slug` detail → halaman detail.
  */
-export function hentaiHref(slug: string): string {
-  return slug.startsWith("hentai/") ? `/${slug}` : `/hentai/${slug}`;
+export function donghuaHref(slug: string, epSlug?: string): string {
+  if (epSlug) return `/donghua/watch/${epSlug}`;
+  return `/donghua/${slug}`;
+}
+
+/**
+ * URL lokal satu entri history.
+ * Donghua gak bawa `t` — tombol provider (iframe) gak bisa nge-seek.
+ */
+export function hrefOf(h: HistoryEntry): string {
+  if (h.kind === "donghua") return donghuaHref(h.slug, h.epSlug);
+  if (h.kind === "hentai") return "/";
+  const base = `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
+  if (!h.t || h.t <= 0) return base;
+  return `${base}&t=${Math.floor(h.t)}`;
 }
 
 /** 00:00 / 1:02:03 */

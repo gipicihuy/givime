@@ -41,10 +41,6 @@ cloudflare-env.d.ts
 *.tsbuildinfo
 next-env.d.ts
 
-# go (hanime.go CLI)
-/hanime
-/hanime.exe
-
 # local-only / large
 AnimeHub_3.3.1.apks
 *.apks

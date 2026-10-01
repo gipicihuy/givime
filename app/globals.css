@@ -2856,114 +2856,113 @@ body.watching-landscape .cp-title-ep {
   }
 }
 
-/* —— hentai (grid & detail masih 16:9, bukan poster 2:3) —— */
-.hentai-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 12px;
-}
-
-@media (min-width: 560px) {
-  .hentai-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .hentai-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .hentai-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-.hentai-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  color: inherit;
-}
-
-.hentai-thumb {
+/* —— player donghua (iframe embed provider) —— */
+.dp-player {
   position: relative;
-  display: block;
+  width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius);
   overflow: hidden;
-  background: var(--surface-3);
+  background: #000;
   border: 1px solid var(--border);
 }
 
-.hentai-thumb img {
+.dp-player iframe {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 150ms ease;
+  border: 0;
+  background: #000;
 }
 
-.hentai-thumb-ph {
-  width: 100%;
-  height: 100%;
+.dp-loading {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.dp-servers {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dp-server {
+  min-height: 36px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   color: var(--muted);
   font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
-.hentai-card:hover {
-  color: inherit;
+.dp-server:hover {
+  color: var(--foreground);
+  border-color: var(--muted);
 }
 
-.hentai-card:hover .hentai-thumb img {
-  transform: scale(1.03);
+.dp-server.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
-.hentai-card:hover .hentai-title {
-  color: var(--accent);
+.dp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
 }
 
-.hentai-title {
+.dp-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--foreground);
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  overflow-wrap: anywhere;
+  text-decoration: none;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease;
 }
 
-.hentai-meta {
-  font-size: 11px;
-  color: var(--muted);
+.dp-nav-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
-/* Detail tanpa poster 2:3 (halaman episode) → hero jadi satu kolom + still lebar */
-.detail-hero-inner.is-wide {
-  grid-template-columns: minmax(0, 1fr);
+.dp-nav-link.is-disabled {
+  visibility: hidden;
 }
 
-.detail-wide {
-  position: relative;
+.dp-nav-center {
+  margin-inline: auto;
 }
 
-.detail-wide-cover {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  object-fit: cover;
-  background: var(--surface-3);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5);
-}
-
-/* .text-btn dipakai sebagai <Link> di detail hentai */
+/* .text-btn sebagai <Link> (mis. "Kembali" di state error/history) */
 .detail-actions .text-btn {
   display: inline-flex;
   align-items: center;

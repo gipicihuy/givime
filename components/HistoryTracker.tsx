@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { pushHistory } from "@/lib/history";
+import { pushHistory, type HistoryEntry } from "@/lib/history";
 
 export function HistoryTracker({
   slug,
@@ -10,6 +10,7 @@ export function HistoryTracker({
   cover,
   src,
   t,
+  epSlug,
   kind,
 }: {
   slug: string;
@@ -18,11 +19,13 @@ export function HistoryTracker({
   cover?: string;
   src?: string;
   t?: number;
-  kind?: "anime" | "hentai";
+  /** slug episode donghua (link player di history) */
+  epSlug?: string;
+  kind?: HistoryEntry["kind"];
 }) {
   useEffect(() => {
-    pushHistory({ slug, title, ep, cover, src, t, kind });
-  }, [slug, title, ep, cover, src, t, kind]);
+    pushHistory({ slug, title, ep, cover, src, t, epSlug, kind });
+  }, [slug, title, ep, cover, src, t, epSlug, kind]);
 
   return null;
 }

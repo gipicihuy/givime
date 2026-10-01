@@ -158,10 +158,10 @@ export function VideoPlayer({
   epSlug?: string;
   prevEp?: string | null;
   nextEp?: string | null;
-  /** Link prev/next custom (mis. /hentai/…) — fallback ke `/play/…?ep=`. */
+  /** Link prev/next custom (route lain di luar `/play/…`) — fallback ke `/play/…?ep=`. */
   prevHref?: string | null;
   nextHref?: string | null;
-  /** Endpoint resolve server lain (/api/hentai-stream?slug=…) buat tombol "server lain". */
+  /** Endpoint resolve server lain (`/api/*-stream?slug=…`) buat tombol "server lain". */
   streamApi?: string | null;
   /** Index server hasil resolve SSR — biar "server lain" gak balik ke server yang sama. */
   streamIndex?: number | null;

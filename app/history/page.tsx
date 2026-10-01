@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { IconEmpty } from "@/components/Icons";
 import {
-  hentaiHref,
   clearHistory,
   fmtProgress,
+  hrefOf,
   readHistory,
   type HistoryEntry,
 } from "@/lib/history";
@@ -40,13 +40,6 @@ function clockLabel(at: number): string {
   } catch {
     return "";
   }
-}
-
-function hrefOf(h: HistoryEntry) {
-  const base =
-    h.kind === "hentai" ? hentaiHref(h.slug) : `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
-  if (!h.t || h.t <= 0) return base;
-  return `${base}${h.kind === "hentai" ? "?" : "&"}t=${Math.floor(h.t)}`;
 }
 
 type DayGroup = { key: string; label: string; items: HistoryEntry[] };

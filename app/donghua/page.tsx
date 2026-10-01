@@ -78,7 +78,7 @@ export default async function DonghuaPage({ searchParams }: { searchParams: Prom
         </span>
         Donghua
       </h1>
-      <p className="page-sub">Donghua Sub Indo terbaru · section ngikut anichin.moe</p>
+      <p className="page-sub">Donghua Sub Indo · populer & terbaru</p>
       <DonghuaSearch />
 
       {!home ? (
@@ -114,7 +114,7 @@ export default async function DonghuaPage({ searchParams }: { searchParams: Prom
               Genre
             </h2>
             <Link href="/donghua/list" className="section-more">
-              Donghua List
+              Lihat semua
               <IconChevronRight size={14} />
             </Link>
           </div>

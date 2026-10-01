@@ -17,7 +17,7 @@ export type DonghuaItem = {
   status: string | null;
   /** "Sub" (`.sb`) */
   sub: string | null;
-  /** Kartu episode → tautan lokal langsung ke player */
+  /** Kartu ini slug episode (bukan detail) — link tetap ke halaman detail */
   isEpisode: boolean;
 };
 
@@ -30,7 +30,7 @@ export type DonghuaEpisodeItem = {
 
 export type DonghuaServer = { label: string; embed: string };
 
-/** "…-episode-130-subtitle-indonesia" → true (kartu langsung ke player). */
+/** "…-episode-130-subtitle-indonesia" → true (slug episode, bukan detail). */
 export function isEpisodeSlug(slug: string): boolean {
   return /-episode-\d+/.test(slug);
 }
@@ -41,7 +41,8 @@ export function detailSlugOf(slug: string): string {
   return m ? m[1] : slug;
 }
 
-/** Tautan lokal kartu: episode → player, selain itu → detail. */
+/** Tautan kartu: selalu ke halaman detail — sama kayak kartu anime. */
 export function itemHref(it: Pick<DonghuaItem, "slug" | "isEpisode">): string {
-  return it.isEpisode ? `/donghua/watch/${it.slug}` : `/donghua/${it.slug}`;
+  const slug = it.isEpisode ? detailSlugOf(it.slug) : it.slug;
+  return `/donghua/${slug}`;
 }

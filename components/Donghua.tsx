@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { type DonghuaItem, type DonghuaEpisodeItem, itemHref } from "@/lib/donghua";
-import { IconPlay, IconSortNew, IconSortOld } from "@/components/Icons";
+import { IconChevronRight, IconPlay, IconSortNew, IconSortOld } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
 
 type Order = "asc" | "desc";
@@ -55,7 +55,7 @@ export function DonghuaGrid({ items }: { items: DonghuaItem[] }) {
   );
 }
 
-/** Shelf section — urutan & judul ngikut box homepage anichin.moe. */
+/** Shelf section — gaya sama persis `Shelf` di halaman anime. */
 export function DonghuaShelf({
   title,
   href,
@@ -79,7 +79,7 @@ export function DonghuaShelf({
         {href ? (
           <Link href={href} className="section-more">
             Lihat semua
-            <IconPlay size={13} />
+            <IconChevronRight size={14} />
           </Link>
         ) : null}
       </div>

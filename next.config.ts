@@ -14,4 +14,10 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+
+// Context Cloudflare (wrangler/miniflare/workerd) cuma buat `next dev`.
+// `next build` juga nge-eval config ini — kalau dipanggil di sana, tiap build
+// worker nge-spawn workerd dan build Cloudflare nyangkut sampe kena timeout.
+if (process.argv.includes("dev") && !process.argv.includes("build")) {
+  initOpenNextCloudflareForDev();
+}

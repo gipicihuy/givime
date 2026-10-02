@@ -95,6 +95,11 @@ function cacheSet<T>(map: Map<string, Cache<T>>, key: string, data: T) {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** "01" → "1" (ikut format episode anime). Label non-angka dibiarin. */
+function normEpNum<T extends string | null | undefined>(n: T): T | string {
+  return typeof n === "string" ? n.replace(/^0+(?=\d)/, "") : n;
+}
+
 function tSignal(ms: number): AbortSignal {
   try {
     return AbortSignal.timeout(ms);
@@ -425,7 +430,7 @@ export async function fetchDonghuaDetail(slug: string): Promise<DonghuaDetail | 
     const num = $(el).find(".epl-num").text().trim();
     episodes.push({
       slug: eslug,
-      number: num || (eslug.match(/-episode-(\d+)/)?.[1] ?? null),
+      number: normEpNum(num || (eslug.match(/-episode-(\d+)/)?.[1] ?? null)),
       title: $(el).find(".epl-title").text().replace(/\s+/g, " ").trim() || eslug,
       date: $(el).find(".epl-date").text().trim() || null,
     });
@@ -545,7 +550,9 @@ export async function fetchDonghuaEpisode(epSlug: string): Promise<DonghuaEpisod
   };
 
   const thumb = $(".thumb img").first();
-  const number = title.match(/episode\s*(\d+)/i)?.[1] ?? clean.match(/-episode-(\d+)/)?.[1] ?? null;
+  const number = normEpNum(
+    title.match(/episode\s*(\d+)/i)?.[1] ?? clean.match(/-episode-(\d+)/)?.[1] ?? null,
+  );
   const detailSlug = detailHref
     ? slugOf(detailHref)
     : isEpisodeSlug(clean)

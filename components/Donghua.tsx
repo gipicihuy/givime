@@ -125,7 +125,8 @@ export function DonghuaEpisodeList({
     setOrder((o) => (o === "desc" ? "asc" : "desc"));
   };
 
-  const list = order === "asc" ? episodes : [...episodes].reverse();
+  // Data dari anichin udah urut terbaru → terlama (episodes[0] = terbaru).
+  const list = order === "desc" ? episodes : [...episodes].reverse();
 
   return (
     <>

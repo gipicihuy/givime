@@ -2923,6 +2923,30 @@ body.watching-landscape .cp-title-ep {
   color: var(--accent-ink);
 }
 
+.dp-epbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.dp-epbar-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dp-epnav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ep-sort-btn.is-off {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 /* .text-btn sebagai <Link> (mis. "Kembali" di state error/history) */
 .detail-actions .text-btn {
   display: inline-flex;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DonghuaEpisodeList } from "@/components/Donghua";
-import { IconChevronLeft, IconPlay } from "@/components/Icons";
+import { IconPlay } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
 import { fetchDonghuaDetail } from "@/lib/anichin";
 
@@ -41,13 +41,6 @@ export default async function DonghuaDetailPage({ params }: { params: Promise<Pa
 
   return (
     <article className="detail">
-      <p style={{ marginBottom: 12, fontSize: 14 }}>
-        <Link href="/donghua" className="muted meta-item">
-          <IconChevronLeft size={14} />
-          Donghua
-        </Link>
-      </p>
-
       <header className="detail-hero">
         <div className="detail-hero-backdrop" aria-hidden="true">
           {d.cover ? (

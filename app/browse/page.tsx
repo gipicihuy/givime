@@ -46,7 +46,7 @@ const cats: Cat[] = [
   {
     href: "/donghua",
     title: "Donghua",
-    desc: "Animasi Tiongkok · Sub Indonesia",
+    desc: "Animasi China · Sub Indonesia",
     icon: IconLayers,
     badge: "NEW",
   },

@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DonghuaEpisodeList } from "@/components/Donghua";
 import { DonghuaPlayer } from "@/components/DonghuaPlayer";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft } from "@/components/Icons";
-import { fetchDonghuaEpisode, orderedServers, pickBestServer } from "@/lib/anichin";
+import {
+  fetchDonghuaDetail,
+  fetchDonghuaEpisode,
+  orderedServers,
+  pickBestServer,
+} from "@/lib/anichin";
+import type { DonghuaEpisodeItem } from "@/lib/donghua";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar Donghua" };
@@ -30,6 +37,16 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
   }
 
   const detailSlug = data.detailSlug;
+
+  // Daftar episode seri (detail di-cache, jadi murah) buat grid di bawah player.
+  let episodes: DonghuaEpisodeItem[] = [];
+  if (detailSlug) {
+    try {
+      episodes = (await fetchDonghuaDetail(detailSlug))?.episodes ?? [];
+    } catch {
+      episodes = [];
+    }
+  }
   const epLabel = data.number ? `Ep ${data.number}` : "Episode";
 
   if (!servers.length) {
@@ -80,11 +97,18 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
           initial={best}
           title={data.seriesTitle}
           epLabel={epLabel}
-          detailSlug={detailSlug}
-          prev={data.prev}
-          next={data.next}
         />
       </div>
+
+      {episodes.length ? (
+        <section className="section">
+          <DonghuaEpisodeList
+            episodes={episodes}
+            current={data.number}
+            currentSlug={data.slug}
+          />
+        </section>
+      ) : null}
     </>
   );
 }

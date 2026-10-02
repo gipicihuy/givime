@@ -96,9 +96,12 @@ export function DonghuaShelf({
 export function DonghuaEpisodeList({
   episodes,
   current,
+  currentSlug,
 }: {
   episodes: DonghuaEpisodeItem[];
   current?: string | null;
+  /** Slug episode yang lagi diputar — lebih akurat daripada cocokin nomor. */
+  currentSlug?: string | null;
 }) {
   const [order, setOrder] = useState<Order>("desc");
 
@@ -151,7 +154,9 @@ export function DonghuaEpisodeList({
       <div className="ep-grid">
         {list.map((e) => {
           const label = e.number ?? e.title;
-          const active = current != null && String(current) === String(e.number);
+          const active = currentSlug
+            ? e.slug === currentSlug
+            : current != null && String(current) === String(e.number);
           return (
             <Link
               key={e.slug}

@@ -1,7 +1,7 @@
 import { StepPager } from "@/components/Pager";
 import { SectionOrnament } from "@/components/Shelf";
 import { DonghuaGrid } from "@/components/Donghua";
-import { fetchDonghuaCatalog } from "@/lib/anichin";
+import { fetchDonghuaCatalog } from "@/lib/dongha";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Donghua List" };

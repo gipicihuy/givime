@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Pager } from "@/components/Pager";
 import { SectionOrnament } from "@/components/Shelf";
 import { DonghuaGrid } from "@/components/Donghua";
-import { fetchDonghuaGenre } from "@/lib/anichin";
+import { fetchDonghuaGenre } from "@/lib/dongha";
 
 export const dynamic = "force-dynamic";
 

@@ -148,6 +148,8 @@ export function VideoPlayer({
   streamApi,
   streamIndex,
   servers,
+  tracks,
+  qualities,
 }: {
   src: string;
   animeTitle: string;
@@ -167,8 +169,13 @@ export function VideoPlayer({
   streamIndex?: number | null;
   /** Embed mentah tiap server (label + url) buat fallback iframe "server asal". */
   servers?: { label: string; embed: string }[];
+  /** Subtitle track (VTT) — opsional, dipakai halaman donghua. */
+  tracks?: { src: string; label: string; lang: string; default?: boolean }[];
+  /** Pilihan kualitas (HLS/mp4) — opsional, dipakai halaman donghua. */
+  qualities?: { label: string; src: string }[];
 }) {
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const [qualitySrc, setQualitySrc] = useState<string | null>(null);
   const [triedServers, setTriedServers] = useState<number[]>(
     streamIndex != null ? [streamIndex] : [],
   );
@@ -177,7 +184,7 @@ export function VideoPlayer({
   // Fallback: nampilin embed server asal via iframe kalau resolve/putar gagal.
   const [embedUrl, setEmbedUrl] = useState<string | null>(null);
   const embedIdx = useRef(0);
-  const src = streamUrl ?? srcProp;
+  const src = qualitySrc ?? streamUrl ?? srcProp;
   const playable = encodeMedia(src);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -256,6 +263,7 @@ export function VideoPlayer({
   // ganti server lewat tombol datanya gak ikut ke-reset.
   useEffect(() => {
     setStreamUrl(null);
+    setQualitySrc(null);
     setTriedServers(streamIndex != null ? [streamIndex] : []);
     setNoMoreServers(false);
     setEmbedUrl(null);
@@ -673,7 +681,18 @@ export function VideoPlayer({
         onError={() => {
           if (hlsMode !== "hls") setMediaErr(true);
         }}
-      />
+      >
+        {tracks?.map((t) => (
+          <track
+            key={t.src}
+            kind="subtitles"
+            src={t.src}
+            srcLang={t.lang}
+            label={t.label}
+            default={t.default}
+          />
+        ))}
+      </video>
 
       <div className="cp-ov">
         <div className="cp-scrim cp-fade" aria-hidden="true" />
@@ -816,6 +835,21 @@ export function VideoPlayer({
               {fmtClock(duration)}
             </span>
             <div className="cp-bottom-right">
+              {qualities && qualities.length > 1 ? (
+                <select
+                  className="cp-btn cp-speed cp-quality"
+                  aria-label="Kualitas video"
+                  value={qualitySrc ?? qualities[0]?.src ?? ""}
+                  disabled={locked}
+                  onChange={(e) => setQualitySrc(e.target.value)}
+                >
+                  {qualities.map((q) => (
+                    <option key={q.src} value={q.src}>
+                      {q.label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               <button
                 type="button"
                 className="cp-btn cp-speed"

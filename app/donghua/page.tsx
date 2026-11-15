@@ -3,7 +3,7 @@ import { IconChevronRight } from "@/components/Icons";
 import { SearchBox } from "@/components/SearchBox";
 import { SectionOrnament } from "@/components/Shelf";
 import { DonghuaGrid, DonghuaShelf } from "@/components/Donghua";
-import { fetchDonghuaHome, fetchDonghuaSearch } from "@/lib/anichin";
+import { fetchDonghuaHome, fetchDonghuaSearch } from "@/lib/dongha";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Donghua" };

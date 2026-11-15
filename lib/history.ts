@@ -93,17 +93,20 @@ export function clearHistory() {
  * URL lokal buat entri donghua. `epSlug` ada → langsung ke player
  * (`/donghua/watch/…`), cuma `slug` detail → halaman detail.
  */
-export function donghuaHref(slug: string, epSlug?: string): string {
-  if (epSlug) return `/donghua/watch/${epSlug}`;
+export function donghuaHref(slug: string, epSlug?: string, t?: number): string {
+  if (epSlug) {
+    const base = `/donghua/watch/${epSlug}`;
+    if (t && t > 0) return `${base}?t=${Math.floor(t)}`;
+    return base;
+  }
   return `/donghua/${slug}`;
 }
 
 /**
  * URL lokal satu entri history.
- * Donghua gak bawa `t` — tombol provider (iframe) gak bisa nge-seek.
  */
 export function hrefOf(h: HistoryEntry): string {
-  if (h.kind === "donghua") return donghuaHref(h.slug, h.epSlug);
+  if (h.kind === "donghua") return donghuaHref(h.slug, h.epSlug, h.t);
   if (h.kind === "hentai") return "/";
   const base = `/play/${h.slug}?ep=${encodeURIComponent(h.ep)}`;
   if (!h.t || h.t <= 0) return base;

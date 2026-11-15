@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { suggestDonghua } from "@/lib/anichin";
+import { suggestDonghua } from "@/lib/dongha";
 
 export const dynamic = "force-dynamic";
 

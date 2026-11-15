@@ -1900,6 +1900,18 @@ a:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.cp-quality {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 62px;
+  text-align: center;
+  text-align-last: center;
+}
+
+.cp-quality option {
+  color: #111;
+}
+
 .cp-progress {
   position: relative;
   height: 18px;

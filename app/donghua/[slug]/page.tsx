@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { DonghuaEpisodeList } from "@/components/Donghua";
 import { IconPlay } from "@/components/Icons";
 import { SectionOrnament } from "@/components/Shelf";
-import { fetchDonghuaDetail } from "@/lib/anichin";
+import { fetchDonghuaDetail } from "@/lib/dongha";
 
 export const revalidate = 600;
 
@@ -148,7 +148,7 @@ export default async function DonghuaDetailPage({ params }: { params: Promise<Pa
         </section>
 
         <section className="detail-block">
-          <DonghuaEpisodeList episodes={d.episodes} current={latest?.number} />
+          <DonghuaEpisodeList episodes={d.episodes} current={latest?.slug} />
         </section>
       </div>
     </article>

@@ -3,7 +3,7 @@
 ## Project
 - **Web (fokus):** Next.js app di **root** repo (`app/`, `lib/`, `components/`)
 - **CLI (opsional):** `animehub.js` — reverse-engineered karanime.com WP REST
-- **Sumber donghua:** `lib/anichin.ts` — scrape anichin.moe (server-side, embed iframe)
+- **Sumber donghua:** `lib/dongha.ts` — gateway `gateway.dongha.id` (server-side, HLS + subtitle). CLI: `donghua.js`.
 - **Base API:** `https://karanime.com/wp-json/wp/v2` (GET, no auth)
 
 ## Design & UI

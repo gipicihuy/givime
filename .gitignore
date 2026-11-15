@@ -46,3 +46,7 @@ AnimeHub_3.3.1.apks
 *.apks
 samples/
 .opencode/
+
+# dongha CLI creds
+creds.json
+.dongha-creds.json

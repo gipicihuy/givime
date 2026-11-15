@@ -48,8 +48,8 @@ export function DonghuaGrid({ items }: { items: DonghuaItem[] }) {
   }
   return (
     <div className="poster-grid">
-      {items.map((it) => (
-        <DonghuaCard key={it.slug} item={it} />
+      {items.map((it, i) => (
+        <DonghuaCard key={`${it.slug}-${it.href ?? i}`} item={it} />
       ))}
     </div>
   );
@@ -84,8 +84,8 @@ export function DonghuaShelf({
         ) : null}
       </div>
       <div className="rail" tabIndex={0} aria-label={`Geser ${title}`}>
-        {items.map((it) => (
-          <DonghuaCard key={it.slug} item={it} />
+        {items.map((it, i) => (
+          <DonghuaCard key={`${it.slug}-${it.href ?? i}`} item={it} />
         ))}
       </div>
     </section>
@@ -128,7 +128,7 @@ export function DonghuaEpisodeList({
     setOrder((o) => (o === "desc" ? "asc" : "desc"));
   };
 
-  // Data dari anichin udah urut terbaru → terlama (episodes[0] = terbaru).
+  // Default "desc" = episode terbaru dulu, "asc" = urut dari awal.
   const list = order === "desc" ? episodes : [...episodes].reverse();
 
   return (
@@ -153,7 +153,7 @@ export function DonghuaEpisodeList({
 
       <div className="ep-grid">
         {list.map((e) => {
-          const label = e.number ?? e.title;
+          const label = e.label ?? e.number ?? e.title;
           const active = currentSlug
             ? e.slug === currentSlug
             : current != null && String(current) === String(e.number);

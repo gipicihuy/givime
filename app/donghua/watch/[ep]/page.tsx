@@ -1,24 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DonghuaEpisodeList } from "@/components/Donghua";
-import { DonghuaPlayer } from "@/components/DonghuaPlayer";
+import { VideoPlayer } from "@/components/Episode";
 import { HistoryTracker } from "@/components/HistoryTracker";
 import { IconChevronLeft, IconChevronRight } from "@/components/Icons";
-import {
-  fetchDonghuaDetail,
-  fetchDonghuaEpisode,
-  orderedServers,
-  pickBestServer,
-} from "@/lib/anichin";
+import { fetchDonghuaDetail, fetchDonghuaEpisode } from "@/lib/dongha";
 import type { DonghuaEpisodeItem } from "@/lib/donghua";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Putar Donghua" };
 
 type Params = { ep: string };
+type SP = { t?: string };
 
-export default async function DonghuaWatchPage({ params }: { params: Promise<Params> }) {
+const navNum = (label?: string | null) => label?.replace(/^Ep\s*/i, "") ?? null;
+
+export default async function DonghuaWatchPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>;
+  searchParams: Promise<SP>;
+}) {
   const { ep } = await params;
+  const sp = await searchParams;
 
   let data: Awaited<ReturnType<typeof fetchDonghuaEpisode>> = null;
   try {
@@ -27,14 +32,6 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
     data = null;
   }
   if (!data) notFound();
-
-  const servers = orderedServers(data.servers);
-  let best = servers[0] ?? null;
-  try {
-    best = (await pickBestServer(data)) ?? best;
-  } catch {
-    /* fallback server pertama */
-  }
 
   const detailSlug = data.detailSlug;
 
@@ -47,42 +44,44 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
       episodes = [];
     }
   }
+
   const epLabel = data.number ? `Ep ${data.number}` : "Episode";
+  const initialTime = Math.max(0, Number(sp.t) || 0);
 
-  // Daftar urut terbaru → terlama: indeks lebih kecil = episode lebih baru.
-  // Kalau episode ini gak ada di daftar, pakai prev/next hasil scrape halaman.
-  const idx = episodes.findIndex((e) => e.slug === data.slug);
-  const prevEp =
-    idx >= 0
-      ? episodes[idx + 1]
-        ? { slug: episodes[idx + 1].slug, number: episodes[idx + 1].number }
-        : null
-      : data.prev
-        ? { slug: data.prev.slug, number: null }
-        : null;
-  const nextEp =
-    idx >= 0
-      ? idx > 0
-        ? { slug: episodes[idx - 1].slug, number: episodes[idx - 1].number }
-        : null
-      : data.next
-        ? { slug: data.next.slug, number: null }
-        : null;
-
-  if (!servers.length) {
+  if (!data.videos.length) {
     return (
       <>
-        <h1 className="page-title">{data.title}</h1>
+        <h1 className="page-title">{data.seriesTitle}</h1>
         <div className="state">
-          <strong>Server belum tersedia</strong>
-          Episode ini lagi gak punya server yang bisa diputar.
-          <Link href={detailSlug ? `/donghua/${detailSlug}` : "/donghua"} className="muted meta-item">
+          <strong>Video belum tersedia</strong>
+          Episode ini belum punya file yang bisa diputar.
+          <Link
+            href={detailSlug ? `/donghua/${detailSlug}` : "/donghua"}
+            className="muted meta-item"
+          >
             Kembali
           </Link>
         </div>
       </>
     );
   }
+
+  const best = data.videos[0];
+  const qualities = data.videos.map((v) => ({
+    label: [v.quality || "Auto", v.isDubbed ? "Dub" : null].filter(Boolean).join(" · "),
+    src: v.url,
+  }));
+
+  const defaultSubtitle =
+    data.subtitles.find((s) => s.language === "id") ??
+    data.subtitles.find((s) => s.isDefault) ??
+    data.subtitles[0];
+  const tracks = data.subtitles.map((s) => ({
+    src: s.url,
+    label: s.label,
+    lang: (s.language || "und").slice(0, 2),
+    default: s.id === defaultSubtitle?.id,
+  }));
 
   return (
     <>
@@ -93,6 +92,8 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
         ep={data.number ?? data.title}
         epSlug={data.slug}
         cover={data.cover ?? undefined}
+        src={best.url}
+        t={initialTime || undefined}
       />
 
       <p style={{ marginBottom: 12, fontSize: 14 }}>
@@ -106,18 +107,20 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
       </p>
 
       <h1 className="page-title">{data.seriesTitle}</h1>
+
       <div className="dp-epbar">
         <p className="dp-epbar-label">
           {epLabel}
-          {servers.length > 1 ? ` · ${servers.length} server` : ""}
+          {data.videos.length > 1 ? ` · ${data.videos.length} kualitas` : ""}
+          {data.subtitles.length ? ` · ${data.subtitles.length} subtitle` : ""}
         </p>
         <nav className="dp-epnav" aria-label="Episode lain">
-          {prevEp ? (
+          {data.prev ? (
             <Link
-              href={`/donghua/watch/${prevEp.slug}`}
+              href={`/donghua/watch/${data.prev.slug}`}
               className="ep-sort-btn"
-              aria-label={`Episode sebelumnya${prevEp.number ? ` (Ep ${prevEp.number})` : ""}`}
-              title={prevEp.number ? `Ep ${prevEp.number}` : "Sebelumnya"}
+              aria-label={`Episode sebelumnya${data.prev.label ? ` (${data.prev.label})` : ""}`}
+              title={data.prev.label || "Sebelumnya"}
             >
               <IconChevronLeft size={17} />
             </Link>
@@ -126,12 +129,12 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
               <IconChevronLeft size={17} />
             </span>
           )}
-          {nextEp ? (
+          {data.next ? (
             <Link
-              href={`/donghua/watch/${nextEp.slug}`}
+              href={`/donghua/watch/${data.next.slug}`}
               className="ep-sort-btn"
-              aria-label={`Episode berikutnya${nextEp.number ? ` (Ep ${nextEp.number})` : ""}`}
-              title={nextEp.number ? `Ep ${nextEp.number}` : "Berikutnya"}
+              aria-label={`Episode berikutnya${data.next.label ? ` (${data.next.label})` : ""}`}
+              title={data.next.label || "Berikutnya"}
             >
               <IconChevronRight size={17} />
             </Link>
@@ -144,11 +147,19 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <DonghuaPlayer
-          servers={servers}
-          initial={best}
-          title={data.seriesTitle}
-          epLabel={epLabel}
+        <VideoPlayer
+          src={best.url}
+          animeTitle={data.seriesTitle}
+          episode={data.number ?? "?"}
+          slug={detailSlug ?? data.slug}
+          epSlug={data.slug}
+          initialTime={initialTime}
+          prevEp={navNum(data.prev?.label)}
+          nextEp={navNum(data.next?.label)}
+          prevHref={data.prev ? `/donghua/watch/${data.prev.slug}` : null}
+          nextHref={data.next ? `/donghua/watch/${data.next.slug}` : null}
+          tracks={tracks}
+          qualities={qualities}
         />
       </div>
 
@@ -159,6 +170,15 @@ export default async function DonghuaWatchPage({ params }: { params: Promise<Par
             current={data.number}
             currentSlug={data.slug}
           />
+        </section>
+      ) : null}
+
+      {data.synopsis ? (
+        <section className="section">
+          <div className="section-head">
+            <h2 className="section-title">Sinopsis</h2>
+          </div>
+          <p className="detail-synopsis">{data.synopsis}</p>
         </section>
       ) : null}
     </>

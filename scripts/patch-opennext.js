@@ -21,21 +21,16 @@ function patchFile(filePath, patchFn, description) {
 
 const rootDir = path.resolve(__dirname, '..');
 
-// 1. Patch OpenNext Cloudflare CLI index.js to automatically include --dangerouslyUseUnsupportedNextVersion in argv
+// 1. Ensure cli/index.js is clean (do NOT inject flags into argv globally because it breaks `wrangler deploy`)
 const cliIndexPath = path.join(rootDir, 'node_modules/@opennextjs/cloudflare/dist/cli/index.js');
 patchFile(cliIndexPath, (content) => {
-  if (content.includes('// PATCHED_UNSUPPORTED_NEXT')) return content;
   return content.replace(
-    'const nodeProcess = process;',
-    `const nodeProcess = process;
-// PATCHED_UNSUPPORTED_NEXT
-if (!nodeProcess.argv.includes('--dangerouslyUseUnsupportedNextVersion')) {
-  nodeProcess.argv.push('--dangerouslyUseUnsupportedNextVersion');
-}`
+    /\n\/\/ PATCHED_UNSUPPORTED_NEXT[\s\S]*?nodeProcess\.argv\.push\(['"]--dangerouslyUseUnsupportedNextVersion['"]\);\s*\}/,
+    ''
   );
-}, '@opennextjs/cloudflare cli index.js');
+}, '@opennextjs/cloudflare cli index.js cleanup');
 
-// 2. Patch OpenNext Cloudflare build command options default
+// 2. Patch OpenNext Cloudflare build command options default so build command always has dangerouslyUseUnsupportedNextVersion = true
 const buildCmdPath = path.join(rootDir, 'node_modules/@opennextjs/cloudflare/dist/cli/commands/build.js');
 patchFile(buildCmdPath, (content) => {
   return content.replace(
@@ -44,7 +39,7 @@ patchFile(buildCmdPath, (content) => {
   );
 }, '@opennextjs/cloudflare build command options');
 
-// 3. Patch OpenNext AWS helper checkNextVersionSupport
+// 3. Patch OpenNext AWS helper checkNextVersionSupport to allow Next.js version
 const awsHelperPath = path.join(rootDir, 'node_modules/@opennextjs/aws/dist/build/helper.js');
 patchFile(awsHelperPath, (content) => {
   if (content.includes('allowUnsupportedNextVersion = true; // PATCHED')) return content;
